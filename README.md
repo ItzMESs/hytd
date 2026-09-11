@@ -46,13 +46,26 @@ Import хийгээд Deploy дарахаас өмнөх дэлгэц дээр *
 3. (Сонголтоор, гэхдээ зөвлөмж болгож байна) `NEXTAUTH_URL`-ийг мөн адил нэмж, утга нь project-ынхоо жинхэнэ Vercel домэйн байх ёстой (жишээ нь `https://your-project.vercel.app` — энэ домэйныг Vercel project-ынхоо **Settings → Domains** эсвэл Overview хуудаснаас харна). Үүнийг тохируулаагүй ч сайт ажиллах болно (project VERCEL_URL-ээ автоматаар ашиглана), гэхдээ тогтмол домэйнтой болгоход зөвлөмж болгодог.
 
 ### 2.5. Хүснэгтүүдийг санд үүсгэх
-Локал компьютертоо:
+Хоёр аргын аль нэгээр:
+
+**А) Терминал ашиглаж болох бол** (илүү зөв, "албан ёсны" арга):
 ```bash
 npm i -g vercel        # Vercel CLI суулгасан эсэхээ шалгана
 vercel link            # энэ project-той холбоно (нэг л удаа)
 vercel env pull .env   # Vercel дээрх бодит Postgres холболтын мөрүүдийг татаж авна
 npx prisma db push     # User/Progress хүснэгтүүдийг production санд үүсгэнэ
 ```
+
+**Б) Терминал байхгүй бол** (browser-аар л шийддэг энгийн арга):
+Энэ төсөлд `/api/admin/setup-db` гэсэн тусгай route орсон байгаа — нэг л удаа browser дээрээ дараах хаягаар орвол хүснэгтүүдийг өөрөө үүсгэдэг:
+```
+https://<таны-домэйн>.vercel.app/api/admin/setup-db?key=<таны NEXTAUTH_SECRET утга>
+```
+Жишээ нь `NEXTAUTH_SECRET`-ээ `VOVtZ9ZbSEGosMEhzwrr4egt5jwJQk1KPdzP6G0zpCo=` гэж тохируулсан бол:
+```
+https://hytd.vercel.app/api/admin/setup-db?key=VOVtZ9ZbSEGosMEhzwrr4egt5jwJQk1KPdzP6G0zpCo=
+```
+Амжилттай бол `{"ok":true, ...}` гэсэн JSON харагдана. Дахин орсон ч зүгээр — аль хэдийн байгаа хүснэгтийг дахин үүсгэхгүй, алдаа өгөхгүй.
 
 ### 2.6. Дахин deploy хийх
 Vercel dashboard дээрээс **Redeploy** дарна (эсвэл GitHub-т шинэ commit push хийхэд автоматаар дахин deploy хийгдэнэ). Одоо сайт бүрэн ажиллах ёстой.
