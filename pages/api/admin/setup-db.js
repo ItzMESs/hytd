@@ -33,9 +33,20 @@ const STATEMENTS = [
 ];
 
 export default async function handler(req, res) {
-  const key = req.query.key;
-  if (!process.env.NEXTAUTH_SECRET || key !== process.env.NEXTAUTH_SECRET) {
-    return res.status(403).json({ error: "Forbidden — wrong or missing ?key=" });
+  // .trim() guards against a stray trailing space/newline that can sneak in
+  // when pasting a secret into Vercel's Environment Variables textarea.
+  const provided = (req.query.key || "").trim();
+  const configured = (process.env.NEXTAUTH_SECRET || "").trim();
+  if (!configured || provided !== configured) {
+    return res.status(403).json({
+      error: "Forbidden — wrong or missing ?key=",
+      // Safe hint for debugging a mismatch without leaking the actual secret.
+      debug: {
+        secretIsSet: Boolean(process.env.NEXTAUTH_SECRET),
+        secretLength: configured.length,
+        providedLength: provided.length,
+      },
+    });
   }
 
   const results = [];
