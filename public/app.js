@@ -569,6 +569,15 @@ function recordQuiz(scopeKey, score, count){
 // by pages/index.js as window.__HSK_USER__ before this script runs.
 const CURRENT_USER = (typeof window!=="undefined" && window.__HSK_USER__) || {id:null, email:""};
 
+// Deterministic avatar color for a nickname, drawn from the app's own
+// jade/gold/seal palette so leaderboard avatars stay on-theme.
+const LB_AVATAR_COLORS = ["#2f6f5e","#b8873c","#b5342a","#5b6359","#204f43"];
+function avatarColor(name){
+  let hash = 0;
+  for(let i=0;i<name.length;i++) hash = (hash*31 + name.charCodeAt(i)) | 0;
+  return LB_AVATAR_COLORS[Math.abs(hash) % LB_AVATAR_COLORS.length];
+}
+
 async function publishLeaderboard(){
   const nickInput = document.getElementById("lb-nickname");
   const chalInput = document.getElementById("lb-challenge");
@@ -615,9 +624,13 @@ async function loadLeaderboard(){
     }
     const html = rows.map((v,i)=>{
       const mine = v.userId===CURRENT_USER.id;
-      return `<div class="lb-row${mine?" mine":""}">
-        <span class="lb-rank">${i+1}</span>
-        <span class="lb-name">${escapeHtml(v.nickname||"???")}${mine?" (Та)":""}</span>
+      const topClass = i===0?" top-1":i===1?" top-2":i===2?" top-3":"";
+      const name = v.nickname||"???";
+      const rankLabel = i<3 ? ["🥇","🥈","🥉"][i] : String(i+1);
+      return `<div class="lb-row${mine?" mine":""}${topClass}">
+        <span class="lb-rank">${rankLabel}</span>
+        <span class="lb-avatar" style="background:${avatarColor(name)}">${escapeHtml(name.slice(0,1).toUpperCase())}</span>
+        <span class="lb-name">${escapeHtml(name)}${mine?" (Та)":""}</span>
         <span class="lb-score">${v.mastered||0} эзэмшсэн</span>
         ${v.challenge?`<span class="lb-challenge">💬 ${escapeHtml(v.challenge)}</span>`:""}
       </div>`;
@@ -734,7 +747,7 @@ function renderLevelTabs(){
       <div class="lv-sub">${meta.sub}</div>
       <div class="lv-bar"><i style="width:${pct}%"></i></div>
       <div class="lv-pct">${st.mastered}/${st.total} эзэмшсэн</div>`;
-    btn.addEventListener("click", ()=>{ currentLevel=level; renderLevelTabs(); renderLessons(); renderVocabBrowser(); });
+    btn.addEventListener("click", ()=>{ currentLevel=level; vbFlashPos=0; vbFlashOrder=null; renderLevelTabs(); renderLessons(); renderVocabBrowser(); });
     box.appendChild(btn);
   });
 }
@@ -778,6 +791,12 @@ function renderLessons(){
 /* ============================= RENDER: VOCAB BROWSER ============================= */
 let vbQuery = "";
 let vbTopic = "";
+let vbViewMode = "grid"; // "grid" | "flash"
+let vbFlashPos = 0;
+let vbFlashOrder = null; // null = natural order, else shuffled array of indices into `filtered`
+let vbFlashSide = "hz"; // "hz" | "mn" — which field is shown big
+let vbFlashReveal = {py:true, other:false, ex:false, note:false};
+
 function populateTopicSelect(){
   const sel = document.getElementById("vb-topic");
   if(!sel || sel.dataset.filled) return;
@@ -785,13 +804,28 @@ function populateTopicSelect(){
     TOPICS.map(t=>`<option value="${escapeHtml(t.key)}">${escapeHtml(t.label)}</option>`).join("") +
     `<option value="other">Бусад</option>`;
   sel.dataset.filled = "1";
-  sel.addEventListener("change", (e)=>{ vbTopic = e.target.value; renderVocabBrowser(); });
+  sel.addEventListener("change", (e)=>{ vbTopic = e.target.value; vbFlashPos=0; vbFlashOrder=null; renderVocabBrowser(); });
 }
+
+/* Find one example sentence (from the grammar lessons) that contains this hanzi word. */
+function findExampleSentence(hz){
+  for(const lv of LEVELS){
+    const lessons = DATA[lv]||[];
+    for(const lesson of lessons){
+      for(const ex of lesson.grammar.examples){
+        if(ex[0].includes(hz)) return {hz:ex[0], py:ex[1], mn:ex[2]};
+      }
+    }
+  }
+  return null;
+}
+
 function renderVocabBrowser(){
   populateTopicSelect();
   const title = document.getElementById("vb-title");
   const countEl = document.getElementById("vb-count");
-  const tbody = document.getElementById("vb-tbody");
+  const grid = document.getElementById("vb-grid");
+  const flashBox = document.getElementById("vb-flash");
   const rows = FULL_VOCAB[currentLevel] || [];
   title.textContent = `Бүх үгийн сан — ${LEVEL_META[currentLevel].label} (${rows.length} үг)`;
   const q = vbQuery.trim().toLowerCase();
@@ -806,14 +840,166 @@ function renderVocabBrowser(){
   });
   const active = q || vbTopic;
   countEl.textContent = active ? `${filtered.length} / ${rows.length} үг олдлоо` : `Нийт ${rows.length} үг`;
-  tbody.innerHTML = filtered.map(({r,idx})=>{
+
+  grid.hidden = vbViewMode!=="grid";
+  flashBox.hidden = vbViewMode!=="flash";
+  const scrollEl = document.getElementById("vb-scroll");
+  if(scrollEl) scrollEl.classList.toggle("vb-scroll-flash", vbViewMode==="flash");
+
+  if(vbViewMode==="flash"){
+    renderVbFlash(filtered);
+    return;
+  }
+
+  if(!filtered.length){
+    grid.innerHTML = `<p class="prog-empty" style="grid-column:1/-1;">Илэрц олдсонгүй.</p>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(({r,idx})=>{
     const id = currentLevel+":w:"+idx;
-    return `<tr><td>${idx+1}</td><td class="hz"><span class="hz-cell">${escapeHtml(r[0])}${speakerBtnHtml(r[0])}${starBtnHtml(id)}${noteBtnHtml(id)}</span></td><td class="py">${escapeHtml(r[1])}</td><td class="en-def">${escapeHtml(r[3])}</td></tr>
-    ${noteTrHtml(id, 4)}`;
+    return `<div class="vword-card">
+      <div class="vword-top">
+        <span class="vword-idx">${idx+1}</span>
+        <span class="hz-cell">${escapeHtml(r[0])}${speakerBtnHtml(r[0])}</span>
+        <span class="vword-actions">${starBtnHtml(id)}${noteBtnHtml(id)}</span>
+      </div>
+      <div class="py">${escapeHtml(r[1])}</div>
+      <div class="en-def">${escapeHtml(r[3])}</div>
+      ${noteBoxHtml(id)}
+    </div>`;
   }).join("");
 }
+
+/* ---- Flash card browsing view (1999.study-style) ---- */
+function renderVbFlash(filtered){
+  const box = document.getElementById("vb-flash");
+  if(vbFlashOrder && vbFlashOrder.length!==filtered.length){ vbFlashOrder=null; vbFlashPos=0; }
+  if(vbFlashPos>=filtered.length) vbFlashPos = 0;
+
+  if(!filtered.length){
+    box.innerHTML = `<p class="prog-empty">Илэрц олдсонгүй.</p>`;
+    return;
+  }
+
+  let learned=0, marked=0;
+  filtered.forEach(({idx})=>{
+    const id = currentLevel+":w:"+idx;
+    if(isMastered(srs.cards[id])) learned+=1;
+    if(isBookmarked(id)) marked+=1;
+  });
+  const total = filtered.length;
+  const notLearned = total-learned;
+  const remain = total-learned;
+
+  const orderIdx = vbFlashOrder ? vbFlashOrder[vbFlashPos] : vbFlashPos;
+  const {r, idx} = filtered[orderIdx];
+  const id = currentLevel+":w:"+idx;
+  const hz=r[0], py=r[1], en=r[2], mn=r[3];
+  const bigText = vbFlashSide==="hz" ? hz : mn;
+  const otherField = vbFlashSide==="hz" ? {key:"other", label:"Орчуулга", val:mn} : {key:"other", label:"Ханз", val:hz};
+  const example = vbFlashReveal.ex ? findExampleSentence(hz) : null;
+
+  const chip = (key,label,on)=>`<button type="button" class="vfc-chip ${on?"active":""}" data-reveal="${key}">${label}</button>`;
+
+  let revealBodyHtml = "";
+  if(vbFlashReveal.py) revealBodyHtml += `<div class="vfc-reveal-row vfc-py">${escapeHtml(py)}</div>`;
+  if(vbFlashReveal.other) revealBodyHtml += `<div class="vfc-reveal-row vfc-other">${escapeHtml(otherField.val)}</div>`;
+  if(vbFlashReveal.ex){
+    revealBodyHtml += example
+      ? `<div class="vfc-reveal-row vfc-example"><span class="vfc-ex-hz">${escapeHtml(example.hz)}</span><span class="vfc-ex-py">${escapeHtml(example.py)}</span><span class="vfc-ex-mn">${escapeHtml(example.mn)}</span></div>`
+      : `<div class="vfc-reveal-row vfc-example vfc-ex-empty">Жишээ өгүүлбэр олдсонгүй.</div>`;
+  }
+  if(vbFlashReveal.note){
+    const noteVal = getNote(id);
+    revealBodyHtml += `<div class="vfc-reveal-row vfc-note">
+      <div class="note-box vfc-note-box" data-note-tr="${escapeHtml(id)}">
+        <textarea class="note-input" data-note-input="${escapeHtml(id)}" placeholder="Энэ үгэнд өөрийн тэмдэглэл, жишээ өгүүлбэр бичээрэй...">${escapeHtml(noteVal)}</textarea>
+      </div>
+    </div>`;
+  }
+
+  box.innerHTML = `
+    <div class="vfc-stats">
+      <span class="vfc-stat"><i class="vfc-dot vfc-dot-total"></i><b>${total}</b> Нийт үг</span>
+      <span class="vfc-stat"><i class="vfc-dot vfc-dot-remain"></i><b>${remain}</b> Үлдсэн үг</span>
+      <span class="vfc-stat"><i class="vfc-dot vfc-dot-new"></i><b>${notLearned}</b> Ойлгоогүй</span>
+      <span class="vfc-stat"><i class="vfc-dot vfc-dot-learned"></i><b>${learned}</b> Ойлгосон</span>
+      <span class="vfc-stat"><i class="vfc-dot vfc-dot-marked"></i><b>${marked}</b> Тэмдэглэсэн</span>
+    </div>
+    <div class="vfc-toolbar">
+      <button type="button" class="vfc-tool-btn" id="vfc-shuffle" title="Холих">🔀</button>
+      <button type="button" class="vfc-tool-btn" id="vfc-speak" title="Дуудлага сонсох">🔊</button>
+      <button type="button" class="vfc-tool-btn" id="vfc-fullscreen" title="Дэлгэц дүүргэх">⛶</button>
+    </div>
+    <div class="vfc-stage" id="vfc-stage">
+      <button type="button" class="vfc-nav vfc-prev" id="vfc-prev" aria-label="Өмнөх">‹</button>
+      <div class="vfc-card">
+        <div class="vfc-side-tabs">
+          <button type="button" class="vfc-side-btn ${vbFlashSide==="hz"?"active":""}" data-side="hz">ХЯТАД</button>
+          <button type="button" class="vfc-side-btn ${vbFlashSide==="mn"?"active":""}" data-side="mn">МОНГОЛ</button>
+        </div>
+        ${starBtnHtml(id, "vfc-star")}
+        <div class="vfc-big ${vbFlashSide}">${escapeHtml(bigText)}</div>
+        ${vbFlashSide==="hz" ? speakerBtnHtml(hz, "vfc-spk") : ""}
+        <div class="vfc-reveals">
+          ${chip("py","Pinyin", vbFlashReveal.py)}
+          ${chip("other", otherField.label, vbFlashReveal.other)}
+          ${chip("ex","Жишээ", vbFlashReveal.ex)}
+          ${chip("note","Тэмдэглэл", vbFlashReveal.note)}
+        </div>
+        ${revealBodyHtml ? `<div class="vfc-reveal-body">${revealBodyHtml}</div>` : ""}
+      </div>
+      <button type="button" class="vfc-nav vfc-next" id="vfc-next" aria-label="Дараах">›</button>
+    </div>
+    <div class="vfc-footer">${vbFlashPos+1} / ${total}</div>
+  `;
+
+  const move = (delta)=>{
+    vbFlashPos = (vbFlashPos + delta + total) % total;
+    renderVbFlash(filtered);
+  };
+  document.getElementById("vfc-prev").addEventListener("click", ()=>move(-1));
+  document.getElementById("vfc-next").addEventListener("click", ()=>move(1));
+  document.getElementById("vfc-shuffle").addEventListener("click", ()=>{
+    const order = filtered.map((_,i)=>i);
+    vbFlashOrder = shuffle(order);
+    vbFlashPos = 0;
+    renderVbFlash(filtered);
+  });
+  document.getElementById("vfc-speak").addEventListener("click", ()=>speak(hz));
+  document.getElementById("vfc-fullscreen").addEventListener("click", ()=>{
+    const stage = document.getElementById("vfc-stage");
+    if(!document.fullscreenElement){ stage.requestFullscreen && stage.requestFullscreen().catch(()=>{}); }
+    else{ document.exitFullscreen && document.exitFullscreen(); }
+  });
+  box.querySelectorAll(".vfc-side-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ vbFlashSide = btn.dataset.side; renderVbFlash(filtered); });
+  });
+  box.querySelectorAll(".vfc-chip").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const key = btn.dataset.reveal;
+      vbFlashReveal[key] = !vbFlashReveal[key];
+      renderVbFlash(filtered);
+    });
+  });
+}
+
 document.getElementById("vb-search").addEventListener("input", (e)=>{
   vbQuery = e.target.value;
+  vbFlashPos = 0;
+  vbFlashOrder = null;
+  renderVocabBrowser();
+});
+document.getElementById("vb-view-grid").addEventListener("click", ()=>{
+  vbViewMode = "grid";
+  document.getElementById("vb-view-grid").classList.add("active");
+  document.getElementById("vb-view-flash").classList.remove("active");
+  renderVocabBrowser();
+});
+document.getElementById("vb-view-flash").addEventListener("click", ()=>{
+  vbViewMode = "flash";
+  document.getElementById("vb-view-flash").classList.add("active");
+  document.getElementById("vb-view-grid").classList.remove("active");
   renderVocabBrowser();
 });
 
@@ -1882,12 +2068,130 @@ function renderSpeakingGame(){
   });
 }
 
+/* ============================= ТОГЛООМ: СОНСГОЛ (LISTENING) ============================= */
+let listenLevel = "hsk1";
+let listenSubMode = "word"; // "word" | "sentence"
+let listenRound = null;
+let listenStats = {correct:0, total:0};
+
+function collectListenSentences(level){
+  const lessons = DATA[level] || [];
+  const out = [];
+  lessons.forEach(lesson=>{
+    lesson.grammar.examples.forEach(ex=>{
+      out.push({level, lessonEn:lesson.en, hz:ex[0], py:ex[1], mn:ex[2]});
+    });
+  });
+  return out;
+}
+
+function newListenRound(){
+  if(listenSubMode==="word"){
+    const pool = DECK.filter(c=>c.level===listenLevel);
+    const source = pool.length>=4 ? pool : DECK;
+    if(!source.length){ listenRound=null; return; }
+    const card = source[Math.floor(Math.random()*source.length)];
+    listenRound = {kind:"word", card, options: buildOptions(card, "listening", source)};
+  } else {
+    let all = collectListenSentences(listenLevel);
+    if(all.length<4) all = LEVELS.flatMap(collectListenSentences);
+    if(all.length<4){ listenRound=null; return; }
+    const pick = all[Math.floor(Math.random()*all.length)];
+    const seen = new Set([pick.mn]);
+    const distractors = [];
+    shuffle(all.filter(s=>s.mn!==pick.mn)).forEach(s=>{
+      if(distractors.length>=3) return;
+      if(seen.has(s.mn)) return;
+      seen.add(s.mn); distractors.push(s.mn);
+    });
+    if(distractors.length<3){
+      shuffle(LEVELS.flatMap(collectListenSentences).filter(s=>s.mn!==pick.mn)).forEach(s=>{
+        if(distractors.length>=3) return;
+        if(seen.has(s.mn)) return;
+        seen.add(s.mn); distractors.push(s.mn);
+      });
+    }
+    const options = shuffle(distractors.concat([pick.mn])).map(mn=>({mn, isCorrect:mn===pick.mn}));
+    if(options.length<2){ listenRound=null; return; }
+    listenRound = {kind:"sentence", sentence:pick, options};
+  }
+}
+
+function renderListenFilters(){
+  const box = document.getElementById("games-listen-filters");
+  box.innerHTML = "";
+  [["word","🔤 Ганц үг"], ["sentence","💬 Өгүүлбэр"]].forEach(([key,label])=>{
+    const chip = document.createElement("button");
+    chip.className = "chip"+(key===listenSubMode?" active":"");
+    chip.textContent = label;
+    chip.addEventListener("click", ()=>{ listenSubMode=key; newListenRound(); renderListenFilters(); renderListenGame(); });
+    box.appendChild(chip);
+  });
+  LEVELS.forEach(lv=>{
+    const chip = document.createElement("button");
+    chip.className = "chip"+(lv===listenLevel?" active":"");
+    chip.textContent = LEVEL_META[lv].label;
+    chip.addEventListener("click", ()=>{ listenLevel=lv; newListenRound(); renderListenFilters(); renderListenGame(); });
+    box.appendChild(chip);
+  });
+}
+
+function renderListenGame(){
+  const box = document.getElementById("games-body");
+  if(!listenRound){
+    box.innerHTML = `<div class="empty-state"><p>Энэ түвшинд сонсох материал олдсонгүй.</p></div>`;
+    return;
+  }
+  const r = listenRound;
+  const kicker = r.kind==="word" ? LEVEL_META[r.card.level].label : `${LEVEL_META[r.sentence.level].label} · ${escapeHtml(r.sentence.lessonEn)}`;
+  const sayText = r.kind==="word" ? r.card.h : r.sentence.hz;
+  const optsHtml = r.kind==="word"
+    ? r.options.map((o,idx)=>`<button class="qopt" data-idx="${idx}"><span class="qtxt">${escapeHtml(o.card.m)}</span></button>`).join("")
+    : r.options.map((o,idx)=>`<button class="qopt" data-idx="${idx}"><span class="qtxt">${escapeHtml(o.mn)}</span></button>`).join("");
+  box.innerHTML = `
+    <div class="session-count" style="text-align:center;margin-bottom:10px;">Оноо: ${listenStats.correct}/${listenStats.total}</div>
+    <div class="quiz-card">
+      <div class="quiz-kicker">${kicker}</div>
+      <div class="qp-row">${speakerBtnHtml(sayText, "big")}</div>
+      <div class="quiz-instruction">${r.kind==="word" ? "Сонсоод утгыг сонгоно уу" : "Сонсоод өгүүлбэрийн утгыг сонгоно уу"}</div>
+      <div class="quiz-listen-reveal" id="listen-reveal"></div>
+      <div class="quiz-options">${optsHtml}</div>
+      <div class="quiz-next-wrap" id="listen-next-wrap"></div>
+    </div>`;
+  speak(sayText);
+  const optButtons = box.querySelectorAll(".qopt");
+  optButtons.forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      optButtons.forEach(b=>b.disabled=true);
+      const idx = Number(btn.dataset.idx);
+      const chosen = r.options[idx];
+      listenStats.total += 1;
+      if(chosen.isCorrect){ btn.classList.add("correct"); listenStats.correct += 1; }
+      else{
+        btn.classList.add("wrong");
+        const correctBtn = Array.from(optButtons).find((b,i)=>r.options[i].isCorrect);
+        if(correctBtn) correctBtn.classList.add("correct");
+      }
+      const reveal = document.getElementById("listen-reveal");
+      if(reveal){
+        reveal.textContent = r.kind==="word" ? `${r.card.h} (${r.card.p})` : `${r.sentence.hz} (${r.sentence.py})`;
+      }
+      const nextWrap = document.getElementById("listen-next-wrap");
+      const nextBtn = document.createElement("button");
+      nextBtn.className="btn-primary";
+      nextBtn.textContent = "Дараах";
+      nextBtn.addEventListener("click", ()=>{ newListenRound(); renderListenGame(); });
+      nextWrap.appendChild(nextBtn);
+    });
+  });
+}
+
 /* ============================= ТОГЛООМ: ИНТРО/ТОНОГЛОЛ ============================= */
 let gamesMode = "scramble";
 function renderGamesIntro(){
   const box = document.getElementById("games-mode-filters");
   box.innerHTML = "";
-  [["scramble","🧩 Өгүүлбэр угсрах"], ["match","🔗 Ижил/Эсрэг утга"], ["dialogue","🗣️ Харилцан яриа"], ["speaking","🎙️ HSKK бэлтгэл"]].forEach(([key,label])=>{
+  [["scramble","🧩 Өгүүлбэр угсрах"], ["match","🔗 Ижил/Эсрэг утга"], ["listen","🎧 Сонсгол"], ["dialogue","🗣️ Харилцан яриа"], ["speaking","🎙️ HSKK бэлтгэл"]].forEach(([key,label])=>{
     const chip = document.createElement("button");
     chip.className = "chip"+(key===gamesMode?" active":"");
     chip.textContent = label;
@@ -1895,9 +2199,11 @@ function renderGamesIntro(){
     box.appendChild(chip);
   });
   const scrambleFilterBox = document.getElementById("games-scramble-filters");
+  const listenFilterBox = document.getElementById("games-listen-filters");
   const dialogueFilterBox = document.getElementById("games-dialogue-filters");
   const speakingFilterBox = document.getElementById("games-speaking-filters");
   scrambleFilterBox.hidden = gamesMode!=="scramble";
+  listenFilterBox.hidden = gamesMode!=="listen";
   dialogueFilterBox.hidden = gamesMode!=="dialogue";
   speakingFilterBox.hidden = gamesMode!=="speaking";
   if(gamesMode==="scramble"){
@@ -1907,6 +2213,10 @@ function renderGamesIntro(){
   } else if(gamesMode==="match"){
     if(!matchRound) newMatchRound();
     renderMatchGame();
+  } else if(gamesMode==="listen"){
+    renderListenFilters();
+    if(!listenRound) newListenRound();
+    renderListenGame();
   } else if(gamesMode==="dialogue"){
     renderDialogueFilters();
     renderDialogueGame();
@@ -2042,7 +2352,7 @@ function renderProgress(){
 
     <div class="prog-section">
       <h3>🏆 Найзуудтайгаа өрсөлдөх</h3>
-      <p class="prog-empty">Жинхэнэ нэвтрэлт (login) энэ платформд одоогоор байхгүй тул энэ жагсаалт зөвхөн <strong>энэ HSK Path холбоосыг өөрсдийн эрхээр нээсэн</strong> хүмүүсийг харуулна. Найзууддаа энэ артифактын холбоосыг илгээж, тэднийг нэрээ оруулаад оноогоо нийтлэхийг урина уу.</p>
+      <p class="prog-empty">Нэрээ болон (сонголтоор) зорилтоо бичээд нийтэлбэл, HSK Path дээр бүртгэлтэй бусад хэрэглэгчидтэй хамт нэгэн жагсаалтад харагдана.</p>
       <div class="lb-controls">
         <input type="text" id="lb-nickname" placeholder="Таны нэр (жагсаалтад харагдана)" value="${escapeHtml(srs.nickname||"")}" maxlength="24">
         <input type="text" id="lb-challenge" placeholder="Найзууддаа зорилт бичих (заавал биш)" value="${escapeHtml(srs.challenge||"")}" maxlength="60">
@@ -2079,6 +2389,35 @@ document.getElementById("tab-review").addEventListener("click", ()=>switchView("
 document.getElementById("tab-quiz").addEventListener("click", ()=>switchView("quiz"));
 document.getElementById("tab-games").addEventListener("click", ()=>switchView("games"));
 document.getElementById("tab-progress").addEventListener("click", ()=>switchView("progress"));
+
+/* ============================= MOBILE NAV (☰ dropdown) ============================= */
+// Below 720px the CSS turns #main-nav into a hidden dropdown; this button
+// toggles it open/closed, and picking any section closes it again.
+(function(){
+  const navToggle = document.getElementById("nav-toggle");
+  const mainNav = document.getElementById("main-nav");
+  if(!navToggle || !mainNav) return;
+  function closeNav(){
+    mainNav.classList.remove("open");
+    navToggle.setAttribute("aria-expanded", "false");
+  }
+  navToggle.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    const open = mainNav.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  mainNav.addEventListener("click", (e)=>{
+    if(e.target.closest("button")) closeNav();
+  });
+  document.addEventListener("click", (e)=>{
+    if(mainNav.classList.contains("open") && !mainNav.contains(e.target) && e.target!==navToggle && !navToggle.contains(e.target)){
+      closeNav();
+    }
+  });
+  document.addEventListener("keydown", (e)=>{
+    if(e.key==="Escape") closeNav();
+  });
+})();
 
 document.getElementById("goal-input").addEventListener("change", (e)=>{
   setDailyGoal(Number(e.target.value));

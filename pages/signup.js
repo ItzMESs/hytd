@@ -2,11 +2,13 @@ import { useState } from "react";
 import Head from "next/head";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../lib/authOptions";
+import { IconMail, IconLock, IconEye, IconWarning } from "../components/icons";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -57,45 +59,76 @@ export default function SignupPage() {
         <div className="auth-card">
           <div className="auth-brand">
             <span className="mark">汉</span>
-            <span className="name">HSK Path</span>
+            <div className="auth-brand-text">
+              <span className="name">HSK Path</span>
+              <span className="tagline">Хятад хэл сурах платформ</span>
+            </div>
           </div>
-          <h1>Бүртгүүлэх</h1>
-          {error && <div className="auth-error">{error}</div>}
+          <div className="hsk-dots" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <h1>Шинэ бүртгэл үүсгэе</h1>
+          {error && (
+            <div className="auth-error">
+              <IconWarning />
+              <span>{error}</span>
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
             <div className="auth-field">
               <label htmlFor="email">И-мэйл</label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-              />
+              <div className="auth-input-wrap">
+                <IconMail />
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                />
+              </div>
             </div>
             <div className="auth-field">
               <label htmlFor="password">Нууц үг (дор хаяж 6 тэмдэгт)</label>
-              <input
-                id="password"
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-              />
+              <div className="auth-input-wrap">
+                <IconLock />
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  data-pw-field
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="auth-toggle-visibility"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-label={showPassword ? "Нууц үг нуух" : "Нууц үг харуулах"}
+                  tabIndex={-1}
+                >
+                  <IconEye off={showPassword} />
+                </button>
+              </div>
             </div>
             <div className="auth-field">
               <label htmlFor="confirm">Нууц үг давтах</label>
-              <input
-                id="confirm"
-                type="password"
-                required
-                minLength={6}
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                autoComplete="new-password"
-              />
+              <div className="auth-input-wrap">
+                <IconLock />
+                <input
+                  id="confirm"
+                  type={showPassword ? "text" : "password"}
+                  data-pw-field
+                  required
+                  minLength={6}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  autoComplete="new-password"
+                />
+              </div>
             </div>
             <button className="auth-submit" type="submit" disabled={loading}>
               {loading ? "Бүртгэж байна..." : "Бүртгүүлэх"}

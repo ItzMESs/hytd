@@ -6,12 +6,17 @@ export const BODY_HTML = `<header class="top">
       <span class="mark">汉</span>
       <span class="name">HSK Path<small>Хичээл · Давталт · Тест · Тоглоом · Ахиц</small></span>
     </div>
-    <div class="view-toggle">
-      <button id="tab-lessons" class="active">Хичээл</button>
-      <button id="tab-review">Давталт</button>
-      <button id="tab-quiz">Тест</button>
-      <button id="tab-games">Тоглоом</button>
-      <button id="tab-progress">Ахиц</button>
+    <div class="nav-wrap">
+      <button id="nav-toggle" class="nav-toggle-btn" aria-expanded="false" aria-controls="main-nav" aria-label="Цэс">
+        <span class="hamburger-ic">☰</span>
+      </button>
+      <div class="view-toggle" id="main-nav">
+        <button id="tab-lessons" class="active"><span class="tab-ic">📖</span>Хичээл</button>
+        <button id="tab-review"><span class="tab-ic">🗂️</span>Давталт</button>
+        <button id="tab-quiz"><span class="tab-ic">✏️</span>Тест</button>
+        <button id="tab-games"><span class="tab-ic">🎮</span>Тоглоом</button>
+        <button id="tab-progress"><span class="tab-ic">📊</span>Ахиц</button>
+      </div>
     </div>
     <div class="stats">
       <div class="pill due"><b id="stat-due">0</b>&nbsp;давтах</div>
@@ -28,21 +33,23 @@ export const BODY_HTML = `<header class="top">
 
   <section id="lessons-view">
     <p class="intro">HSK 1-ээс 5 хүртэлх түвшний дүрмийн хичээлүүд, тэдгээрийг тайлбарлах жишээ үгсийн сан. Мөн тухайн түвшний <strong>албан ёсны (хуучин стандарт) бүрэн үгийн сан ойролцоогоор 2500 үгийг</strong> доор жагсаасан болно — эдгээр бүх үг <strong>Давталт</strong> болон <strong>Тест</strong> хэсэгт ашиглагдана. Дүрмийн хичээлээ үзсэний дараа Давталт хэсэгт очиж Anki маягийн давталтаар бататгаад, Тест хэсэгт мэдлэгээ шалгаарай.</p>
-    <div id="wotd-card"></div>
+    <div id="wotd-card" class="wotd-card"></div>
     <div class="levels" id="level-tabs"></div>
     <div id="lesson-list"></div>
     <div class="vocab-browser">
       <div class="vb-head">
         <h3 id="vb-title">Бүх үгийн сан</h3>
+        <div class="vb-view-toggle">
+          <button type="button" id="vb-view-grid" class="vb-view-btn active">📋 Жагсаалт</button>
+          <button type="button" id="vb-view-flash" class="vb-view-btn">🃏 Флаш карт</button>
+        </div>
         <select id="vb-topic"></select>
         <input type="text" id="vb-search" placeholder="Хайх: ханз, пиньин, монгол утга...">
       </div>
       <div class="vb-count" id="vb-count"></div>
-      <div class="vb-scroll">
-        <table class="vocab vb-table" id="vb-table">
-          <thead><tr><th>№</th><th>Ханз</th><th>Пиньин</th><th>Утга</th></tr></thead>
-          <tbody id="vb-tbody"></tbody>
-        </table>
+      <div class="vb-scroll" id="vb-scroll">
+        <div class="vb-grid" id="vb-grid"></div>
+        <div class="vb-flash" id="vb-flash" hidden></div>
       </div>
     </div>
   </section>
@@ -70,6 +77,7 @@ export const BODY_HTML = `<header class="top">
   <section id="games-view">
     <div class="scope-filters" id="games-mode-filters"></div>
     <div class="scope-filters" id="games-scramble-filters"></div>
+    <div class="scope-filters" id="games-listen-filters"></div>
     <div class="scope-filters" id="games-dialogue-filters"></div>
     <div class="scope-filters" id="games-speaking-filters"></div>
     <div id="games-body"></div>

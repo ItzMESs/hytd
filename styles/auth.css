@@ -1,47 +1,138 @@
+/* ============================= AUTH PAGES (Login / Signup) ============================= */
+
 .auth-wrap {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--paper);
-  padding: 20px;
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 24px 24px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
 }
+.auth-wrap::before,
+.auth-wrap::after {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.28;
+  z-index: 0;
+  pointer-events: none;
+}
+.auth-wrap::before {
+  background: var(--jade);
+  top: -90px;
+  left: -90px;
+}
+.auth-wrap::after {
+  background: var(--gold);
+  bottom: -110px;
+  right: -110px;
+}
+
 .auth-card {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 380px;
   background: var(--paper-raised);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 20px;
   box-shadow: var(--shadow);
-  padding: 32px 28px;
+  padding: 34px 30px 30px;
+  animation: authCardIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+@keyframes authCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .auth-brand {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
   justify-content: center;
-  margin-bottom: 22px;
+  margin-bottom: 6px;
 }
 .auth-brand .mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--jade-soft);
+  border: 1.5px dashed var(--jade);
   font-family: "Noto Serif SC", serif;
-  font-size: 1.6rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--jade-strong);
+  flex-shrink: 0;
+}
+.auth-brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.25;
 }
 .auth-brand .name {
   font-family: "Noto Serif SC", serif;
   font-weight: 700;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
+  color: var(--ink);
 }
+.auth-brand .tagline {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+
+.hsk-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 14px 0 20px;
+}
+.hsk-dots span {
+  display: block;
+  border-radius: 50%;
+  background: var(--jade);
+}
+.hsk-dots span:nth-child(1) { width: 5px; height: 5px; opacity: 0.35; }
+.hsk-dots span:nth-child(2) { width: 6px; height: 6px; opacity: 0.5; }
+.hsk-dots span:nth-child(3) { width: 7px; height: 7px; opacity: 0.68; }
+.hsk-dots span:nth-child(4) { width: 8px; height: 8px; opacity: 0.85; }
+.hsk-dots span:nth-child(5) { width: 9px; height: 9px; opacity: 1; }
+.hsk-dots::after {
+  content: "HSK 1–5";
+  margin-left: 8px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+
 .auth-card h1 {
   font-family: "Noto Serif SC", serif;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   text-align: center;
   margin: 0 0 22px;
   color: var(--ink);
 }
+
 .auth-field {
-  margin-bottom: 14px;
+  margin-bottom: 15px;
 }
 .auth-field label {
   display: block;
@@ -49,49 +140,115 @@
   color: var(--ink-soft);
   margin-bottom: 6px;
 }
+.auth-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.auth-input-wrap svg {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
 .auth-field input {
   width: 100%;
   font: inherit;
   font-size: 0.9rem;
-  padding: 10px 12px;
+  padding: 11px 12px 11px 36px;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 11px;
   background: var(--paper);
   color: var(--ink);
   box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .auth-field input:focus {
-  outline: 2px solid var(--jade);
-  outline-offset: -1px;
+  outline: none;
+  border-color: var(--jade);
+  box-shadow: 0 0 0 3px var(--jade-soft);
 }
+.auth-toggle-visibility {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  padding: 6px;
+  display: flex;
+  cursor: pointer;
+  color: var(--ink-faint);
+  border-radius: 8px;
+}
+.auth-toggle-visibility:hover {
+  color: var(--ink-soft);
+  background: var(--paper-sunken);
+}
+.auth-toggle-visibility svg {
+  width: 16px;
+  height: 16px;
+}
+.auth-field input[type="password"],
+.auth-field input[data-pw-field] {
+  padding-right: 34px;
+}
+
 .auth-submit {
   width: 100%;
-  margin-top: 6px;
-  background: var(--jade);
+  margin-top: 8px;
+  background: linear-gradient(135deg, var(--jade), var(--jade-strong));
   color: #fff;
   border: none;
-  border-radius: 10px;
-  padding: 11px 18px;
+  border-radius: 11px;
+  padding: 12px 18px;
   font: inherit;
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   cursor: pointer;
+  box-shadow: 0 6px 16px -6px var(--jade-strong);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+.auth-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px -6px var(--jade-strong);
+}
+.auth-submit:active:not(:disabled) {
+  transform: translateY(0);
 }
 .auth-submit:disabled {
   opacity: 0.6;
   cursor: default;
+  box-shadow: none;
 }
+
 .auth-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   background: var(--seal-soft);
   color: var(--seal);
-  border-radius: 10px;
+  border-radius: 11px;
   padding: 10px 12px;
   font-size: 0.8rem;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+  animation: authShake 0.35s ease;
 }
+.auth-error svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+@keyframes authShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
 .auth-switch {
   text-align: center;
-  margin-top: 18px;
+  margin-top: 20px;
   font-size: 0.82rem;
   color: var(--ink-soft);
 }
