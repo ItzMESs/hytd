@@ -30,13 +30,14 @@ model Progress {
   id        String   @id @default(cuid())
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  data      Json
-  nickname  String   @default("")
-  challenge String   @default("")
-  mastered  Int      @default(0)
-  learned   Int      @default(0)
-  streak    Int      @default(0)
-  updatedAt DateTime @updatedAt
+  data        Json
+  nickname    String   @default("")
+  challenge   String   @default("")
+  avatarEmoji String   @default("")
+  mastered    Int      @default(0)
+  learned     Int      @default(0)
+  streak      Int      @default(0)
+  updatedAt   DateTime @updatedAt
 
   @@index([mastered])
 }

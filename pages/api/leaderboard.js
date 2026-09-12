@@ -18,6 +18,7 @@ export default async function handler(req, res) {
         userId: true,
         nickname: true,
         challenge: true,
+        avatarEmoji: true,
         mastered: true,
         learned: true,
         streak: true,
@@ -27,7 +28,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const { nickname, challenge, mastered, learned, streak } = req.body || {};
+    const { nickname, challenge, avatarEmoji, mastered, learned, streak } = req.body || {};
     await prisma.progress.upsert({
       where: { userId },
       create: {
@@ -35,6 +36,7 @@ export default async function handler(req, res) {
         data: {},
         nickname: (nickname || "").slice(0, 24),
         challenge: (challenge || "").slice(0, 60),
+        avatarEmoji: (avatarEmoji || "").slice(0, 8),
         mastered: Number(mastered) || 0,
         learned: Number(learned) || 0,
         streak: Number(streak) || 0,
@@ -42,6 +44,7 @@ export default async function handler(req, res) {
       update: {
         nickname: (nickname || "").slice(0, 24),
         challenge: (challenge || "").slice(0, 60),
+        avatarEmoji: (avatarEmoji || "").slice(0, 8),
         mastered: Number(mastered) || 0,
         learned: Number(learned) || 0,
         streak: Number(streak) || 0,

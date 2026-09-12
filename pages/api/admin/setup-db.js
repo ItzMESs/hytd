@@ -30,6 +30,9 @@ const STATEMENTS = [
   `CREATE UNIQUE INDEX IF NOT EXISTS "Progress_userId_key" ON "Progress"("userId")`,
   `CREATE INDEX IF NOT EXISTS "Progress_mastered_idx" ON "Progress"("mastered")`,
   `ALTER TABLE "Progress" ADD CONSTRAINT "Progress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE`,
+  // Added later (profile avatar picker) — IF NOT EXISTS makes this safe to
+  // run again on a database that was already set up before this column existed.
+  `ALTER TABLE "Progress" ADD COLUMN IF NOT EXISTS "avatarEmoji" TEXT NOT NULL DEFAULT ''`,
 ];
 
 export default async function handler(req, res) {

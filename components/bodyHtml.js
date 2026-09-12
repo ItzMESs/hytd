@@ -16,6 +16,7 @@ export const BODY_HTML = `<header class="top">
         <button id="tab-quiz"><span class="tab-ic">✏️</span>Тест</button>
         <button id="tab-games"><span class="tab-ic">🎮</span>Тоглоом</button>
         <button id="tab-progress"><span class="tab-ic">📊</span>Ахиц</button>
+        <button id="tab-leaderboard"><span class="tab-ic">🏆</span>Тэргүүлэгчид</button>
       </div>
     </div>
     <div class="stats">
@@ -47,10 +48,17 @@ export const BODY_HTML = `<header class="top">
           </div>
           <div class="pm-section">
             <div class="pm-section-label">Өнгөний горим</div>
-            <div class="pm-seg" id="pm-theme-seg">
-              <button type="button" class="pm-seg-btn" data-theme-choice="light">☀️ Цайвар</button>
-              <button type="button" class="pm-seg-btn" data-theme-choice="dark">🌙 Бараан</button>
-              <button type="button" class="pm-seg-btn" data-theme-choice="system">🖥️ Системийнх</button>
+            <div class="pm-theme-toggle">
+              <span class="pm-theme-side pm-theme-side-light">
+                <span class="pm-theme-ic">☀️</span>Цайвар
+              </span>
+              <label class="pm-switch pm-switch-lg">
+                <input type="checkbox" id="pm-theme-toggle">
+                <span class="pm-switch-track"><span class="pm-switch-thumb"></span></span>
+              </label>
+              <span class="pm-theme-side pm-theme-side-dark">
+                Бараан<span class="pm-theme-ic">🌙</span>
+              </span>
             </div>
           </div>
           <div class="pm-section pm-offline">
@@ -131,6 +139,14 @@ export const BODY_HTML = `<header class="top">
 
   <section id="progress-view">
     <div id="progress-body"></div>
+  </section>
+
+  <section id="leaderboard-view">
+    <div id="leaderboard-page-body"></div>
+  </section>
+
+  <section id="profile-view">
+    <div id="profile-body"></div>
   </section>
 
   <p class="save-note" id="save-note">Ахиц дэвшил автоматаар хадгалагдана.</p>
