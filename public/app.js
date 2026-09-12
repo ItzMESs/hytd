@@ -776,6 +776,50 @@ async function loadLeaderboardPage(){
 
 function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveState, 700); }
 
+// scheduleSave() waits 700ms before actually sending anything to the server
+// (so rapid actions — flipping through flash cards, typing a note — don't
+// fire a request per keystroke/click). That's fine while the tab stays
+// open, but it means an action taken right before the page's life ends
+// (logging out, closing/refreshing the tab, switching apps) can be lost:
+// the timer never gets the chance to fire. The functions below make sure a
+// pending save is always flushed at those moments instead of silently
+// dropped — this is what was behind "зарим зүйл дээр мэдээлэл
+// хадгалагдахгүй байна" (мастер тэмдэглэл, багц, тест, leaderboard) reports:
+// those all go through this same debounced save.
+function flushSaveNow(){
+  if(saveTimer==null) return Promise.resolve();
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  return saveState();
+}
+window.__hskFlushSave = flushSaveNow;
+
+// A normal fetch() can get cancelled mid-flight once the browser starts
+// actually unloading the page, so for the "tab is going away right now"
+// moments we use sendBeacon instead — it's handed off to the browser and
+// survives navigation/tab-close. Only fires when there's something pending.
+function beaconSaveNow(){
+  if(saveTimer==null) return;
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  if(typeof navigator!=="undefined" && navigator.sendBeacon){
+    try{
+      const blob = new Blob([JSON.stringify(srs)], {type:"application/json"});
+      const ok = navigator.sendBeacon("/api/progress", blob);
+      if(ok) return;
+    }catch(e){ /* fall through to a normal save attempt below */ }
+  }
+  saveState();
+}
+if(typeof document!=="undefined"){
+  document.addEventListener("visibilitychange", ()=>{
+    if(document.visibilityState==="hidden") beaconSaveNow();
+  });
+}
+if(typeof window!=="undefined"){
+  window.addEventListener("pagehide", beaconSaveNow);
+}
+
 function mergeStateData(d){
   srs = {
     cards:d.cards||{}, streak:d.streak||0, maxStreak:d.maxStreak||d.streak||0,

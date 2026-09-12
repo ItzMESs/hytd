@@ -14,9 +14,22 @@ export default function Home({ user }) {
     // "Invalid URL" there if NEXTAUTH_URL isn't resolvable in that context.
     // Loading it only inside this client-only effect avoids that entirely.
     window.__hskLogout = () => {
-      import("next-auth/react").then(({ signOut }) =>
-        signOut({ callbackUrl: "/login" })
-      );
+      const doSignOut = () =>
+        import("next-auth/react").then(({ signOut }) =>
+          signOut({ callbackUrl: "/login" })
+        );
+      // app.js debounces saves by ~700ms so rapid actions don't spam the
+      // server. Logging out right after marking a card, finishing a quiz,
+      // or creating a deck could previously race that debounce and lose the
+      // change. window.__hskFlushSave (set by app.js) forces any pending
+      // save to go out first; a short timeout keeps logout from hanging if
+      // that save is slow or the network is down.
+      const flush =
+        typeof window.__hskFlushSave === "function"
+          ? Promise.resolve(window.__hskFlushSave()).catch(() => {})
+          : Promise.resolve();
+      const timeout = new Promise((resolve) => setTimeout(resolve, 1500));
+      Promise.race([flush, timeout]).then(doSignOut);
     };
   }, []);
 
