@@ -37,6 +37,11 @@ export default function LoginPage() {
     <>
       <Head>
         <title>Нэвтрэх — HSK Path</title>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("hsk-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`,
+          }}
+        />
       </Head>
       <div className="auth-wrap">
         <div className="auth-card">

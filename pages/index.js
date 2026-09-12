@@ -28,6 +28,14 @@ export default function Home({ user }) {
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         />
+        {/* Applies the saved Цайвар/Бараан/Системийнх choice before first paint,
+            so switching pages (or a full reload) never flashes the wrong theme
+            for a moment before app.js runs. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("hsk-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`,
+          }}
+        />
       </Head>
 
       {/* Injected before app.js runs, so it can read the signed-in user's id/email

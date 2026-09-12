@@ -23,9 +23,55 @@ export const BODY_HTML = `<header class="top">
       <div class="pill"><b id="stat-learned">0</b>/<span id="stat-total">0</span>&nbsp;сурсан</div>
       <div class="pill streak">🔥<b id="stat-streak">0</b></div>
       <div class="pill goal" title="Өдрийн зорилго">🎯<b id="stat-goal-count">0</b>/<input type="number" id="goal-input" min="1" max="500" value="20">&nbsp;карт</div>
-      <span id="user-email-pill" class="pill" style="color:var(--ink-soft);"></span>
-      <button id="logout-btn" class="btn-ghost" style="padding:6px 12px;font-size:.78rem;">Гарах</button>
+      <div class="profile-block" id="profile-block">
+        <button type="button" class="profile-trigger" id="profile-trigger" aria-expanded="false" aria-haspopup="true">
+          <span class="profile-greet">Тавтай морил, <b id="profile-name">Хэрэглэгч</b></span>
+          <span class="profile-avatar" id="profile-avatar">?</span>
+          <span class="profile-caret">⌄</span>
+        </button>
+        <div class="profile-menu" id="profile-menu" hidden>
+          <div class="pm-head">
+            <span class="pm-avatar" id="pm-avatar-big">?</span>
+            <span class="pm-name" id="pm-name-big">Хэрэглэгч</span>
+          </div>
+          <button type="button" class="pm-item" id="pm-goto-profile">
+            <span class="pm-item-ic">👤</span> Профайл
+          </button>
+          <div class="pm-section">
+            <div class="pm-section-label">Хэл</div>
+            <div class="pm-seg">
+              <button type="button" class="pm-seg-btn active" data-lang="mn">MN</button>
+              <button type="button" class="pm-seg-btn" data-lang="en" disabled title="Тун удахгүй">EN</button>
+              <button type="button" class="pm-seg-btn" data-lang="zh" disabled title="Тун удахгүй">中文</button>
+            </div>
+          </div>
+          <div class="pm-section">
+            <div class="pm-section-label">Өнгөний горим</div>
+            <div class="pm-seg" id="pm-theme-seg">
+              <button type="button" class="pm-seg-btn" data-theme-choice="light">☀️ Цайвар</button>
+              <button type="button" class="pm-seg-btn" data-theme-choice="dark">🌙 Бараан</button>
+              <button type="button" class="pm-seg-btn" data-theme-choice="system">🖥️ Системийнх</button>
+            </div>
+          </div>
+          <div class="pm-section pm-offline">
+            <div class="pm-offline-row">
+              <span class="pm-item-ic">📶</span>
+              <span class="pm-offline-label">Оффлайнд ашиглах</span>
+              <label class="pm-switch">
+                <input type="checkbox" id="pm-offline-toggle">
+                <span class="pm-switch-track"><span class="pm-switch-thumb"></span></span>
+              </label>
+            </div>
+            <p class="pm-offline-desc">Апп-ыг урьдчилан кэшлээд интернэтгүй үед ч онгойлгож, хичээл/флаш карт үзэх боломжтой. Ахиц дэвшил зөвхөн онлайн үед серверт хадгалагдана.</p>
+          </div>
+          <div class="pm-menu-email" id="profile-menu-email"></div>
+          <button type="button" id="logout-btn" class="pm-item pm-logout">
+            <span class="pm-item-ic">⏻</span> Гарах
+          </button>
+        </div>
+      </div>
     </div>
+    <div class="top-quote" id="top-quote"></div>
   </div>
 </header>
 
@@ -89,4 +135,24 @@ export const BODY_HTML = `<header class="top">
 
   <p class="save-note" id="save-note">Ахиц дэвшил автоматаар хадгалагдана.</p>
 </div>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-brand">
+      <span class="mark">汉</span>
+      <div>
+        <b>HSK Path</b>
+        <span class="site-footer-tagline">Монгол хэлээр Хятад хэл сурах платформ</span>
+      </div>
+    </div>
+    <nav class="site-footer-links">
+      <button type="button" data-goto-tab="tab-lessons">Хичээл</button>
+      <button type="button" data-goto-tab="tab-review">Давталт</button>
+      <button type="button" data-goto-tab="tab-quiz">Тест</button>
+      <button type="button" data-goto-tab="tab-games">Тоглоом</button>
+      <button type="button" data-goto-tab="tab-progress">Ахиц</button>
+    </nav>
+  </div>
+  <div class="site-footer-copy">© <span id="footer-year"></span> HSK Path — хувийн, арилжааны бус төсөл.</div>
+</footer>
 `;

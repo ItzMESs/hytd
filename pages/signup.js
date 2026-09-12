@@ -54,6 +54,11 @@ export default function SignupPage() {
     <>
       <Head>
         <title>Бүртгүүлэх — HSK Path</title>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("hsk-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`,
+          }}
+        />
       </Head>
       <div className="auth-wrap">
         <div className="auth-card">

@@ -451,6 +451,37 @@ function renderWotd(){
     <span class="wotd-lv">${LEVEL_META[card.level].label}</span>`;
 }
 
+/* ============================= ӨДРИЙН ЗҮЙР ҮГ ============================= */
+const CHINESE_PROVERBS = [
+  "Мянган бээрийн аялал ганц алхмаас эхэлдэг.",
+  "Далайг адаг хүртэл нь усална, уулыг оройд нь гаргана.",
+  "Тоймгүй яарвал ажил бүтэхгүй.",
+  "Мод тарихад хамгийн сайн цаг бол хорин жилийн өмнө байсан, хоёр дахь сайн цаг нь өнөөдөр.",
+  "Мянган мянган бээрийн зам хөл дороо эхэлдэг.",
+  "Уул хол байхад л өндөр харагддаг.",
+  "Ус дуслаараа чулуу цооно.",
+  "Сурахуй урсгал сөрсөн завь мэт. Урагшлахгүй бол ухарна.",
+  "Гурван хүн явбал заавал нэг нь миний багш байдаг.",
+  "Хэн хурдан явахыг хүсвэл ганцаараа яв, хэн хол явахыг хүсвэл хамтаараа яв.",
+  "Мэдэхгүй гэдгээ мэдэх нь мэдлэгийн эхлэл.",
+  "Өдөрт нэг сайн үйл хийвэл жилд гурван зуун жаран тав.",
+  "Зуун удаа сонсохоос нэг удаа харах нь дээр.",
+  "Аз жаргал алдаагаа засахаас эхэлдэг.",
+  "Урт зам ч гэсэн нэг алхмаас эхэлнэ.",
+  "Цаг хугацаа алт мөнгөнөөс үнэтэй, харин алт мөнгөөр цаг хугацаа худалдаж авч чадахгүй.",
+];
+function dailyProverb(){
+  const d = todayStr();
+  let hash = 0;
+  for(let i=0;i<d.length;i++){ hash = (hash*33 + d.charCodeAt(i)) >>> 0; }
+  return CHINESE_PROVERBS[hash % CHINESE_PROVERBS.length];
+}
+function renderTopQuote(){
+  const box = document.getElementById("top-quote");
+  if(!box) return;
+  box.innerHTML = `“${escapeHtml(dailyProverb())}”<span class="top-quote-src">— Хятад зүйр үг</span>`;
+}
+
 function isBookmarked(id){ return !!(srs.bookmarks && srs.bookmarks[id]); }
 function toggleBookmark(id){
   srs.bookmarks = srs.bookmarks || {};
@@ -546,6 +577,26 @@ function rate(id, grade){
     else { srs.streak = 1; }
     srs.lastDay = t;
     srs.maxStreak = Math.max(srs.maxStreak||0, srs.streak);
+  }
+  scheduleSave();
+}
+
+/* Quick mastery marking from the flash-card browser — separate from rate()
+   (SRS review reps): this doesn't touch streak/today-count/rating stats,
+   it just moves the word's mastery state, and both views share srs.cards
+   so a word marked here also shows as mastered/due in Давталт. */
+function setCardKnown(id, known){
+  if(known){
+    const st = Object.assign({iv:0, ease:2.5, reps:0, due:todayStr(), lapses:0}, srs.cards[id]);
+    st.iv = Math.max(st.iv, 21);
+    st.reps = Math.max(st.reps, 1);
+    const due = new Date(); due.setDate(due.getDate()+st.iv);
+    st.due = due.toISOString().slice(0,10);
+    srs.cards[id] = st;
+  } else if(srs.cards[id]){
+    const st = srs.cards[id];
+    st.iv = 0; st.reps = 0; st.due = todayStr();
+    srs.cards[id] = st;
   }
   scheduleSave();
 }
@@ -919,17 +970,18 @@ function renderVbFlash(filtered){
   }
 
   box.innerHTML = `
+    <div class="vfc-toolbar">
+      <button type="button" class="vfc-tool-btn ${vbFlashOrder?"active":""}" id="vfc-shuffle" title="Холих">🔀</button>
+      <button type="button" class="vfc-tool-btn" id="vfc-reset-order" title="Дарааллаар" ${vbFlashOrder?"":"disabled"}>↺</button>
+      <button type="button" class="vfc-tool-btn" id="vfc-fullscreen" title="Дэлгэц дүүргэх">⛶</button>
+      <button type="button" class="vfc-tool-btn" id="vfc-speak" title="Дуудлага сонсох">🔊</button>
+    </div>
     <div class="vfc-stats">
       <span class="vfc-stat"><i class="vfc-dot vfc-dot-total"></i><b>${total}</b> Нийт үг</span>
       <span class="vfc-stat"><i class="vfc-dot vfc-dot-remain"></i><b>${remain}</b> Үлдсэн үг</span>
       <span class="vfc-stat"><i class="vfc-dot vfc-dot-new"></i><b>${notLearned}</b> Ойлгоогүй</span>
       <span class="vfc-stat"><i class="vfc-dot vfc-dot-learned"></i><b>${learned}</b> Ойлгосон</span>
       <span class="vfc-stat"><i class="vfc-dot vfc-dot-marked"></i><b>${marked}</b> Тэмдэглэсэн</span>
-    </div>
-    <div class="vfc-toolbar">
-      <button type="button" class="vfc-tool-btn" id="vfc-shuffle" title="Холих">🔀</button>
-      <button type="button" class="vfc-tool-btn" id="vfc-speak" title="Дуудлага сонсох">🔊</button>
-      <button type="button" class="vfc-tool-btn" id="vfc-fullscreen" title="Дэлгэц дүүргэх">⛶</button>
     </div>
     <div class="vfc-stage" id="vfc-stage">
       <button type="button" class="vfc-nav vfc-prev" id="vfc-prev" aria-label="Өмнөх">‹</button>
@@ -951,6 +1003,11 @@ function renderVbFlash(filtered){
       </div>
       <button type="button" class="vfc-nav vfc-next" id="vfc-next" aria-label="Дараах">›</button>
     </div>
+    <div class="vfc-mastery-row">
+      <button type="button" class="vfc-mastery-btn vfc-mastery-yes" id="vfc-mark-known">✓ Ойлгосон</button>
+      <button type="button" class="vfc-mastery-btn vfc-mastery-no" id="vfc-mark-unknown">✕ Ойлгоогүй</button>
+    </div>
+    <div class="vfc-mastery-counts">Ойлгосон үг: ${learned} · Ойлгоогүй үг: ${notLearned}</div>
     <div class="vfc-footer">${vbFlashPos+1} / ${total}</div>
   `;
 
@@ -966,7 +1023,21 @@ function renderVbFlash(filtered){
     vbFlashPos = 0;
     renderVbFlash(filtered);
   });
+  document.getElementById("vfc-reset-order").addEventListener("click", ()=>{
+    if(!vbFlashOrder) return;
+    vbFlashOrder = null;
+    vbFlashPos = 0;
+    renderVbFlash(filtered);
+  });
   document.getElementById("vfc-speak").addEventListener("click", ()=>speak(hz));
+  document.getElementById("vfc-mark-known").addEventListener("click", ()=>{
+    setCardKnown(id, true);
+    move(1);
+  });
+  document.getElementById("vfc-mark-unknown").addEventListener("click", ()=>{
+    setCardKnown(id, false);
+    move(1);
+  });
   document.getElementById("vfc-fullscreen").addEventListener("click", ()=>{
     const stage = document.getElementById("vfc-stage");
     if(!document.fullscreenElement){ stage.requestFullscreen && stage.requestFullscreen().catch(()=>{}); }
@@ -2424,16 +2495,127 @@ document.getElementById("goal-input").addEventListener("change", (e)=>{
   updateHeaderStats();
 });
 
-/* ============================= НЭВТРЭЛТ / ГАРАХ ============================= */
-const userPill = document.getElementById("user-email-pill");
-if(userPill) userPill.textContent = CURRENT_USER.email || "";
+/* ============================= НЭВТРЭЛТ / ПРОФАЙЛ / ГАРАХ ============================= */
+function displayNameFromEmail(email){
+  const local = String(email||"").split("@")[0].replace(/[0-9._-]+$/,"").trim();
+  const base = local || String(email||"").split("@")[0] || "Хэрэглэгч";
+  return base.charAt(0).toUpperCase() + base.slice(1);
+}
+function renderProfileBlock(){
+  const name = displayNameFromEmail(CURRENT_USER.email);
+  const initial = name.charAt(0).toUpperCase();
+  const color = avatarColor(name);
+  const nameEl = document.getElementById("profile-name");
+  const avatarEl = document.getElementById("profile-avatar");
+  const emailEl = document.getElementById("profile-menu-email");
+  const bigNameEl = document.getElementById("pm-name-big");
+  const bigAvatarEl = document.getElementById("pm-avatar-big");
+  if(nameEl) nameEl.textContent = name;
+  if(avatarEl){ avatarEl.textContent = initial; avatarEl.style.background = color; }
+  if(bigNameEl) bigNameEl.textContent = name;
+  if(bigAvatarEl){ bigAvatarEl.textContent = initial; bigAvatarEl.style.background = color; }
+  if(emailEl) emailEl.textContent = CURRENT_USER.email || "";
+}
+
+/* ---- Өнгөний горим (Цайвар/Бараан/Системийнх) ---- */
+function getThemeChoice(){
+  try{ return localStorage.getItem("hsk-theme") || "system"; }catch(e){ return "system"; }
+}
+function applyTheme(choice){
+  if(choice==="light" || choice==="dark") document.documentElement.setAttribute("data-theme", choice);
+  else document.documentElement.removeAttribute("data-theme");
+}
+function setThemeChoice(choice){
+  try{ localStorage.setItem("hsk-theme", choice); }catch(e){}
+  applyTheme(choice);
+  renderThemeSeg();
+}
+function renderThemeSeg(){
+  const current = getThemeChoice();
+  document.querySelectorAll("#pm-theme-seg .pm-seg-btn").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.themeChoice===current);
+  });
+}
+
+/* ---- Оффлайнд ашиглах (үндсэн app shell-ийг service worker-ээр кэшлэх) ---- */
+function isOfflineEnabled(){
+  try{ return localStorage.getItem("hsk-offline")==="1"; }catch(e){ return false; }
+}
+async function setOfflineEnabled(on){
+  try{ localStorage.setItem("hsk-offline", on?"1":"0"); }catch(e){}
+  if(!("serviceWorker" in navigator)) return;
+  try{
+    if(on){
+      await navigator.serviceWorker.register("/sw.js");
+    } else {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for(const r of regs) await r.unregister();
+      if(typeof caches!=="undefined" && caches.keys){
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k=>caches.delete(k)));
+      }
+    }
+  }catch(e){ /* offline caching is a nice-to-have — never break the app over it */ }
+}
+function initOfflineToggle(){
+  const cb = document.getElementById("pm-offline-toggle");
+  if(!cb) return;
+  const on = isOfflineEnabled();
+  cb.checked = on;
+  if(on) setOfflineEnabled(true); // re-register on every load so caching stays warm
+  cb.addEventListener("change", ()=>setOfflineEnabled(cb.checked));
+}
+
+(function(){
+  const trigger = document.getElementById("profile-trigger");
+  const menu = document.getElementById("profile-menu");
+  const block = document.getElementById("profile-block");
+  if(!trigger || !menu || !block) return;
+  function closeMenu(){ menu.hidden = true; trigger.setAttribute("aria-expanded", "false"); }
+  trigger.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    const open = menu.hidden;
+    menu.hidden = !open;
+    trigger.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  document.addEventListener("click", (e)=>{
+    if(!menu.hidden && !block.contains(e.target)) closeMenu();
+  });
+  document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeMenu(); });
+  const gotoProfile = document.getElementById("pm-goto-profile");
+  if(gotoProfile) gotoProfile.addEventListener("click", ()=>{
+    closeMenu();
+    const tab = document.getElementById("tab-progress");
+    if(tab) tab.click();
+  });
+  document.querySelectorAll("#pm-theme-seg .pm-seg-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>setThemeChoice(btn.dataset.themeChoice));
+  });
+  applyTheme(getThemeChoice());
+  renderThemeSeg();
+  initOfflineToggle();
+})();
 const logoutBtn = document.getElementById("logout-btn");
 if(logoutBtn) logoutBtn.addEventListener("click", ()=>{
   if(typeof window.__hskLogout === "function") window.__hskLogout();
 });
 
+(function initSiteFooter(){
+  const yearEl = document.getElementById("footer-year");
+  if(yearEl) yearEl.textContent = new Date().getFullYear();
+  document.querySelectorAll(".site-footer-links button[data-goto-tab]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const tab = document.getElementById(btn.dataset.gotoTab);
+      if(tab) tab.click();
+      window.scrollTo({top:0, behavior:"smooth"});
+    });
+  });
+})();
+
 /* ============================= BOOT ============================= */
 (async function boot(){
+  renderProfileBlock();
+  renderTopQuote();
   await loadState();
   renderWotd();
   renderLevelTabs();
