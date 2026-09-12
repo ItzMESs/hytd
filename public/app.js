@@ -1044,12 +1044,59 @@ function escapeHtml(s){ return String(s).replace(/[&<>]/g, c=>({"&":"&amp;","<":
 function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
 /* ============================= TTS (ДУУДЛАГА) ============================= */
+// Recording/licensing real human-voice audio for the app's ~3000 words isn't
+// practical to do from here, so instead we get the best out of what's
+// already free and built into the browser: most devices actually ship 2-3
+// different Chinese voices (a basic offline one plus a much more natural
+// "neural"/online one), but the Web Speech API just hands them all back in
+// no particular order — apps that blindly take voices[0] often end up with
+// the worse-sounding one. zhVoiceScore ranks them so the best available
+// voice is picked automatically, and — since "best" can still vary by
+// device — the profile menu additionally offers a picker (only shown when
+// there's an actual choice) so someone can switch if the default happens to
+// sound worse on their machine.
 const ttsSupported = typeof window!=="undefined" && "speechSynthesis" in window;
 let zhVoice = null;
+let zhVoiceList = [];
+function zhVoiceScore(v){
+  const name = (v.name||"").toLowerCase();
+  let score = 0;
+  if(/neural|enhanced|premium|natural|online/.test(name)) score += 5;
+  // Names of specific voices known to be higher-quality neural/cloud voices
+  // on Windows (Edge), macOS/iOS and Chrome's own Google TTS engine.
+  if(/xiaoxiao|xiaoyi|yunxi|yunyang|yunjian|yunyou|tingting|mei-?jia|sin-?ji|讯飞|google/.test(name)) score += 3;
+  if(v.localService===false) score += 2; // network/cloud voices tend to sound better than the tiny bundled offline ones
+  if(/zh-cn/i.test(v.lang)) score += 1; // prefer Mandarin (mainland) specifically over generic "zh" or other zh-* locales
+  return score;
+}
+function getStoredVoiceURI(){
+  try{ return localStorage.getItem("hsk-voice-uri") || ""; }catch(e){ return ""; }
+}
+function setZhVoice(voiceURI){
+  const found = zhVoiceList.find(v=>v.voiceURI===voiceURI);
+  if(!found) return;
+  zhVoice = found;
+  try{ localStorage.setItem("hsk-voice-uri", voiceURI); }catch(e){}
+}
 function pickZhVoice(){
   if(!ttsSupported) return;
   const voices = window.speechSynthesis.getVoices();
-  zhVoice = voices.find(v=>/zh[-_]CN/i.test(v.lang)) || voices.find(v=>/^zh/i.test(v.lang)) || null;
+  zhVoiceList = voices.filter(v=>/^zh/i.test(v.lang)).sort((a,b)=>zhVoiceScore(b)-zhVoiceScore(a));
+  const storedURI = getStoredVoiceURI();
+  const stored = storedURI && zhVoiceList.find(v=>v.voiceURI===storedURI);
+  zhVoice = stored || zhVoiceList[0] || null;
+  renderVoicePicker();
+}
+function renderVoicePicker(){
+  const section = document.getElementById("pm-voice-section");
+  const select = document.getElementById("pm-voice-select");
+  if(!section || !select) return;
+  if(zhVoiceList.length < 2){ section.hidden = true; return; }
+  section.hidden = false;
+  const current = zhVoice ? zhVoice.voiceURI : "";
+  select.innerHTML = zhVoiceList.map(v=>
+    `<option value="${escapeHtml(v.voiceURI)}" ${v.voiceURI===current?"selected":""}>${escapeHtml(v.name)}</option>`
+  ).join("");
 }
 if(ttsSupported){
   pickZhVoice();
@@ -3595,6 +3642,11 @@ function initOfflineToggle(){
   applyTheme(getThemeChoice());
   renderThemeToggle();
   initOfflineToggle();
+  const voiceSelect = document.getElementById("pm-voice-select");
+  if(voiceSelect) voiceSelect.addEventListener("change", ()=>setZhVoice(voiceSelect.value));
+  const voiceTest = document.getElementById("pm-voice-test");
+  if(voiceTest) voiceTest.addEventListener("click", ()=>speak("你好，很高兴认识你。"));
+  renderVoicePicker(); // in case voices were already loaded before this IIFE ran
 })();
 
 // "⋮" overflow menu for the secondary header stats (сурсан/streak/зорилго) —

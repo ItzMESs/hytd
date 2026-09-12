@@ -68,6 +68,13 @@ export const BODY_HTML = `<header class="top">
               </span>
             </div>
           </div>
+          <div class="pm-section pm-voice" id="pm-voice-section" hidden>
+            <div class="pm-section-label">Дуудлагын дуу хоолой</div>
+            <div class="pm-voice-row">
+              <select id="pm-voice-select"></select>
+              <button type="button" class="pm-voice-test" id="pm-voice-test" title="Турших">🔊</button>
+            </div>
+          </div>
           <div class="pm-section pm-offline">
             <div class="pm-offline-row">
               <span class="pm-item-ic">📶</span>
