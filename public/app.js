@@ -360,6 +360,104 @@ function buildDeck(){
 }
 const DECK = buildDeck();
 
+/* ============================= ТОГЛООМЫН ӨГҮҮЛБЭРИЙН НЭМЭЛТ САН ============================= */
+// Угсрах (Scramble) болон Сонсголын "Өгүүлбэр" горим өмнө нь зөвхөн дүрмийн
+// хичээл тус бүрийн 2-3 жишээ өгүүлбэрээс (нийт ~18/түвшин, зарим түвшинд
+// угсрахад тохирох нь ердөө 5) сонголт хийдэг байсан тул ижил өгүүлбэрүүд
+// хэт олон удаа давтагддаг байлаа. Энэ сан нь тэдгээр хичээлийн жишээнээс
+// тусад нь, зөвхөн тоглоомд зориулж нэмж бичсэн илүү том, түвшин тус
+// бүрийн санг агуулна — collectScrambleCandidates/collectListenSentences
+// хоёулаа үүнийг хичээлийн жишээн дээр нэмж ашиглана.
+const GAME_SENTENCES = {
+  hsk1:[
+    ["我是学生。","Wǒ shì xuésheng.","Би оюутан."],
+    ["他是老师。","Tā shì lǎoshī.","Тэр багш."],
+    ["我家有三口人。","Wǒ jiā yǒu sān kǒu rén.","Манай гэрт гурван хүн бий."],
+    ["今天天气很好。","Jīntiān tiānqì hěn hǎo.","Өнөөдөр цаг агаар сайхан байна."],
+    ["我喜欢喝茶。","Wǒ xǐhuan hē chá.","Би цай уухдаа дуртай."],
+    ["他每天去学校。","Tā měitiān qù xuéxiào.","Тэр өдөр бүр сургуульдаа явдаг."],
+    ["我的朋友很高。","Wǒ de péngyou hěn gāo.","Миний найз өндөр."],
+    ["现在几点了？","Xiànzài jǐ diǎn le?","Одоо хэдэн цаг болж байна вэ?"],
+    ["这个苹果很甜。","Zhège píngguǒ hěn tián.","Энэ алим маш чихэрлэг."],
+    ["我想吃米饭。","Wǒ xiǎng chī mǐfàn.","Би цагаан будаа идмээр байна."],
+    ["她在看书。","Tā zài kàn shū.","Тэр ном уншиж байна."],
+    ["你叫什么名字？","Nǐ jiào shénme míngzi?","Таны нэрийг хэн гэдэг вэ?"],
+    ["今天是星期五。","Jīntiān shì xīngqīwǔ.","Өнөөдөр баасан гараг."],
+    ["我爱我的妈妈。","Wǒ ài wǒ de māma.","Би ээждээ хайртай."],
+    ["我们一起去公园吧。","Wǒmen yìqǐ qù gōngyuán ba.","Хамтдаа парк руу явцгаая."],
+  ],
+  hsk2:[
+    ["今天比昨天冷。","Jīntiān bǐ zuótiān lěng.","Өнөөдөр өчигдрөөс хүйтэн байна."],
+    ["他跑得很快。","Tā pǎo de hěn kuài.","Тэр маш хурдан гүйдэг."],
+    ["我已经吃饭了。","Wǒ yǐjīng chīfàn le.","Би аль хэдийн хооллочихлоо."],
+    ["你能帮我一下吗？","Nǐ néng bāng wǒ yíxià ma?","Та надад бага зэрэг тусалж чадах уу?"],
+    ["她一边听音乐一边做作业。","Tā yìbiān tīng yīnyuè yìbiān zuò zuòyè.","Тэр хөгжим сонсохын зэрэгцээ гэрийн даалгавраа хийж байна."],
+    ["我打算明天去旅游。","Wǒ dǎsuàn míngtiān qù lǚyóu.","Би маргааш аялахаар төлөвлөж байна."],
+    ["这件衣服太贵了。","Zhè jiàn yīfu tài guì le.","Энэ хувцас хэтэрхий үнэтэй байна."],
+    ["请把门关上。","Qǐng bǎ mén guānshàng.","Хаалгаа хаагаад өгнө үү."],
+    ["我的手机不见了。","Wǒ de shǒujī bú jiàn le.","Миний гар утас алга болжээ."],
+    ["他比我大两岁。","Tā bǐ wǒ dà liǎng suì.","Тэр надаас 2 насаар том."],
+    ["你会开车吗？","Nǐ huì kāichē ma?","Та машин жолоодож чаддаг уу?"],
+    ["我们下周要考试。","Wǒmen xià zhōu yào kǎoshì.","Бид ирэх долоо хоногт шалгалт өгөх ёстой."],
+    ["外面正在下雨。","Wàimiàn zhèngzài xiàyǔ.","Гадаа яг одоо бороо орж байна."],
+    ["我觉得这个电影很有意思。","Wǒ juéde zhège diànyǐng hěn yǒuyìsi.","Энэ кино их сонирхолтой юм шиг санагдаж байна."],
+    ["你应该多喝水。","Nǐ yīnggāi duō hē shuǐ.","Та ус их уух хэрэгтэй."],
+  ],
+  hsk3:[
+    ["虽然很累，但是我很开心。","Suīrán hěn lèi, dànshì wǒ hěn kāixīn.","Ядарсан ч гэсэн би их баяртай байна."],
+    ["因为下雨，所以我们没去公园。","Yīnwèi xiàyǔ, suǒyǐ wǒmen méi qù gōngyuán.","Бороо орсон учраас бид парк руу яваагүй."],
+    ["我一直想去中国留学。","Wǒ yìzhí xiǎng qù Zhōngguó liúxué.","Би Хятадад суралцахаар явмаар байсаар л байна."],
+    ["只要努力，就能成功。","Zhǐyào nǔlì, jiù néng chénggōng.","Хичээвэл л амжилтад хүрч болно."],
+    ["他对中国文化很感兴趣。","Tā duì Zhōngguó wénhuà hěn gǎn xìngqù.","Тэр Хятадын соёлд их сонирхолтой байдаг."],
+    ["这次考试的结果让我很满意。","Zhè cì kǎoshì de jiéguǒ ràng wǒ hěn mǎnyì.","Энэ удаагийн шалгалтын үр дүн намайг сэтгэл хангалуун болголоо."],
+    ["请你把这份材料翻译成英文。","Qǐng nǐ bǎ zhè fèn cáiliào fānyì chéng Yīngwén.","Энэ материалыг англи хэл рүү орчуулна уу."],
+    ["医生建议我多运动。","Yīshēng jiànyì wǒ duō yùndòng.","Эмч надад илүү их дасгал хийхийг зөвлөсөн."],
+    ["尽管困难很多，我们还是坚持下来了。","Jǐnguǎn kùnnan hěn duō, wǒmen háishi jiānchí xiàlái le.","Хэцүү зүйл их байсан ч бид тэсвэрлэж чадсан."],
+    ["他决定放弃这个工作。","Tā juédìng fàngqì zhège gōngzuò.","Тэр энэ ажлаа орхихоор шийдсэн."],
+    ["我们应该互相帮助。","Wǒmen yīnggāi hùxiāng bāngzhù.","Бид бие биедээ тусалж байх ёстой."],
+    ["这个问题比我想象的复杂。","Zhège wèntí bǐ wǒ xiǎngxiàng de fùzá.","Энэ асуудал миний бодсоноос нарийн байна."],
+    ["他终于实现了自己的梦想。","Tā zhōngyú shíxiànle zìjǐ de mèngxiǎng.","Тэр эцэст нь өөрийн мөрөөдлөө биелүүлэв."],
+    ["我对这个结果并不惊讶。","Wǒ duì zhège jiéguǒ bìng bù jīngyà.","Би энэ үр дүнд огт гайхаагүй."],
+    ["只有认真学习，才能提高成绩。","Zhǐyǒu rènzhēn xuéxí, cáinéng tígāo chéngjì.","Зөвхөн хичээнгүйлэн суралцвал л дүнгээ сайжруулж чадна."],
+  ],
+  hsk4:[
+    ["他不但聪明，而且很努力。","Tā búdàn cōngmíng, érqiě hěn nǔlì.","Тэр ухаалаг төдийгүй маш хичээнгүй."],
+    ["无论遇到什么困难，他都不放弃。","Wúlùn yùdào shénme kùnnan, tā dōu bú fàngqì.","Ямар ч хэцүү явдалтай тулгарсан тэр орхидоггүй."],
+    ["既然你已经决定了，我就不再劝你了。","Jìrán nǐ yǐjīng juédìng le, wǒ jiù bú zài quàn nǐ le.","Чи аль хэдийн шийдчихсэн юм чинь би цаашид чамайг ятгахгүй."],
+    ["一旦开始，就很难停下来。","Yídàn kāishǐ, jiù hěn nán tíng xiàlai.","Нэгэнт эхэлбэл зогсоход хэцүү болдог."],
+    ["除非下大雨，否则比赛照常进行。","Chúfēi xià dàyǔ, fǒuzé bǐsài zhàocháng jìnxíng.","Их бороо орохгүй л бол уралдаан хэвийн явагдана."],
+    ["这个决定对公司的发展很重要。","Zhège juédìng duì gōngsī de fāzhǎn hěn zhòngyào.","Энэ шийдвэр компанийн хөгжилд маш чухал юм."],
+    ["随着经济的发展，人们的生活水平提高了。","Suízhe jīngjì de fāzhǎn, rénmen de shēnghuó shuǐpíng tígāo le.","Эдийн засгийн хөгжлийн хамт хүмүүсийн амьжиргааны түвшин дээшилсэн."],
+    ["他把所有的钱都花光了。","Tā bǎ suǒyǒu de qián dōu huāguāng le.","Тэр бүх мөнгөө үрчихлээ."],
+    ["我们不能忽视环境污染的问题。","Wǒmen bùnéng hūshì huánjìng wūrǎn de wèntí.","Бид байгаль орчны бохирдлын асуудлыг үл тоомсорлож болохгүй."],
+    ["这项政策引起了广泛的关注。","Zhè xiàng zhèngcè yǐnqǐle guǎngfàn de guānzhù.","Энэ бодлого өргөн хүрээний анхаарлыг татсан."],
+    ["他的态度让大家都很失望。","Tā de tàidu ràng dàjiā dōu hěn shīwàng.","Түүний хандлага бүгдийг гутраасан."],
+    ["只要坚持不懈，梦想总会实现。","Zhǐyào jiānchí búxiè, mèngxiǎng zǒng huì shíxiàn.","Тасралтгүй тэвчвэл мөрөөдөл эргэлт буцалтгүй биелдэг."],
+    ["这件事引发了不小的争议。","Zhè jiàn shì yǐnfāle bù xiǎo de zhēngyì.","Энэ явдал багагүй маргаан үүсгэсэн."],
+    ["我们需要重新评估这个方案。","Wǒmen xūyào chóngxīn pínggū zhège fāng'àn.","Бид энэ төслийг дахин үнэлэх шаардлагатай."],
+    ["他一直坚持自己的原则。","Tā yìzhí jiānchí zìjǐ de yuánzé.","Тэр өөрийн зарчмаа тууштай баримталсаар байна."],
+  ],
+  hsk5:[
+    ["他不仅仅是老师，还是我的朋友。","Tā bùjǐnjǐn shì lǎoshī, háishi wǒ de péngyou.","Тэр зөвхөн багш төдийгүй, миний найз ч мөн."],
+    ["与其在家等待，不如主动去争取机会。","Yǔqí zài jiā děngdài, bùrú zhǔdòng qù zhēngqǔ jīhuì.","Гэртээ хүлээж суухаас илүү идэвхтэй боломж хайж эрэлхийлсэн нь дээр."],
+    ["这项技术的出现，从而改变了人们的生活方式。","Zhè xiàng jìshù de chūxiàn, cóng'ér gǎibiànle rénmen de shēnghuó fāngshì.","Энэ технологийн гарч ирэлт хүмүүсийн амьдралын хэв маягийг өөрчилсөн."],
+    ["连小孩子都懂这个道理，何况我们大人呢？","Lián xiǎoháizi dōu dǒng zhège dàolǐ, hékuàng wǒmen dàren ne?","Жижигхэн хүүхэд ч гэсэн энэ учрыг ойлгодог юм чинь, бид том хүмүүс яахав дээ?"],
+    ["甚至连专家也无法预测这个结果。","Shènzhì lián zhuānjiā yě wúfǎ yùcè zhège jiéguǒ.","Тэр ч бүү хэл мэргэжилтнүүд ч гэсэн энэ үр дүнг урьдчилан таамаглаж чадаагүй."],
+    ["他为人处事一向十分谨慎。","Tā wéirénchǔshì yíxiàng shífēn jǐnshèn.","Тэр хүнтэй харилцаж, ажил хэрэг хийхдээ үргэлж маш болгоомжтой байдаг."],
+    ["这场辩论引发了社会各界的广泛讨论。","Zhè chǎng biànlùn yǐnfāle shèhuì gèjiè de guǎngfàn tǎolùn.","Энэ мэтгэлцээн нийгмийн бүх давхаргын өргөн хүрээний хэлэлцүүлгийг өдөөсөн."],
+    ["面对挑战，我们应当保持冷静。","Miànduì tiǎozhàn, wǒmen yīngdāng bǎochí lěngjìng.","Сорилттой нүүр тулахдаа бид тайван байх хэрэгтэй."],
+    ["这份报告详细分析了市场的变化趋势。","Zhè fèn bàogào xiángxì fēnxīle shìchǎng de biànhuà qūshì.","Энэ тайлан зах зээлийн өөрчлөлтийн чиг хандлагыг нарийвчлан шинжилсэн байна."],
+    ["他宁愿放弃休息时间，也要完成这个项目。","Tā nìngyuàn fàngqì xiūxi shíjiān, yě yào wánchéng zhège xiàngmù.","Тэр амралтын цагаа хайрлахгүй ч энэ төслийг дуусгахыг хүсдэг."],
+    ["随着时间的推移，人们逐渐接受了这个观念。","Suízhe shíjiān de tuīyí, rénmen zhújiàn jiēshòule zhège guānniàn.","Цаг хугацаа өнгөрөх тусам хүмүүс энэ үзэл баримтлалыг аажмаар хүлээн зөвшөөрсөн."],
+    ["无论从哪个角度来看，这都是一个明智的选择。","Wúlùn cóng nǎge jiǎodù lái kàn, zhè dōu shì yí gè míngzhì de xuǎnzé.","Ямар өнцгөөс харсан ч энэ бол ухаалаг сонголт."],
+    ["这个理论至今仍存在争议。","Zhège lǐlùn zhìjīn réng cúnzài zhēngyì.","Энэ онол өнөөг хүртэл маргаантай хэвээр байна."],
+    ["他的成功并非偶然，而是长期努力的结果。","Tā de chénggōng bìngfēi ǒurán, ér shì chángqī nǔlì de jiéguǒ.","Түүний амжилт санамсаргүй биш, харин удаан хугацааны хичээл зүтгэлийн үр дүн."],
+    ["保护环境是我们每个人的责任。","Bǎohù huánjìng shì wǒmen měi gè rén de zérèn.","Байгаль орчноо хамгаалах нь бидний хүн бүрийн үүрэг."],
+  ],
+  nhsk1:[],
+};
+
+
 /* ============================= СЭДВИЙН АНГИЛАЛ (heuristic) ============================= */
 const TOPICS = [
   {key:"family", label:"Гэр бүл, хүмүүс",
@@ -1226,6 +1324,7 @@ function renderVbFlash(filtered){
       <button type="button" class="vfc-tool-btn" id="vfc-reset-order" title="Дарааллаар" ${vbFlashOrder?"":"disabled"}>↺</button>
       <button type="button" class="vfc-tool-btn" id="vfc-fullscreen" title="Дэлгэц дүүргэх">⛶</button>
       <button type="button" class="vfc-tool-btn" id="vfc-speak" title="Дуудлага сонсох">🔊</button>
+      <button type="button" class="vfc-tool-btn" id="vfc-stroke" title="Бичих дараалал">✍️</button>
     </div>
     <div class="vfc-stats">
       <span class="vfc-stat"><i class="vfc-dot vfc-dot-total"></i><b>${total}</b> Нийт үг</span>
@@ -1281,6 +1380,7 @@ function renderVbFlash(filtered){
     renderVbFlash(filtered);
   });
   document.getElementById("vfc-speak").addEventListener("click", ()=>speak(hz));
+  document.getElementById("vfc-stroke").addEventListener("click", ()=>openStrokeModal(hz, py));
   document.getElementById("vfc-mark-known").addEventListener("click", ()=>{
     setCardKnown(id, true);
     move(1);
@@ -1305,6 +1405,115 @@ function renderVbFlash(filtered){
     });
   });
 }
+
+
+/* ============================= ХАНЗ БИЧИХ ДАРААЛАЛ (STROKE ORDER) ============================= */
+// The library itself (public/vendor/hanzi-writer.min.js, ~37KB) is bundled
+// with the app so it works offline once loaded once; the per-character
+// stroke-path DATA is fetched on demand from a CDN the first time each
+// character is shown (HanziWriter's own default behaviour) rather than
+// bundling stroke data for every one of the ~3000 words in the app, which
+// would bloat the app for a feature most sessions won't touch.
+let hanziWriterLoadPromise = null;
+function loadHanziWriter(){
+  if(window.HanziWriter) return Promise.resolve();
+  if(hanziWriterLoadPromise) return hanziWriterLoadPromise;
+  hanziWriterLoadPromise = new Promise((resolve, reject)=>{
+    const s = document.createElement("script");
+    s.src = "/vendor/hanzi-writer.min.js";
+    s.onload = ()=>resolve();
+    s.onerror = ()=>{ hanziWriterLoadPromise = null; reject(new Error("load failed")); };
+    document.head.appendChild(s);
+  });
+  return hanziWriterLoadPromise;
+}
+let strokeWriters = [];
+function themeVar(name, fallback){
+  try{
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  }catch(e){ return fallback; }
+}
+function closeStrokeModal(){
+  const modal = document.getElementById("stroke-modal");
+  if(!modal) return;
+  modal.hidden = true;
+  const charsBox = document.getElementById("stroke-modal-chars");
+  if(charsBox) charsBox.innerHTML = "";
+  strokeWriters = [];
+}
+async function openStrokeModal(hz, py){
+  const modal = document.getElementById("stroke-modal");
+  const wordEl = document.getElementById("stroke-modal-word");
+  const pyEl = document.getElementById("stroke-modal-py");
+  const charsBox = document.getElementById("stroke-modal-chars");
+  if(!modal || !charsBox) return;
+  wordEl.textContent = hz;
+  pyEl.textContent = py || "";
+  charsBox.innerHTML = `<p class="prog-empty">Ачаалж байна...</p>`;
+  modal.hidden = false;
+  strokeWriters = [];
+
+  const chars = Array.from(hz).filter(ch=>/[一-鿿]/.test(ch));
+  if(!chars.length){
+    charsBox.innerHTML = `<p class="prog-empty">Зурах ханз тэмдэгт олдсонгүй.</p>`;
+    return;
+  }
+  try{
+    await loadHanziWriter();
+  }catch(e){
+    charsBox.innerHTML = `<p class="prog-empty">Бичих дараалал ачаалж чадсангүй — интернэт холболтоо шалгаад дахин оролдоно уу.</p>`;
+    return;
+  }
+  if(modal.hidden) return; // closed while loading
+
+  charsBox.innerHTML = "";
+  const strokeColor = themeVar("--ink", "#1b211d");
+  const outlineColor = themeVar("--border", "#d8ddd4");
+  const radicalColor = themeVar("--jade-strong", "#204f43");
+  chars.forEach((ch, i)=>{
+    const wrap = document.createElement("div");
+    wrap.className = "stroke-char-box";
+    const target = document.createElement("div");
+    target.className = "stroke-char-target";
+    target.id = "stroke-target-" + i;
+    wrap.appendChild(target);
+    charsBox.appendChild(wrap);
+  });
+  chars.forEach((ch, i)=>{
+    try{
+      const writer = HanziWriter.create("stroke-target-" + i, ch, {
+        width: 128, height: 128, padding: 6,
+        strokeAnimationSpeed: 1,
+        delayBetweenStrokes: 250,
+        strokeFadeDuration: 300,
+        showOutline: true,
+        strokeColor, outlineColor, radicalColor,
+        onLoadCharDataError: ()=>{
+          const box = document.getElementById("stroke-target-" + i);
+          if(box) box.parentElement.innerHTML = `<p class="prog-empty stroke-char-missing">"${escapeHtml(ch)}" олдсонгүй</p>`;
+        },
+      });
+      writer.animateCharacter();
+      strokeWriters.push(writer);
+    }catch(e){ /* this character has no stroke data available — skip it quietly */ }
+  });
+}
+(function initStrokeModal(){
+  const modal = document.getElementById("stroke-modal");
+  if(!modal) return;
+  const closeBtn = document.getElementById("stroke-modal-close");
+  const backdrop = document.getElementById("stroke-modal-backdrop");
+  const replayBtn = document.getElementById("stroke-modal-replay");
+  if(closeBtn) closeBtn.addEventListener("click", closeStrokeModal);
+  if(backdrop) backdrop.addEventListener("click", closeStrokeModal);
+  if(replayBtn) replayBtn.addEventListener("click", ()=>{
+    strokeWriters.forEach(w=>{ try{ w.animateCharacter(); }catch(e){} });
+  });
+  document.addEventListener("keydown", (e)=>{
+    if(e.key==="Escape" && !modal.hidden) closeStrokeModal();
+  });
+})();
 
 document.getElementById("vb-search").addEventListener("input", (e)=>{
   vbQuery = e.target.value;
@@ -2011,6 +2220,17 @@ function segmentSentence(hz, vocabWords){
   }
   return {chunks, trailingPunct};
 }
+// Words to segment a GAME_SENTENCES sentence against — these aren't tied to
+// one specific lesson, so we use the level's whole cumulative vocabulary
+// (this level plus every old-standard level below it) instead of a single
+// lesson's short vocab list.
+function cumulativeVocabWords(level){
+  const idx = OLD_LEVELS.indexOf(level);
+  const chain = idx>=0 ? OLD_LEVELS.slice(0, idx+1) : [level];
+  const words = [];
+  chain.forEach(lv=>{ (FULL_VOCAB[lv]||[]).forEach(r=>words.push(r[0])); });
+  return words;
+}
 function collectScrambleCandidates(level){
   const lessons = DATA[level]||[];
   const cands = [];
@@ -2022,6 +2242,16 @@ function collectScrambleCandidates(level){
         cands.push({level, lessonEn:lesson.en, hz:ex[0], py:ex[1], mn:ex[2], chunks, trailingPunct});
       }
     });
+  });
+  // Dedicated games-only sentence bank (GAME_SENTENCES, near DECK above) —
+  // written specifically to give Scramble/Listening a much bigger, less
+  // repetitive pool than the handful of grammar-lesson examples alone.
+  const extraWords = cumulativeVocabWords(level);
+  (GAME_SENTENCES[level]||[]).forEach(ex=>{
+    const {chunks, trailingPunct} = segmentSentence(ex[0], extraWords);
+    if(chunks.length>=3 && chunks.length<=9){
+      cands.push({level, lessonEn:"Нэмэлт сан", hz:ex[0], py:ex[1], mn:ex[2], chunks, trailingPunct});
+    }
   });
   return cands;
 }
@@ -2620,6 +2850,9 @@ function collectListenSentences(level){
     lesson.grammar.examples.forEach(ex=>{
       out.push({level, lessonEn:lesson.en, hz:ex[0], py:ex[1], mn:ex[2]});
     });
+  });
+  (GAME_SENTENCES[level]||[]).forEach(ex=>{
+    out.push({level, lessonEn:"Нэмэлт сан", hz:ex[0], py:ex[1], mn:ex[2]});
   });
   return out;
 }

@@ -1038,3 +1038,39 @@
     .site-footer-inner{flex-direction:column;}
     .site-footer-copy{text-align:center;}
   }
+
+  /* ---- Ханз бичих дараалал (stroke order) modal ---- */
+  .stroke-modal{position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:20px;}
+  .stroke-modal[hidden]{display:none;}
+  .stroke-modal-backdrop{
+    position:absolute; inset:0; background:color-mix(in srgb, var(--ink) 55%, transparent);
+    backdrop-filter:blur(2px);
+  }
+  .stroke-modal-box{
+    position:relative; z-index:1; width:100%; max-width:480px; max-height:86vh; overflow-y:auto;
+    background:var(--paper-raised); border:1px solid var(--border); border-radius:18px;
+    box-shadow:var(--shadow); padding:22px 20px 20px;
+  }
+  .stroke-modal-close{
+    position:absolute; top:12px; right:12px; width:30px; height:30px; border-radius:50%;
+    border:1px solid var(--border); background:var(--paper-sunken); color:var(--ink-soft);
+    font-size:.85rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .stroke-modal-close:hover{border-color:var(--jade); color:var(--ink);}
+  .stroke-modal-head{text-align:center; margin-bottom:14px;}
+  .stroke-modal-word{font-family:"Noto Serif SC",serif; font-size:1.7rem; font-weight:700;}
+  .stroke-modal-py{font-family:"JetBrains Mono",monospace; font-size:.85rem; color:var(--ink-soft); margin-top:4px;}
+  .stroke-modal-chars{
+    display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:16px;
+  }
+  .stroke-char-box{
+    width:128px; height:128px; border-radius:12px; border:1px solid var(--border);
+    background:var(--paper-sunken); display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .stroke-char-target{width:128px; height:128px;}
+  .stroke-char-missing{margin:0; font-size:.72rem; text-align:center; padding:0 6px;}
+  .stroke-modal-actions{display:flex; justify-content:center; margin-bottom:10px;}
+  .stroke-modal-note{margin:0; font-size:.7rem; color:var(--ink-faint); text-align:center;}
+  @media (max-width:420px){
+    .stroke-char-box, .stroke-char-target{width:104px; height:104px;}
+  }

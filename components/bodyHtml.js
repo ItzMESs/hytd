@@ -193,4 +193,20 @@ export const BODY_HTML = `<header class="top">
   </div>
   <div class="site-footer-copy">© <span id="footer-year"></span> HSK Path — хувийн, арилжааны бус төсөл.</div>
 </footer>
+
+<div class="stroke-modal" id="stroke-modal" hidden>
+  <div class="stroke-modal-backdrop" id="stroke-modal-backdrop"></div>
+  <div class="stroke-modal-box" role="dialog" aria-modal="true" aria-label="Бичих дараалал">
+    <button type="button" class="stroke-modal-close" id="stroke-modal-close" aria-label="Хаах">✕</button>
+    <div class="stroke-modal-head">
+      <div class="stroke-modal-word" id="stroke-modal-word"></div>
+      <div class="stroke-modal-py" id="stroke-modal-py"></div>
+    </div>
+    <div class="stroke-modal-chars" id="stroke-modal-chars"></div>
+    <div class="stroke-modal-actions">
+      <button type="button" class="btn-ghost" id="stroke-modal-replay">↺ Дахин үзүүлэх</button>
+    </div>
+    <p class="stroke-modal-note">Зурааны дараалал эхний удаад ачаалахад интернэт холболт шаардлагатай.</p>
+  </div>
+</div>
 `;
