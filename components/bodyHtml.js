@@ -21,9 +21,16 @@ export const BODY_HTML = `<header class="top">
     </div>
     <div class="stats">
       <div class="pill due"><b id="stat-due">0</b>&nbsp;давтах</div>
-      <div class="pill"><b id="stat-learned">0</b>/<span id="stat-total">0</span>&nbsp;сурсан</div>
-      <div class="pill streak">🔥<b id="stat-streak">0</b></div>
-      <div class="pill goal" title="Өдрийн зорилго">🎯<b id="stat-goal-count">0</b>/<input type="number" id="goal-input" min="1" max="500" value="20">&nbsp;карт</div>
+      <div class="stats-more-wrap" id="stats-more-wrap">
+        <button type="button" class="stats-more-btn" id="stats-more-trigger" aria-expanded="false" aria-haspopup="true" aria-label="Бусад статистик" title="Бусад статистик">
+          <span class="stats-more-dots">⋮</span>
+        </button>
+        <div class="stats-more-menu" id="stats-more-menu" hidden>
+          <div class="pill"><b id="stat-learned">0</b>/<span id="stat-total">0</span>&nbsp;сурсан</div>
+          <div class="pill streak">🔥<b id="stat-streak">0</b></div>
+          <div class="pill goal" title="Өдрийн зорилго">🎯<b id="stat-goal-count">0</b>/<input type="number" id="goal-input" min="1" max="500" value="20">&nbsp;карт</div>
+        </div>
+      </div>
       <div class="profile-block" id="profile-block">
         <button type="button" class="profile-trigger" id="profile-trigger" aria-expanded="false" aria-haspopup="true">
           <span class="profile-greet">Тавтай морил, <b id="profile-name">Хэрэглэгч</b></span>
@@ -88,27 +95,41 @@ export const BODY_HTML = `<header class="top">
   <section id="lessons-view">
     <p class="intro">HSK 1-ээс 5 хүртэлх түвшний дүрмийн хичээлүүд, тэдгээрийг тайлбарлах жишээ үгсийн сан. Мөн тухайн түвшний <strong>албан ёсны (хуучин стандарт) бүрэн үгийн сан ойролцоогоор 2500 үгийг</strong> доор жагсаасан болно — эдгээр бүх үг <strong>Давталт</strong> болон <strong>Тест</strong> хэсэгт ашиглагдана. Дүрмийн хичээлээ үзсэний дараа Давталт хэсэгт очиж Anki маягийн давталтаар бататгаад, Тест хэсэгт мэдлэгээ шалгаарай.</p>
     <div id="wotd-card" class="wotd-card"></div>
-    <div class="levels" id="level-tabs"></div>
     <div id="lesson-list"></div>
-    <div class="vocab-browser">
-      <div class="vb-head">
-        <h3 id="vb-title">Бүх үгийн сан</h3>
-        <div class="vb-view-toggle">
-          <button type="button" id="vb-view-grid" class="vb-view-btn active">📋 Жагсаалт</button>
-          <button type="button" id="vb-view-flash" class="vb-view-btn">🃏 Флаш карт</button>
+
+    <div class="vb-shell" id="vb-shell">
+      <aside class="vb-sidebar" id="vb-sidebar">
+        <div class="standard-toggle" id="level-standard-toggle"></div>
+        <div class="vb-sidebar-levels" id="level-tabs"></div>
+        <div class="vb-sidebar-decks">
+          <div class="vb-sidebar-label">Миний багцууд</div>
+          <button type="button" class="vb-sidebar-newdeck" id="vb-sidebar-newdeck">
+            <span class="vb-sidebar-plus">+</span> Шинэ багц
+          </button>
+          <div class="vb-sidebar-decklist" id="vb-sidebar-decklist"></div>
         </div>
-        <select id="vb-topic"></select>
-        <input type="text" id="vb-search" placeholder="Хайх: ханз, пиньин, монгол утга...">
-      </div>
-      <div class="vb-count" id="vb-count"></div>
-      <div class="vb-scroll" id="vb-scroll">
-        <div class="vb-grid" id="vb-grid"></div>
-        <div class="vb-flash" id="vb-flash" hidden></div>
+      </aside>
+      <div class="vocab-browser">
+        <div class="vb-head">
+          <h3 id="vb-title">Бүх үгийн сан</h3>
+          <div class="vb-view-toggle">
+            <button type="button" id="vb-view-grid" class="vb-view-btn active">📋 Жагсаалт</button>
+            <button type="button" id="vb-view-flash" class="vb-view-btn">🃏 Флаш карт</button>
+          </div>
+          <select id="vb-topic"></select>
+          <input type="text" id="vb-search" placeholder="Хайх: ханз, пиньин, монгол утга...">
+        </div>
+        <div class="vb-count" id="vb-count"></div>
+        <div class="vb-scroll" id="vb-scroll">
+          <div class="vb-grid" id="vb-grid"></div>
+          <div class="vb-flash" id="vb-flash" hidden></div>
+        </div>
       </div>
     </div>
   </section>
 
   <section id="review-view">
+    <div class="standard-toggle" id="review-standard-toggle"></div>
     <div class="scope-filters" id="review-filters"></div>
     <div class="deck-stage">
       <div class="session-progress"><i id="session-bar" style="width:0%"></i></div>
@@ -124,6 +145,7 @@ export const BODY_HTML = `<header class="top">
   </section>
 
   <section id="quiz-view">
+    <div class="standard-toggle" id="quiz-standard-toggle"></div>
     <div class="scope-filters" id="quiz-filters"></div>
     <div id="quiz-body"></div>
   </section>

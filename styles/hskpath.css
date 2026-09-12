@@ -56,53 +56,54 @@
   .brand .name{font-family:"Noto Serif SC",serif; font-weight:700; font-size:1.05rem; letter-spacing:.01em;}
   .brand .name small{display:block; font-family:"Noto Sans SC",sans-serif; font-weight:500; font-size:.66rem; color:var(--ink-soft); letter-spacing:.03em; margin-top:1px;}
 
-  .nav-wrap{position:static;}
+  .nav-wrap{position:relative;}
+  /* The section tab list (Хичээл/Давталт/Тест/...) always collapses behind
+     a ☰ button into a dropdown list, on every screen width — the same
+     compact pattern used by the header's "⋮" stats menu. */
   .nav-toggle-btn{
-    display:none; align-items:center; justify-content:center;
+    display:flex; align-items:center; justify-content:center;
     width:38px; height:38px; border-radius:10px; border:1px solid var(--border);
     background:var(--paper-sunken); color:var(--ink); font-size:1.1rem; cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
   }
-  .nav-toggle-btn:hover{border-color:var(--jade);}
+  .nav-toggle-btn:hover{border-color:var(--jade); background:var(--paper-raised);}
+  .nav-toggle-btn[aria-expanded="true"]{border-color:var(--jade); background:var(--jade-soft); color:var(--jade-strong);}
+  :root:not([data-theme="light"]) .nav-toggle-btn,
+  :root[data-theme="dark"] .nav-toggle-btn{
+    background:color-mix(in srgb, var(--paper-raised) 100%, white 6%);
+    border-color:color-mix(in srgb, var(--border) 100%, white 14%);
+  }
 
   .view-toggle{
-    display:flex; gap:4px; background:var(--paper-sunken); border-radius:10px; padding:3px; border:1px solid var(--border);
-    overflow-x:auto; max-width:100%; scrollbar-width:none;
+    display:none;
+    position:absolute; top:calc(100% + 8px); left:0; right:auto; z-index:30;
+    width:230px; max-width:calc(100vw - 32px);
+    flex-direction:column; gap:2px; padding:6px;
+    background:var(--paper-raised); border:1px solid var(--border); border-radius:14px;
+    box-shadow:var(--shadow); overflow:visible;
   }
-  .view-toggle::-webkit-scrollbar{display:none;}
+  .view-toggle.open{display:flex;}
+  :root:not([data-theme="light"]) .view-toggle,
+  :root[data-theme="dark"] .view-toggle{
+    background:color-mix(in srgb, var(--paper-raised) 100%, white 6%);
+    border-color:color-mix(in srgb, var(--border) 100%, white 14%);
+  }
   .view-toggle button{
-    display:flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0;
-    border:none; background:transparent; color:var(--ink-soft);
-    font:inherit; font-weight:600; font-size:.8rem; padding:7px 13px; border-radius:8px;
+    display:flex; align-items:center; gap:10px; white-space:nowrap;
+    border:none; background:transparent; color:var(--ink-soft); text-align:left;
+    font:inherit; font-weight:600; font-size:.86rem; padding:11px 14px; border-radius:10px;
     cursor:pointer; transition:background .15s ease, color .15s ease, box-shadow .15s ease, transform .1s ease;
   }
-  .view-toggle button .tab-ic{font-size:.95em; line-height:1;}
-  .view-toggle button:hover:not(.active){background:var(--paper-raised); color:var(--ink);}
-  .view-toggle button:active{transform:scale(.97);}
+  .view-toggle button .tab-ic{font-size:1.1em; width:1.3em; text-align:center; flex-shrink:0; line-height:1;}
+  .view-toggle button:hover:not(.active){background:var(--paper-sunken); color:var(--ink);}
+  .view-toggle button:active{transform:scale(.98);}
   .view-toggle button.active{background:var(--jade); color:#fff; box-shadow:0 2px 8px rgba(47,111,94,.28);}
 
-  /* Below this width the pill tab-bar becomes a ☰ button that opens a
-     dropdown list of the same sections, instead of a horizontally
-     scrolling row of tabs. */
-  @media (max-width:720px){
-    .nav-toggle-btn{display:flex;}
-    .view-toggle{
-      display:none;
-      position:absolute; top:calc(100% + 8px); right:0; left:auto; z-index:30;
-      width:220px; max-width:calc(100vw - 32px);
-      flex-direction:column; gap:2px; padding:6px;
-      background:var(--paper-raised); border:1px solid var(--border); border-radius:14px;
-      box-shadow:var(--shadow); overflow:visible;
-    }
-    .view-toggle.open{display:flex;}
-    .view-toggle button{
-      justify-content:flex-start; width:100%; padding:11px 14px; font-size:.86rem; border-radius:10px;
-    }
-    .view-toggle button .tab-ic{font-size:1.1em; width:1.3em; text-align:center; flex-shrink:0;}
-    .view-toggle button:hover:not(.active){background:var(--paper-sunken);}
-    .view-toggle button.active{box-shadow:none;}
+  @media (max-width:480px){
+    .view-toggle{left:auto; right:0;}
   }
 
-  .stats{display:flex; gap:8px; flex-wrap:wrap;}
+  .stats{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
   .pill{
     display:flex; align-items:baseline; gap:5px;
     background:var(--paper-raised); border:1px solid var(--border);
@@ -119,6 +120,49 @@
   }
   .pill.goal input:focus{outline:1px solid var(--jade); border-radius:4px;}
 
+  /* Dark mode: --paper-raised sits too close to the page background for a
+     capsule to read as a distinct, tidy element, so give pills/menus a touch
+     more lift and a brighter border specifically in dark mode. */
+  :root:not([data-theme="light"]) .pill,
+  :root[data-theme="dark"] .pill{
+    background:color-mix(in srgb, var(--paper-raised) 100%, white 6%);
+    border-color:color-mix(in srgb, var(--border) 100%, white 14%);
+  }
+
+  /* "⋮" overflow menu bundling the secondary stats (сурсан/streak/зорилго) so
+     the header shows one clear at-a-glance pill instead of four capsules. */
+  .stats-more-wrap{position:relative;}
+  .stats-more-btn{
+    display:flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:50%; border:1px solid var(--border);
+    background:var(--paper-raised); color:var(--ink-soft); cursor:pointer; box-shadow:var(--shadow);
+    transition:background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .stats-more-btn:hover{border-color:var(--jade); color:var(--ink);}
+  .stats-more-btn[aria-expanded="true"]{background:var(--jade); border-color:var(--jade); color:#fff;}
+  .stats-more-dots{font-size:1.15rem; font-weight:700; line-height:1; letter-spacing:1px;}
+  :root:not([data-theme="light"]) .stats-more-btn,
+  :root[data-theme="dark"] .stats-more-btn{
+    background:color-mix(in srgb, var(--paper-raised) 100%, white 6%);
+    border-color:color-mix(in srgb, var(--border) 100%, white 14%);
+  }
+  .stats-more-menu{
+    position:absolute; top:calc(100% + 8px); left:0; z-index:40;
+    display:flex; flex-direction:column; gap:7px; padding:10px;
+    background:var(--paper-raised); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow);
+    min-width:168px;
+  }
+  .stats-more-menu[hidden]{display:none;}
+  .stats-more-menu .pill{width:100%; box-shadow:none;}
+  :root:not([data-theme="light"]) .stats-more-menu,
+  :root[data-theme="dark"] .stats-more-menu{
+    background:color-mix(in srgb, var(--paper-raised) 100%, white 6%);
+    border-color:color-mix(in srgb, var(--border) 100%, white 14%);
+  }
+  @media (max-width:520px){
+    .stats-more-menu{left:auto; right:0;}
+  }
+
   /* ---- Profile block (greeting + avatar + dropdown) & quote of the day ---- */
   .profile-block{position:relative;}
   .profile-trigger{
@@ -127,6 +171,11 @@
     box-shadow:var(--shadow);
   }
   .profile-trigger:hover{border-color:var(--jade);}
+  :root:not([data-theme="light"]) .profile-trigger,
+  :root[data-theme="dark"] .profile-trigger{
+    background:color-mix(in srgb, var(--paper-raised) 100%, white 6%);
+    border-color:color-mix(in srgb, var(--border) 100%, white 14%);
+  }
   .profile-greet{font-size:.76rem; color:var(--ink-soft); white-space:nowrap;}
   .profile-greet b{color:var(--ink); font-weight:700;}
   .profile-avatar{
@@ -212,20 +261,67 @@
     .top-quote{text-align:left;}
   }
 
-  .levels{display:flex; gap:8px; margin:20px 0 22px; flex-wrap:wrap;}
-  .level-btn{
-    flex:1 1 130px; min-width:130px; text-align:left;
-    background:var(--paper-raised); border:1px solid var(--border); border-radius:12px;
-    padding:10px 12px; cursor:pointer; font:inherit; color:var(--ink);
-    box-shadow:var(--shadow); transition:border-color .15s;
+  /* ---- Vocab study area: a left sidebar (standard/level picker + custom
+     decks) beside the vocab browser / flash-card stage, matching a compact
+     study-app layout instead of a wide row of level cards. ---- */
+  .vb-shell{display:flex; align-items:flex-start; gap:22px; margin-top:26px;}
+  .vb-sidebar{
+    flex:0 0 216px; width:216px; position:sticky; top:86px;
+    display:flex; flex-direction:column; gap:16px;
   }
-  .level-btn:hover{border-color:var(--jade);}
-  .level-btn.active{border-color:var(--jade); background:var(--jade-soft);}
-  .level-btn .lv-label{font-weight:700; font-size:.85rem;}
-  .level-btn .lv-sub{font-size:.66rem; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em;}
-  .lv-bar{margin-top:8px; height:5px; border-radius:99px; background:var(--paper-sunken); overflow:hidden;}
+  .vb-sidebar .standard-toggle{margin-bottom:0; max-width:none;}
+  .vocab-browser{flex:1 1 auto; min-width:0; margin-top:0; padding-top:0; border-top:none;}
+
+  .vb-sidebar-levels{display:flex; flex-direction:column; gap:5px;}
+  .level-btn{
+    text-align:left; background:var(--paper-raised); border:1px solid var(--border);
+    border-left:3px solid transparent; border-radius:9px;
+    padding:9px 11px; cursor:pointer; font:inherit; color:var(--ink);
+    transition:border-color .15s, background .15s;
+  }
+  .level-btn:hover{border-color:var(--border); background:var(--paper-sunken);}
+  .level-btn.active{border-color:var(--border); border-left-color:var(--jade); background:var(--jade-soft);}
+  .lv-row{display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+  .level-btn .lv-label{font-weight:700; font-size:.82rem;}
+  .level-btn.active .lv-label{color:var(--jade-strong);}
+  .lv-count{font-size:.68rem; color:var(--ink-faint); white-space:nowrap;}
+  .lv-bar{margin-top:7px; height:4px; border-radius:99px; background:var(--paper-sunken); overflow:hidden;}
   .lv-bar > i{display:block; height:100%; background:var(--jade); border-radius:99px;}
-  .lv-pct{font-size:.66rem; color:var(--ink-faint); font-variant-numeric:tabular-nums; margin-top:4px;}
+
+  .vb-sidebar-decks{border-top:1px solid var(--border); padding-top:14px;}
+  .vb-sidebar-label{font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:9px;}
+  .vb-sidebar-newdeck{
+    display:flex; align-items:center; gap:6px; width:100%; text-align:left;
+    background:transparent; border:1px dashed var(--border); border-radius:9px;
+    padding:8px 10px; margin-bottom:6px; font:inherit; font-size:.78rem; font-weight:600;
+    color:var(--jade-strong); cursor:pointer; transition:background .15s, border-color .15s;
+  }
+  .vb-sidebar-newdeck:hover{background:var(--jade-soft); border-color:var(--jade);}
+  .vb-sidebar-plus{font-weight:800;}
+  .vb-sidebar-decklist{display:flex; flex-direction:column; gap:3px;}
+  .vb-sidebar-deck{
+    display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; text-align:left;
+    background:transparent; border:none; border-radius:8px; padding:7px 10px; cursor:pointer;
+    font:inherit; font-size:.78rem; color:var(--ink-soft); transition:background .15s, color .15s;
+  }
+  .vb-sidebar-deck:hover{background:var(--paper-sunken); color:var(--ink);}
+  .vb-sidebar-deck-count{font-size:.68rem; color:var(--ink-faint); font-variant-numeric:tabular-nums;}
+  .vb-sidebar-empty{font-size:.74rem; color:var(--ink-faint); margin:0; padding:4px 2px;}
+
+  @media (max-width:860px){
+    .vb-shell{flex-direction:column;}
+    .vb-sidebar{
+      position:static; width:100%; flex:1 1 auto;
+      flex-direction:row; flex-wrap:wrap; align-items:flex-start; gap:12px 20px;
+    }
+    .vb-sidebar .standard-toggle{flex:1 1 100%;}
+    .vb-sidebar-levels{flex:1 1 220px; flex-direction:row; flex-wrap:wrap;}
+    .vb-sidebar-levels .level-btn{flex:1 1 140px; min-width:140px;}
+    .vb-sidebar-decks{flex:1 1 220px; border-top:none; border-left:1px solid var(--border); padding-top:0; padding-left:16px;}
+  }
+  @media (max-width:520px){
+    .vb-sidebar-decks{border-left:none; padding-left:0; border-top:1px solid var(--border); padding-top:14px; width:100%;}
+  }
 
   .intro{color:var(--ink-soft); font-size:.9rem; line-height:1.65; max-width:64ch; margin:0 0 22px;}
 
@@ -341,6 +437,21 @@
     border-radius:999px; padding:6px 13px; font:inherit; font-size:.8rem; font-weight:600; cursor:pointer;
   }
   .chip.active{background:var(--jade); border-color:var(--jade); color:#fff;}
+
+  /* Хуучин / Шинэ HSK стандарт сэлгэгч — HSK-ийн 2 стандартын түвшнүүдийг тусад нь харуулна */
+  .standard-toggle{
+    display:flex; gap:4px; background:var(--paper-sunken); border:1px solid var(--border);
+    border-radius:12px; padding:4px; margin-bottom:16px; max-width:420px;
+  }
+  .standard-toggle:empty{display:none; margin-bottom:0;}
+  .standard-toggle-btn{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:1px; border:none; background:transparent;
+    color:var(--ink-soft); font:inherit; font-weight:700; font-size:.82rem; padding:8px 10px; border-radius:9px;
+    cursor:pointer; transition:background .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+  .standard-toggle-btn:hover:not(.active){background:var(--paper-raised); color:var(--ink);}
+  .standard-toggle-btn.active{background:var(--jade); color:#fff; box-shadow:0 1px 4px rgba(47,111,94,.35);}
+  .standard-toggle-btn .std-sub{font-size:.68rem; font-weight:600; opacity:.75;}
 
   .deck-stage{
     display:flex; flex-direction:column; align-items:center; gap:22px;
@@ -758,6 +869,12 @@
     display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:10px;
     align-content:start;
   }
+  /* `.vb-grid{display:grid}` otherwise beats the browser's default [hidden]
+     rule (same specificity, author origin wins), so toggling `hidden` alone
+     never actually hid the grid — it kept rendering (and taking up space)
+     underneath the flash card. Same risk for .vb-flash if it ever gets an
+     unconditional `display` of its own. */
+  .vb-grid[hidden], .vb-flash[hidden]{display:none;}
   .vb-scroll.vb-scroll-flash{background:transparent; border:none; box-shadow:none; padding:0; max-height:none; overflow:visible;}
   .vword-card{
     background:var(--paper-raised); border:1px solid var(--border); border-radius:12px;
@@ -783,12 +900,15 @@
   }
   .vb-view-btn.active{background:var(--jade); color:#fff;}
 
-  /* ---- Flash card browsing mode (dark, 1999.study-inspired) ---- */
+  /* ---- Flash card browsing mode — uses the site's own light/dark palette
+     (via the existing theme custom properties) instead of a fixed dark
+     "studio" look, so it reads as one clean, tidy surface like the rest of
+     the app in whichever theme the learner has chosen. ---- */
   .vb-flash{
-    --fcd-bg:#0b1220; --fcd-card:#121b30; --fcd-card-hi:#1a2540; --fcd-border:#26325032;
-    --fcd-border-solid:#263250; --fcd-ink:#f4f6fb; --fcd-ink-soft:#93a0c0; --fcd-ink-faint:#5c6786;
-    --fcd-accent:#57cc9c; --fcd-gold:#f0b93c; --fcd-blue:#5b8cff; --fcd-red:#ef6f6f;
-    background:var(--fcd-bg); border-radius:16px; padding:18px 16px 22px;
+    --fcd-bg:var(--paper-sunken); --fcd-card:var(--paper-raised); --fcd-card-hi:var(--paper-sunken);
+    --fcd-border-solid:var(--border); --fcd-ink:var(--ink); --fcd-ink-soft:var(--ink-soft); --fcd-ink-faint:var(--ink-faint);
+    --fcd-accent:var(--jade-strong); --fcd-gold:var(--gold); --fcd-blue:#4d7ea8; --fcd-red:var(--seal);
+    background:var(--fcd-bg); border:1px solid var(--border); border-radius:16px; padding:18px 16px 22px;
   }
   .vfc-toolbar{display:flex; align-items:center; gap:18px; margin-bottom:16px;}
   .vfc-tool-btn{
@@ -819,7 +939,7 @@
     position:relative; flex:1 1 auto; max-width:520px; min-height:300px;
     background:var(--fcd-card); border:1px solid var(--fcd-border-solid); border-radius:20px;
     padding:20px 24px 26px; display:flex; flex-direction:column; align-items:center; gap:14px;
-    box-shadow:0 12px 32px rgba(0,0,0,.35);
+    box-shadow:var(--shadow);
   }
   .vfc-side-tabs{display:flex; gap:4px; align-self:flex-start;}
   .vfc-side-btn{
@@ -835,7 +955,7 @@
   .vfc-big.hz{font-size:clamp(3rem,11vw,4.6rem);}
   .vfc-big.mn{font-size:clamp(1.4rem,5vw,1.9rem); font-family:inherit;}
   .vfc-card .spk-btn.vfc-spk{background:var(--fcd-card-hi); color:var(--fcd-ink-soft); border:1px solid var(--fcd-border-solid); margin-top:-6px;}
-  .vfc-card .spk-btn.vfc-spk:hover{background:var(--fcd-accent); color:#0b1220;}
+  .vfc-card .spk-btn.vfc-spk:hover{background:var(--jade); color:#fff;}
   .vfc-reveals{display:flex; flex-wrap:wrap; justify-content:center; gap:8px;}
   .vfc-chip{
     border:1px solid var(--fcd-border-solid); background:transparent; color:var(--fcd-ink-faint);

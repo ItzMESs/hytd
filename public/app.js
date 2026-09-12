@@ -12,6 +12,26 @@ const LEVEL_META = {
 };
 const LEVELS = ["hsk1","hsk2","hsk3","hsk4","hsk5","nhsk1"];
 
+// HSK has two vocabulary standards: the old (2010, "хуучин") one this app
+// originally used, and the new (2021, "шинэ") one being added level by level.
+// Rather than list every level from both standards in one long row, the UI
+// shows a small "Хуучин / Шинэ стандарт" switcher wherever a level needs to
+// be picked, and only that standard's levels underneath it.
+const OLD_LEVELS = LEVELS.filter(l=>!l.startsWith("nhsk"));
+const NEW_LEVELS = LEVELS.filter(l=>l.startsWith("nhsk"));
+function levelsForStandard(std){ return std==="new" ? NEW_LEVELS : OLD_LEVELS; }
+function renderStandardToggle(containerId, current, onPick){
+  const box = document.getElementById(containerId);
+  if(!box) return;
+  if(NEW_LEVELS.length===0){ box.innerHTML=""; return; }
+  box.innerHTML = `
+    <button type="button" class="standard-toggle-btn${current==="old"?" active":""}" data-std="old">Хуучин стандарт <span class="std-sub">HSK 2.0</span></button>
+    <button type="button" class="standard-toggle-btn${current==="new"?" active":""}" data-std="new">Шинэ стандарт <span class="std-sub">HSK 3.0</span></button>`;
+  box.querySelectorAll(".standard-toggle-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>onPick(btn.dataset.std));
+  });
+}
+
 // vocab rows: [hanzi, pinyin, mongol utga]
 const DATA = {
 hsk1:[
@@ -915,6 +935,7 @@ document.addEventListener("click", (e)=>{
 
 /* ============================= RENDER: LESSONS ============================= */
 let currentLevel = "hsk1";
+let levelStandard = "old";
 
 function levelStats(level){
   const cards = DECK.filter(c=>c.level===level);
@@ -923,23 +944,66 @@ function levelStats(level){
 }
 
 function renderLevelTabs(){
+  renderStandardToggle("level-standard-toggle", levelStandard, (std)=>{
+    levelStandard = std;
+    const list = levelsForStandard(std);
+    if(!list.includes(currentLevel)) currentLevel = list[0];
+    renderLevelTabs(); renderLessons(); renderVocabBrowser();
+  });
   const box = document.getElementById("level-tabs");
   box.innerHTML="";
-  LEVELS.forEach(level=>{
+  levelsForStandard(levelStandard).forEach(level=>{
     const meta = LEVEL_META[level];
     const st = levelStats(level);
     const pct = st.total ? Math.round(100*st.mastered/st.total) : 0;
     const btn = document.createElement("button");
     btn.className = "level-btn"+(level===currentLevel?" active":"");
     btn.innerHTML = `
-      <div class="lv-label">${meta.label}</div>
-      <div class="lv-sub">${meta.sub}</div>
-      <div class="lv-bar"><i style="width:${pct}%"></i></div>
-      <div class="lv-pct">${st.mastered}/${st.total} эзэмшсэн</div>`;
+      <div class="lv-row">
+        <span class="lv-label">${meta.label}</span>
+        <span class="lv-count">${st.total} үг</span>
+      </div>
+      <div class="lv-bar"><i style="width:${pct}%"></i></div>`;
+    btn.title = meta.sub;
     btn.addEventListener("click", ()=>{ currentLevel=level; vbFlashPos=0; vbFlashOrder=null; renderLevelTabs(); renderLessons(); renderVocabBrowser(); });
     box.appendChild(btn);
   });
+  renderVbSidebarDecks();
 }
+
+/* Sidebar "Миний багцууд" (custom decks) mini-list — a lightweight, read-mostly
+   preview of the decks a learner builds on the Profile page. Deep deck
+   management (create/rename/delete/add words) stays on Profile so that logic
+   lives in exactly one place; the sidebar here is just a quick way in. */
+function renderVbSidebarDecks(){
+  const box = document.getElementById("vb-sidebar-decklist");
+  if(!box) return;
+  const decks = customDeckList();
+  box.innerHTML = decks.length
+    ? decks.map(d=>`<button type="button" class="vb-sidebar-deck" data-goto-deck="${escapeHtml(d.id)}">
+        <span class="vb-sidebar-deck-name">${escapeHtml(d.name)}</span>
+        <span class="vb-sidebar-deck-count">${d.cardIds.length}</span>
+      </button>`).join("")
+    : `<p class="vb-sidebar-empty">Багц алга байна</p>`;
+}
+document.getElementById("vb-sidebar-newdeck").addEventListener("click", ()=>{
+  switchView("profile");
+  setTimeout(()=>{
+    const toggle = document.getElementById("pp-deck-create-toggle");
+    const builder = document.getElementById("pp-deck-builder");
+    if(toggle && builder && builder.hidden) toggle.click();
+    if(builder) builder.scrollIntoView({behavior:"smooth", block:"center"});
+  }, 60);
+});
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest(".vb-sidebar-deck[data-goto-deck]");
+  if(!btn) return;
+  switchView("profile");
+  setTimeout(()=>{
+    const row = document.querySelector(`.deck-row [data-deck-view="${CSS.escape(btn.dataset.gotoDeck)}"]`);
+    if(row){ row.scrollIntoView({behavior:"smooth", block:"center"}); row.click(); }
+  }, 60);
+});
 
 function renderLessons(){
   const list = document.getElementById("lesson-list");
@@ -1219,6 +1283,7 @@ document.getElementById("vb-view-flash").addEventListener("click", ()=>{
 
 /* ============================= RENDER: REVIEW ============================= */
 let reviewFilter = "all";
+let reviewStandard = "old";
 let session = {queue:[], pos:0, flipped:false};
 
 const LEECH_THRESHOLD = 3;
@@ -1239,10 +1304,10 @@ function dueCards(levelFilter){
   return shuffle(due.concat(fresh));
 }
 
-function renderFilters(containerId, current, onPick){
+function renderFilters(containerId, current, onPick, levelsList){
   const box = document.getElementById(containerId);
   box.innerHTML="";
-  const opts = ["all"].concat(LEVELS).concat(["bookmarks","leeches"]);
+  const opts = ["all"].concat(levelsList||LEVELS).concat(["bookmarks","leeches"]);
   opts.forEach(key=>{
     const chip = document.createElement("button");
     chip.className="chip"+(key===current?" active":"");
@@ -1253,7 +1318,13 @@ function renderFilters(containerId, current, onPick){
 }
 
 function startSession(){
-  renderFilters("review-filters", reviewFilter, (key)=>{ reviewFilter=key; startSession(); });
+  renderStandardToggle("review-standard-toggle", reviewStandard, (std)=>{
+    reviewStandard = std;
+    const list = levelsForStandard(std);
+    if(!["all","bookmarks","leeches"].includes(reviewFilter) && !list.includes(reviewFilter)) reviewFilter = "all";
+    startSession();
+  });
+  renderFilters("review-filters", reviewFilter, (key)=>{ reviewFilter=key; startSession(); }, levelsForStandard(reviewStandard));
   session = {queue: dueCards(reviewFilter), pos:0, flipped:false};
   renderCard();
 }
@@ -1346,6 +1417,7 @@ document.getElementById("rate-row").addEventListener("click", (e)=>{
 
 /* ============================= RENDER: QUIZ ============================= */
 let quizScope = "all";
+let quizStandard = "old";
 let quiz = {questions:[], pos:0, score:0, misses:[], done:false};
 
 function fieldForType(type){ return (type==="meaning"||type==="listening") ? "m" : type==="hanzi" ? "h" : "p"; }
@@ -1528,7 +1600,13 @@ function startExamTimerTick(){
 
 function renderQuizIntro(){
   clearExamTimer();
-  renderFilters("quiz-filters", quizScope, (key)=>{ quizScope=key; renderQuizIntro(); });
+  renderStandardToggle("quiz-standard-toggle", quizStandard, (std)=>{
+    quizStandard = std;
+    const list = levelsForStandard(std);
+    if(!["all","bookmarks","leeches"].includes(quizScope) && !list.includes(quizScope)) quizScope = "all";
+    renderQuizIntro();
+  });
+  renderFilters("quiz-filters", quizScope, (key)=>{ quizScope=key; renderQuizIntro(); }, levelsForStandard(quizStandard));
   const body = document.getElementById("quiz-body");
   const key = quizScope;
   const rec = (srs.quiz||{})[key];
@@ -3240,6 +3318,27 @@ function initOfflineToggle(){
   applyTheme(getThemeChoice());
   renderThemeToggle();
   initOfflineToggle();
+})();
+
+// "⋮" overflow menu for the secondary header stats (сурсан/streak/зорилго) —
+// keeps only the most useful "давтах" pill always visible so the header
+// reads as a tidy, uncluttered row instead of four separate capsules in a line.
+(function(){
+  const trigger = document.getElementById("stats-more-trigger");
+  const menu = document.getElementById("stats-more-menu");
+  const wrap = document.getElementById("stats-more-wrap");
+  if(!trigger || !menu || !wrap) return;
+  function closeMenu(){ menu.hidden = true; trigger.setAttribute("aria-expanded", "false"); }
+  trigger.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    const open = menu.hidden;
+    menu.hidden = !open;
+    trigger.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  document.addEventListener("click", (e)=>{
+    if(!menu.hidden && !wrap.contains(e.target)) closeMenu();
+  });
+  document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeMenu(); });
 })();
 const logoutBtn = document.getElementById("logout-btn");
 if(logoutBtn) logoutBtn.addEventListener("click", ()=>{
