@@ -437,9 +437,37 @@
   .ex .expy{font-family:"JetBrains Mono",monospace; font-size:.72rem; color:var(--jade-strong); display:block; margin:1px 0;}
   .ex .exen{color:var(--ink-soft); font-style:italic;}
 
-  #review-view, #quiz-view, #progress-view, #games-view, #leaderboard-view, #profile-view{display:none;}
-  #review-view.active, #quiz-view.active, #progress-view.active, #games-view.active, #leaderboard-view.active, #profile-view.active{display:block;}
+  #review-view, #quiz-view, #progress-view, #games-view, #leaderboard-view, #profile-view, #grammar-view{display:none;}
+  #review-view.active, #quiz-view.active, #progress-view.active, #games-view.active, #leaderboard-view.active, #profile-view.active, #grammar-view.active{display:block;}
   #lessons-view.hidden{display:none;}
+
+  .grammar-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;}
+  .grammar-head input{
+    flex:1; min-width:220px; font:inherit; font-size:.88rem; padding:9px 13px;
+    border:1px solid var(--border); border-radius:10px; background:var(--paper); color:var(--ink);
+  }
+  .grammar-head input:focus{outline:2px solid var(--jade); outline-offset:-1px;}
+  .grammar-count{font-size:.78rem; color:var(--ink-faint); white-space:nowrap;}
+  .grammar-body-grid, #grammar-body{display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));}
+  .grammar-card{
+    background:var(--jade-soft); border-radius:12px; padding:14px 16px;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .grammar-card-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:2px;}
+  .grammar-card-level{
+    font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+    color:var(--jade-strong); background:var(--paper-raised); border-radius:999px; padding:2px 9px;
+  }
+  .grammar-card .pattern{
+    display:inline-block; font-family:"Noto Serif SC",serif; font-weight:700; font-size:1rem;
+    background:var(--paper-raised); color:var(--jade-strong); border-radius:8px; padding:3px 10px;
+  }
+  .grammar-card h4{margin:8px 0 6px; font-size:.88rem;}
+  .grammar-card p{margin:0 0 10px; font-size:.82rem; line-height:1.55; color:var(--ink-soft);}
+  .grammar-card-goto{margin-top:auto; align-self:flex-start;}
+  @media (max-width:640px){
+    #grammar-body{grid-template-columns:1fr;}
+  }
 
   .scope-filters{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px;}
   .chip{
@@ -661,6 +689,18 @@
   .qopt.correct{border-color:var(--jade); background:var(--jade-soft);}
   .qopt.wrong{border-color:var(--seal); background:var(--seal-soft);}
   .quiz-next-wrap{display:flex; justify-content:center; margin-top:20px;}
+
+  .homophone-legend{
+    max-width:420px; margin:16px auto 0; background:var(--paper-sunken); border-radius:12px; padding:12px 14px;
+  }
+  .homophone-legend-title{font-size:.76rem; font-weight:700; color:var(--ink-faint); margin-bottom:6px;}
+  .homophone-legend-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-size:.84rem; padding:4px 0; border-top:1px solid var(--border);
+  }
+  .homophone-legend-row:first-of-type{border-top:none;}
+  .homophone-legend-row .hz-cell{font-family:"Noto Serif SC",serif; font-size:1.05rem; font-weight:600;}
+
   .quiz-results{max-width:560px; margin:0 auto; text-align:center;}
   .score-big{font-family:"Noto Serif SC",serif; font-size:3rem; font-weight:700; color:var(--jade-strong); margin:6px 0;}
   .score-sub{color:var(--ink-soft); font-size:.85rem; margin-bottom:22px;}
@@ -799,7 +839,22 @@
     transition:border-color .15s ease, box-shadow .15s ease;
   }
   .pp-field-row input:focus{outline:none; border-color:var(--jade); box-shadow:0 0 0 3px var(--jade-soft);}
+  .pp-field-row select{
+    flex:1 1 160px; font:inherit; font-size:.85rem; padding:10px 12px;
+    border:1px solid var(--border); border-radius:10px; background:var(--paper-raised); color:var(--ink);
+  }
   .pp-hint{font-size:.72rem; color:var(--ink-faint); margin:6px 0 0;}
+
+  .exam-countdown{
+    display:flex; align-items:center; gap:14px; background:var(--jade-soft); border-radius:12px;
+    padding:14px 18px; margin-top:10px;
+  }
+  .exam-countdown-num{font-size:1.8rem; font-weight:800; color:var(--jade-strong); line-height:1;}
+  .exam-countdown-label{font-size:.85rem; color:var(--ink-soft); line-height:1.4;}
+  .exam-countdown-today{background:var(--gold-soft);}
+  .exam-countdown-today .exam-countdown-num{font-size:1.4rem; color:var(--gold);}
+  .exam-countdown-past{background:var(--paper-sunken);}
+  .exam-goal-section{padding-top:14px; padding-bottom:14px;}
   .pp-msg{font-size:.78rem; margin-top:8px; min-height:1.2em;}
   .pp-msg-ok{color:var(--jade-strong); font-weight:600;}
   .pp-msg-err{color:var(--seal); font-weight:600;}

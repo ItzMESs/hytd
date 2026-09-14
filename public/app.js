@@ -701,6 +701,21 @@ function rate(id, grade){
   scheduleSave();
 }
 
+// A wrong Тест answer didn't used to touch srs.cards at all — it only showed
+// up in that one quiz session's own miss-list, then was forgotten. That left
+// "⚠️ Хүндрэлтэй" (leech) tracking blind to anything except Review "Дахин"
+// presses, so a word someone consistently gets wrong on quizzes (but never
+// happens to hit in Review) never surfaced as a problem word. This bumps
+// the same lapses counter Review uses, without touching iv/ease/due — a
+// quiz miss should flag the word as tricky, not reset its SRS schedule.
+function recordQuizMiss(id){
+  if(!id) return;
+  const st = Object.assign({iv:0, ease:2.5, reps:0, due:todayStr(), lapses:0}, srs.cards[id]);
+  st.lapses = (st.lapses||0) + 1;
+  srs.cards[id] = st;
+  scheduleSave();
+}
+
 /* Quick mastery marking from the flash-card browser — separate from rate()
    (SRS review reps): this doesn't touch streak/today-count/rating stats,
    it just moves the word's mastery state, and both views share srs.cards
@@ -1205,6 +1220,7 @@ function renderLessons(){
   lessons.forEach((lesson, li)=>{
     const details = document.createElement("details");
     details.className="lesson";
+    details.id = "lesson-idx-"+li;
     if(li===0) details.open=true;
     const vocabRows = lesson.vocab.map(v=>`
       <tr><td class="hz"><span class="hz-cell">${escapeHtml(v[0])}${speakerBtnHtml(v[0])}</span></td><td class="py">${escapeHtml(v[1])}</td><td class="en-def">${escapeHtml(v[2])}</td></tr>
@@ -1232,6 +1248,99 @@ function renderLessons(){
         </div>
       </div>`;
     list.appendChild(details);
+  });
+}
+
+/* ============================= ДҮРМИЙН ЛАВЛАХ (grammar reference/index) ============================= */
+// A searchable index of every grammar point across all levels, so a learner
+// can look one up directly instead of hunting through each level's lesson
+// list. Pulls straight from the same DATA[level][i].grammar the Lessons page
+// already renders — no separate content to keep in sync.
+let grammarQuery = "";
+let grammarLevelFilter = "";
+
+function allGrammarPoints(){
+  const rows = [];
+  OLD_LEVELS.forEach(level=>{
+    (DATA[level]||[]).forEach((lesson, li)=>{
+      rows.push({level, li, lesson});
+    });
+  });
+  return rows;
+}
+
+function renderGrammarFilters(){
+  const box = document.getElementById("grammar-level-filters");
+  if(!box) return;
+  const btns = [`<button type="button" class="chip${grammarLevelFilter===""?" active":""}" data-lv="">Бүх түвшин</button>`]
+    .concat(OLD_LEVELS.map(lv=>`<button type="button" class="chip${grammarLevelFilter===lv?" active":""}" data-lv="${lv}">${LEVEL_META[lv].label}</button>`));
+  box.innerHTML = btns.join("");
+  box.querySelectorAll(".chip").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ grammarLevelFilter = btn.dataset.lv; renderGrammarIndex(); });
+  });
+}
+
+function jumpToLesson(level, li){
+  currentLevel = level;
+  vbFlashPos = 0;
+  vbFlashOrder = null;
+  switchView("lessons");
+  renderLevelTabs();
+  renderLessons();
+  setTimeout(()=>{
+    const el = document.getElementById("lesson-idx-"+li);
+    if(el){
+      el.open = true;
+      el.scrollIntoView({behavior:"smooth", block:"start"});
+    }
+  }, 60);
+}
+
+function renderGrammarIndex(){
+  const box = document.getElementById("grammar-body");
+  if(!box) return;
+  renderGrammarFilters();
+  const query = grammarQuery.trim().toLowerCase();
+  const rows = allGrammarPoints().filter(r=>{
+    if(grammarLevelFilter && r.level!==grammarLevelFilter) return false;
+    if(!query) return true;
+    const g = r.lesson.grammar;
+    const hay = [g.title, g.pattern, g.note, r.lesson.en, r.lesson.zh].join(" ").toLowerCase();
+    return hay.includes(query);
+  });
+  const countEl = document.getElementById("grammar-count");
+  if(countEl) countEl.textContent = `${rows.length} дүрэм`;
+  if(rows.length===0){
+    box.innerHTML = `<p class="prog-empty">Илэрц олдсонгүй.</p>`;
+    return;
+  }
+  box.innerHTML = rows.map(r=>{
+    const g = r.lesson.grammar;
+    const exHtml = g.examples.slice(0,2).map(x=>`
+      <div class="ex"><span class="exhz">${escapeHtml(x[0])}</span><span class="expy">${escapeHtml(x[1])}</span><span class="exen">${escapeHtml(x[2])}</span></div>
+    `).join("");
+    return `
+      <div class="grammar-card">
+        <div class="grammar-card-head">
+          <span class="grammar-card-level">${LEVEL_META[r.level].label}</span>
+          <span class="pattern">${escapeHtml(g.pattern)}</span>
+        </div>
+        <h4>${escapeHtml(g.title)}</h4>
+        <p>${escapeHtml(g.note)}</p>
+        ${exHtml}
+        <button type="button" class="btn-ghost grammar-card-goto" data-lv="${r.level}" data-li="${r.li}">📖 Хичээл рүү очих</button>
+      </div>`;
+  }).join("");
+  box.querySelectorAll(".grammar-card-goto").forEach(btn=>{
+    btn.addEventListener("click", ()=>jumpToLesson(btn.dataset.lv, Number(btn.dataset.li)));
+  });
+}
+
+const grammarSearchInput = document.getElementById("grammar-search");
+if(grammarSearchInput){
+  grammarSearchInput.addEventListener("input", (e)=>{
+    grammarQuery = e.target.value;
+    renderGrammarIndex();
   });
 }
 
@@ -1315,6 +1424,80 @@ function renderVocabBrowser(){
       ${noteBoxHtml(id)}
     </div>`;
   }).join("");
+}
+
+/* ---- Vocab PDF шпаргалка (cheat sheet) ----
+   Uses the browser's own print pipeline (a new tab with print-friendly CSS,
+   then window.print()) rather than a client-side PDF library — this avoids
+   Chinese-font-embedding headaches with things like jsPDF, and "Save as PDF"
+   is built into every browser's print dialog already. Respects whatever
+   search/topic filter is currently active on the Vocab Browser, so what the
+   learner sees on screen is what gets printed. */
+function buildCheatSheetRows(){
+  const rows = FULL_VOCAB[currentLevel] || [];
+  const q = vbQuery.trim().toLowerCase();
+  const indexed = rows.map((r,i)=>({r, idx:i}));
+  return indexed.filter(({r,idx})=>{
+    const matchesSearch = !q || r[0].toLowerCase().includes(q) || r[1].toLowerCase().includes(q) || r[3].toLowerCase().includes(q);
+    if(!matchesSearch) return false;
+    if(!vbTopic) return true;
+    const id = currentLevel+":w:"+idx;
+    const tags = WORD_TOPICS.get(id) || [];
+    return vbTopic==="other" ? tags.length===0 : tags.includes(vbTopic);
+  }).map(({r})=>r);
+}
+function buildCheatSheetHtml(rows, levelLabel, subtitle){
+  const bodyRows = rows.map((r,i)=>`<tr><td class="csn">${i+1}</td><td class="cshz">${escapeHtml(r[0])}</td><td class="cspy">${escapeHtml(r[1])}</td><td class="csmn">${escapeHtml(r[3])}</td></tr>`).join("");
+  return `<!doctype html>
+<html><head><meta charset="utf-8">
+<title>${escapeHtml(levelLabel)} — Vocab шпаргалка</title>
+<style>
+  body{font-family:Arial,"Noto Sans",sans-serif; color:#1a1a1a; margin:20px;}
+  h1{font-size:19px; margin:0 0 2px;}
+  .sub{color:#666; font-size:12px; margin-bottom:14px;}
+  table{width:100%; border-collapse:collapse; font-size:11.5px;}
+  th,td{border:1px solid #ccc; padding:3px 7px; text-align:left;}
+  th{background:#eef6f0;}
+  td.csn{color:#999; width:26px;}
+  td.cshz{font-family:"Noto Serif SC","PingFang SC","Microsoft YaHei",serif; font-size:14px; width:70px;}
+  td.cspy{font-family:"JetBrains Mono",monospace; width:120px;}
+  tr{page-break-inside:avoid;}
+  .print-btn{
+    display:inline-block; margin-bottom:14px; padding:8px 16px; background:#1f8a5c; color:#fff;
+    border:none; border-radius:8px; font:inherit; font-size:13px; cursor:pointer;
+  }
+  @media print{
+    @page{ margin:14mm 12mm; }
+    .print-btn{ display:none; }
+  }
+</style>
+</head>
+<body>
+  <button type="button" class="print-btn" onclick="window.print()">🖨️ Хэвлэх / PDF болгож хадгалах</button>
+  <h1>HSK Path — ${escapeHtml(levelLabel)} шпаргалка</h1>
+  <div class="sub">${escapeHtml(subtitle)} · Нийт ${rows.length} үг</div>
+  <table>
+    <thead><tr><th>№</th><th>Ханз</th><th>Пиньин</th><th>Монгол утга</th></tr></thead>
+    <tbody>${bodyRows}</tbody>
+  </table>
+</body></html>`;
+}
+function openCheatSheet(){
+  const rows = buildCheatSheetRows();
+  if(!rows.length){ alert("Хэвлэх үг олдсонгүй. Хайлт/шүүлтүүрээ шалгана уу."); return; }
+  const meta = LEVEL_META[currentLevel];
+  const filtered = vbQuery.trim() || vbTopic;
+  const subtitle = filtered ? "Шүүсэн жагсаалт" : "Бүх үг";
+  const html = buildCheatSheetHtml(rows, meta.label, subtitle);
+  const w = window.open("", "_blank");
+  if(!w){ alert("Попап цонх блоклогдсон байна. Хөтчийнхөө зөвшөөрлийг нээгээд дахин оролдоно уу."); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+{
+  const printBtn = document.getElementById("vb-print-btn");
+  if(printBtn) printBtn.addEventListener("click", openCheatSheet);
 }
 
 /* ---- Flash card browsing view (1999.study-style) ---- */
@@ -2140,7 +2323,7 @@ function renderExamQuestion(){
         btn.classList.add("wrong");
         if(q.kind==="sentence"){ quiz.misses.push({kind:"sentence", hzFull:q.hzFull, mn:q.mn}); }
         else if(q.kind==="grammar"){ quiz.misses.push({kind:"grammar", hzFull:q.hzFull, mn:q.mn}); }
-        else{ quiz.misses.push({kind:"vocab", card:q.card}); }
+        else{ quiz.misses.push({kind:"vocab", card:q.card}); recordQuizMiss(q.card.id); }
         const correctBtn = Array.from(optButtons).find((b,i)=>q.options[i].isCorrect);
         if(correctBtn) correctBtn.classList.add("correct");
       }
@@ -2232,7 +2415,7 @@ function renderQuizQuestion(){
         btn.classList.add("wrong");
         if(q.kind==="sentence"){ quiz.misses.push({kind:"sentence", hzFull:q.hzFull, mn:q.mn}); }
         else if(q.kind==="grammar"){ quiz.misses.push({kind:"grammar", hzFull:q.hzFull, mn:q.mn}); }
-        else{ quiz.misses.push({kind:"vocab", card:q.card}); }
+        else{ quiz.misses.push({kind:"vocab", card:q.card}); recordQuizMiss(q.card.id); }
         const correctBtn = Array.from(optButtons).find((b,i)=>q.options[i].isCorrect);
         if(correctBtn) correctBtn.classList.add("correct");
       }
@@ -2513,6 +2696,168 @@ function renderMatchGame(){
   if(nextBtn) nextBtn.addEventListener("click", ()=>{ newMatchRound(); renderMatchGame(); });
 }
 
+/* ============================= ИЖИЛ ДУУДЛАГАТАЙ ҮГС (homophones) =============================
+   A confusion drill for characters that sound the same (or are frequently
+   mixed up because they sound almost the same): given the shared reading and
+   one word's Mongolian meaning, pick the matching hanzi from the group. */
+const HOMOPHONE_GROUPS = [
+  {py:"tā", exact:true, words:[
+    {hz:"他", mn:"тэр (эрэгтэй хүн)"},
+    {hz:"她", mn:"тэр (эмэгтэй хүн)"},
+    {hz:"它", mn:"тэр (амьтан, зүйл)"},
+  ]},
+  {py:"zài", exact:true, words:[
+    {hz:"在", mn:"байх; -д, -т (байршил заах)"},
+    {hz:"再", mn:"дахин, дараа нь"},
+  ]},
+  {py:"zuò", exact:true, words:[
+    {hz:"做", mn:"хийх"},
+    {hz:"坐", mn:"суух"},
+  ]},
+  {py:"shì", exact:true, words:[
+    {hz:"是", mn:"мөн (холбох үг)"},
+    {hz:"事", mn:"хэрэг, ажил явдал"},
+    {hz:"试", mn:"туршиж үзэх (试试)"},
+  ]},
+  {py:"yī", exact:true, words:[
+    {hz:"一", mn:"нэг (тоо)"},
+    {hz:"衣", mn:"хувцас (衣服)"},
+    {hz:"医", mn:"эмнэлэг, эмчлэх (医生)"},
+  ]},
+  {py:"kě", exact:true, words:[
+    {hz:"可", mn:"болно, чадна (可以)"},
+    {hz:"渴", mn:"цангах"},
+  ]},
+  {py:"zhōng", exact:true, words:[
+    {hz:"中", mn:"дунд, төв (中国)"},
+    {hz:"钟", mn:"цаг (цагийн механизм)"},
+  ]},
+  {py:"huà", exact:true, words:[
+    {hz:"话", mn:"үг яриа (说话)"},
+    {hz:"画", mn:"зурах, зураг"},
+    {hz:"化", mn:"хувиргах, өөрчлөгдөх"},
+  ]},
+  {py:"jiā", exact:true, words:[
+    {hz:"家", mn:"гэр, гэр бүл"},
+    {hz:"加", mn:"нэмэх"},
+  ]},
+  {py:"kǎo", exact:true, words:[
+    {hz:"考", mn:"шалгалт өгөх (考试)"},
+    {hz:"烤", mn:"шарах, чанах"},
+  ]},
+  {py:"shēng", exact:true, words:[
+    {hz:"生", mn:"төрөх; сурагч (学生)"},
+    {hz:"声", mn:"дуу авиа (声音)"},
+  ]},
+  {py:"wǎng", exact:true, words:[
+    {hz:"网", mn:"сүлжээ, интернэт (上网)"},
+    {hz:"往", mn:"өөд, тийш (чиглэл)"},
+  ]},
+  {py:"yuán", exact:true, words:[
+    {hz:"元", mn:"юань (мөнгөн нэгж)"},
+    {hz:"园", mn:"цэцэрлэгт хүрээлэн (公园)"},
+    {hz:"员", mn:"ажилтан (服务员)"},
+  ]},
+  {py:"zhù", exact:true, words:[
+    {hz:"住", mn:"амьдрах, суух (гэрээр)"},
+    {hz:"祝", mn:"ерөөх, хүсэх (祝你...)"},
+  ]},
+  {py:"lǐ", exact:true, words:[
+    {hz:"里", mn:"дотор, дотоод тал"},
+    {hz:"理", mn:"ойлгох, зохицуулах (经理, 理解)"},
+    {hz:"礼", mn:"бэлэг, ёслол (礼物)"},
+  ]},
+  {py:"xiào", exact:true, words:[
+    {hz:"笑", mn:"инээх"},
+    {hz:"校", mn:"сургууль (学校)"},
+  ]},
+  {py:"kè", exact:true, words:[
+    {hz:"课", mn:"хичээл"},
+    {hz:"客", mn:"зочин (客人)"},
+    {hz:"刻", mn:"хорин таван минут (差一刻)"},
+  ]},
+  {py:"nǎ / nà", exact:false, words:[
+    {hz:"哪", mn:"аль (асуух үг, nǎ)"},
+    {hz:"那", mn:"тэр (nà)"},
+  ]},
+  {py:"mǎi / mài", exact:false, words:[
+    {hz:"买", mn:"худалдаж авах (mǎi)"},
+    {hz:"卖", mn:"худалдах, зарах (mài)"},
+  ]},
+  {py:"hǎo / hào", exact:false, words:[
+    {hz:"好", mn:"сайн (hǎo)"},
+    {hz:"号", mn:"дугаар, сар/өдөр (hào)"},
+  ]},
+];
+
+let homophoneRound = null;
+let homophoneStats = {correct:0, total:0};
+
+function newHomophoneRound(){
+  const groups = HOMOPHONE_GROUPS.filter(g=>g.words.length>=2);
+  const group = groups[Math.floor(Math.random()*groups.length)];
+  const targetIdx = Math.floor(Math.random()*group.words.length);
+  homophoneRound = {
+    group, targetIdx,
+    order: shuffle(group.words.map((_,i)=>i)),
+    answered: false,
+  };
+}
+
+function renderHomophoneGame(){
+  const box = document.getElementById("games-body");
+  if(!homophoneRound) newHomophoneRound();
+  const r = homophoneRound;
+  const target = r.group.words[r.targetIdx];
+  const optsHtml = r.order.map(i=>{
+    const w = r.group.words[i];
+    return `<button type="button" class="qopt homophone-opt" data-idx="${i}"><span class="qhz">${escapeHtml(w.hz)}</span></button>`;
+  }).join("");
+  const soundNote = r.group.exact
+    ? "Эдгээр ханз бүгд яг адилхан дуудлагатай (тон хүртэл ижил)."
+    : "Эдгээр ханз дуудлага төстэй ч тон нь өөр — сайн ялгаж сонсоорой.";
+  box.innerHTML = `
+    <div class="session-count" style="text-align:center;margin-bottom:10px;">Ижил дуудлагатай үг · Оноо: ${homophoneStats.correct}/${homophoneStats.total}</div>
+    <div class="quiz-card">
+      <div class="quiz-kicker">Дуудлага: <b>${escapeHtml(r.group.py)}</b> ${speakerBtnHtml(target.hz)}</div>
+      <p class="score-sub" style="margin-top:-6px;">${soundNote}</p>
+      <p class="quiz-instruction">Утга нь: «<b>${escapeHtml(target.mn)}</b>» — аль ханз нь энэ утгатай вэ?</p>
+      <div class="quiz-options">${optsHtml}</div>
+      <div class="homophone-legend" id="homophone-legend" hidden></div>
+      <div class="quiz-next-wrap" id="homophone-next-wrap"></div>
+    </div>`;
+  const btns = box.querySelectorAll(".homophone-opt");
+  btns.forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(r.answered) return;
+      r.answered = true;
+      btns.forEach(b=>b.disabled=true);
+      const idx = Number(btn.dataset.idx);
+      homophoneStats.total += 1;
+      if(idx===r.targetIdx){
+        btn.classList.add("correct");
+        homophoneStats.correct += 1;
+      } else {
+        btn.classList.add("wrong");
+        const correctBtn = box.querySelector(`.homophone-opt[data-idx="${r.targetIdx}"]`);
+        if(correctBtn) correctBtn.classList.add("correct");
+      }
+      const legend = document.getElementById("homophone-legend");
+      if(legend){
+        legend.hidden = false;
+        legend.innerHTML = `<div class="homophone-legend-title">Бүх ялгааг харах:</div>` + r.group.words.map(w=>
+          `<div class="homophone-legend-row"><span class="hz-cell">${escapeHtml(w.hz)}${speakerBtnHtml(w.hz)}</span><span>${escapeHtml(w.mn)}</span></div>`
+        ).join("");
+      }
+      const nextWrap = document.getElementById("homophone-next-wrap");
+      if(nextWrap){
+        nextWrap.innerHTML = `<button type="button" class="btn-primary" id="homophone-next">Дараах</button>`;
+        document.getElementById("homophone-next").addEventListener("click", ()=>{ newHomophoneRound(); renderHomophoneGame(); });
+      }
+    });
+  });
+}
+
 /* ============================= ХАРИЛЦАН ЯРИА СОНСОХ ============================= */
 function speakSequence(items){
   if(!ttsSupported || !items.length) return;
@@ -2552,6 +2897,28 @@ hsk1:[
      {q:"Алимны нэг жин нь хэдэн юань вэ?", opts:["三块","五块","八块","十块"], answer:1},
      {q:"明хэдэн жин алим авах вэ?", opts:["Нэг жин","Хоёр жин","Гурван жин","Дөрвөн жин"], answer:1},
    ]},
+  {title:"Ресторанд захиалах", desc:"Хоолны газарт хоол захиалж байна",
+   lines:[
+     {spk:"服务员", hz:"你们好，想吃点儿什么？", py:"Nǐmen hǎo, xiǎng chī diǎnr shénme?", mn:"Сайн байна уу, юу идэхийг хүсэж байна?"},
+     {spk:"明", hz:"我要一碗米饭和一个鸡蛋。", py:"Wǒ yào yì wǎn mǐfàn hé yí ge jīdàn.", mn:"Надад нэг аяга цагаан будаа, нэг өндөг өгнө үү."},
+     {spk:"芳", hz:"我要一杯茶，谢谢。", py:"Wǒ yào yì bēi chá, xièxie.", mn:"Надад нэг аяга цай, баярлалаа."},
+     {spk:"服务员", hz:"好的，请等一下。", py:"Hǎo de, qǐng děng yíxià.", mn:"За, бага зэрэг хүлээгээрэй."},
+   ],
+   questions:[
+     {q:"明юу захиалав?", opts:["Цагаан будаа, өндөг","Мах, будаа","Талх, сүү","Жимс"], answer:0},
+     {q:"芳юу уухыг хүслээ?", opts:["Цай","Ус","Сүү","Кофе"], answer:0},
+   ]},
+  {title:"Гэр бүлээ танилцуулах", desc:"明гэр бүлийнхээ тухай ярьж байна",
+   lines:[
+     {spk:"芳", hz:"你家有几口人？", py:"Nǐ jiā yǒu jǐ kǒu rén?", mn:"Танайх хэдэн хүнтэй вэ?"},
+     {spk:"明", hz:"我家有四口人：爸爸、妈妈、姐姐和我。", py:"Wǒ jiā yǒu sì kǒu rén: bàba, māma, jiějie hé wǒ.", mn:"Манайх дөрвөн хүнтэй: аав, ээж, эгч, би."},
+     {spk:"芳", hz:"你姐姐做什么工作？", py:"Nǐ jiějiě zuò shénme gōngzuò?", mn:"Чиний эгч ямар ажил хийдэг вэ?"},
+     {spk:"明", hz:"她是老师，在学校工作。", py:"Tā shì lǎoshī, zài xuéxiào gōngzuò.", mn:"Тэр багш, сургуульд ажилладаг."},
+   ],
+   questions:[
+     {q:"明гэр бүлдээ хэдэн хүнтэй вэ?", opts:["Гурван","Дөрвөн","Таван","Зургаан"], answer:1},
+     {q:"明ийн эгч ямар ажил хийдэг вэ?", opts:["Эмч","Багш","Дэлгүүрийн ажилтан","Жолооч"], answer:1},
+   ]},
 ],
 hsk2:[
   {title:"Утсаар ярих", desc:"Оройн хоолны төлөвлөгөө хийж байна",
@@ -2577,6 +2944,28 @@ hsk2:[
      {q:"Аль цүнх нь илүү том вэ?", opts:["Энэ","Тэр","Хоёулаа адилхан","Мэдэгдэхгүй"], answer:0},
      {q:"Эцэст нь ямар цүнх авахаар болов?", opts:["Том, үнэтэй нэгийг","Гоё харагдсан нэгийг","Хямд нэгийг","Хоёуланг"], answer:1},
    ]},
+  {title:"Замаа асуух", desc:"芳зочид буудал руу яаж явахаа асууж байна",
+   lines:[
+     {spk:"芳", hz:"请问，去火车站怎么走？", py:"Qǐngwèn, qù huǒchēzhàn zěnme zǒu?", mn:"Уучлаарай, галт тэрэгний буудал луу яаж явах вэ?"},
+     {spk:"明", hz:"一直往前走，然后往右拐。", py:"Yìzhí wǎng qián zǒu, ránhòu wǎng yòu guǎi.", mn:"Шууд урагшаа явж, дараа нь баруун тийш эргэ."},
+     {spk:"芳", hz:"要走多长时间？", py:"Yào zǒu duō cháng shíjiān?", mn:"Хэр удаан явах ёстой вэ?"},
+     {spk:"明", hz:"大概十分钟就到了。", py:"Dàgài shí fēnzhōng jiù dào le.", mn:"Ойролцоогоор арван минутад хүрнэ."},
+   ],
+   questions:[
+     {q:"芳хаашаа явахыг хүсэж байна вэ?", opts:["Дэлгүүр","Галт тэрэгний буудал","Эмнэлэг","Сургууль"], answer:1},
+     {q:"Явахад ойролцоогоор хэдэн минут зарцуулагдах вэ?", opts:["Тав","Арав","Хорин","Гуч"], answer:1},
+   ]},
+  {title:"Эмнэлэгт", desc:"明бие муудаж эмчид үзүүлж байна",
+   lines:[
+     {spk:"医生", hz:"你哪儿不舒服？", py:"Nǐ nǎr bù shūfu?", mn:"Хаана нь өвдөж байна вэ?"},
+     {spk:"明", hz:"我头疼，还有点儿发烧。", py:"Wǒ tóuténg, hái yǒudiǎnr fāshāo.", mn:"Толгой өвдөж байна, бас бага зэрэг халуурч байна."},
+     {spk:"医生", hz:"多喝水，好好休息，这几天别上班了。", py:"Duō hē shuǐ, hǎohāo xiūxi, zhè jǐ tiān bié shàngbān le.", mn:"Ус их уугаад, сайн амраарай, энэ хэдэн өдөр ажилдаа бүү яв."},
+     {spk:"明", hz:"谢谢医生，我会注意的。", py:"Xièxie yīshēng, wǒ huì zhùyì de.", mn:"Баярлалаа эмч ээ, би анхаарна."},
+   ],
+   questions:[
+     {q:"明ямар шинжтэй байна вэ?", opts:["Хамар боолт","Толгой өвдөж, халуурч","Гэдэс өвдөж","Хөл гэмтсэн"], answer:1},
+     {q:"Эмч юу зөвлөв?", opts:["Ажилдаа явахыг","Ус их уух, амрах","Дасгал хийхийг","Юу ч хийхгүй байхыг"], answer:1},
+   ]},
 ],
 hsk3:[
   {title:"Дугуй алдсан нь", desc:"芳дугуйгаа алдаад明-ээс тусламж хүсэж байна",
@@ -2600,6 +2989,28 @@ hsk3:[
    questions:[
      {q:"Цаг агаар ямар болж байна вэ?", opts:["Улам дулаарч байна","Улам хүйтэрч байна","Өөрчлөгдөхгүй байна","Бороо орж байна"], answer:1},
      {q:"Тэд хэзээ дэлгүүр явахаар болов?", opts:["Маргааш","Өнөөдөр","Амралтын өдрөөр","Дараа долоо хоногт"], answer:2},
+   ]},
+  {title:"Зочид буудалд захиалга", desc:"芳зочид буудалд өрөө захиалж байна",
+   lines:[
+     {spk:"芳", hz:"你好，我想预订一个房间。", py:"Nǐ hǎo, wǒ xiǎng yùdìng yí ge fángjiān.", mn:"Сайн байна уу, би нэг өрөө захиалмаар байна."},
+     {spk:"前台", hz:"好的，您需要住几天？", py:"Hǎo de, nín xūyào zhù jǐ tiān?", mn:"За, та хэдэн хоног байрлах вэ?"},
+     {spk:"芳", hz:"三天，如果可以的话，我要一个安静的房间。", py:"Sān tiān, rúguǒ kěyǐ dehuà, wǒ yào yí ge ānjìng de fángjiān.", mn:"Гурван хоног, боломжтой бол намуухан өрөө хүсч байна."},
+     {spk:"前台", hz:"没问题，一共是九百块。", py:"Méi wèntí, yígòng shì jiǔbǎi kuài.", mn:"Асуудалгүй, нийт есөн зуун юань болно."},
+   ],
+   questions:[
+     {q:"芳хэдэн хоног байрлах вэ?", opts:["Хоёр","Гурав","Тав","Долоо"], answer:1},
+     {q:"芳ямар өрөө хүссэн бэ?", opts:["Том өрөө","Намуухан өрөө","Хямд өрөө","Дээд давхрын өрөө"], answer:1},
+   ]},
+  {title:"Онгоцны буудалд", desc:"明онгоцны буудалд бүртгүүлж байна",
+   lines:[
+     {spk:"明", hz:"您好，我要办理登机手续。", py:"Nín hǎo, wǒ yào bànlǐ dēngjī shǒuxù.", mn:"Сайн байна уу, би онгоцонд суух бүртгэл хийлгэмээр байна."},
+     {spk:"工作人员", hz:"请出示您的护照和机票。", py:"Qǐng chūshì nín de hùzhào hé jīpiào.", mn:"Гадаад паспорт, тасалбараа үзүүлнэ үү."},
+     {spk:"明", hz:"给您，我还有一个行李箱要托运。", py:"Gěi nín, wǒ hái yǒu yí ge xínglixiāng yào tuōyùn.", mn:"Авна уу, надад бас нэг бэлдэн авах гэрийн тээш байгаа."},
+     {spk:"工作人员", hz:"好的，请把箱子放在这里。", py:"Hǎo de, qǐng bǎ xiāngzi fàng zài zhèlǐ.", mn:"За, чемоданаа энд тавина уу."},
+   ],
+   questions:[
+     {q:"明юу хийхийг хүссэн бэ?", opts:["Тасалбар худалдаж авах","Онгоцонд суух бүртгэл хийлгэх","Хоол захиалах","Такси дуудах"], answer:1},
+     {q:"Ажилтан юу үзүүлэхийг хүслээ?", opts:["Мөнгө","Гадаад паспорт, тасалбар","Утас","Түлхүүр"], answer:1},
    ]},
 ],
 hsk4:[
@@ -2625,6 +3036,28 @@ hsk4:[
      {q:"明яагаад тэр ажилд өргөдөл өгсөн бэ?", opts:["Цалин өндөр учир","Салбарт дуртай учир","Ойрхон учир","Найзынх нь зөвлөсөн учир"], answer:1},
      {q:"Менежерийн хэлснээр юу хийвэл боломж олдох вэ?", opts:["Их ярих","Хичээж ажиллах","Оройтож ирэх","Юу ч хийхгүй байх"], answer:1},
    ]},
+  {title:"Байгаль орчны яриа", desc:"明,芳хог хаягдлын тухай ярилцаж байна",
+   lines:[
+     {spk:"明", hz:"随着人口的增加，垃圾问题越来越严重了。", py:"Suízhe rénkǒu de zēngjiā, lājī wèntí yuèláiyuè yánzhòng le.", mn:"Хүн ам нэмэгдэхийн хэрээр хогийн асуудал улам бүр хүндэрч байна."},
+     {spk:"芳", hz:"没错，我觉得我们应该从垃圾分类做起。", py:"Méi cuò, wǒ juéde wǒmen yīnggāi cóng lājī fēnlèi zuòqǐ.", mn:"Тийм ээ, миний бодлоор бид хог ялгахаас эхлэх ёстой."},
+     {spk:"明", hz:"不仅仅是分类，减少使用塑料袋也很重要。", py:"Bùjǐnjǐn shì fēnlèi, jiǎnshǎo shǐyòng sùliàodài yě hěn zhòngyào.", mn:"Ялгаж авах төдийгүй, хуванцар уут хэрэглэхийг багасгах нь ч чухал."},
+     {spk:"芳", hz:"对，只要大家一起努力，情况就会改善。", py:"Duì, zhǐyào dàjiā yìqǐ nǔlì, qíngkuàng jiù huì gǎishàn.", mn:"Тийм, бүгд хамтдаа хичээвэл л нөхцөл байдал сайжирна."},
+   ],
+   questions:[
+     {q:"Юуны улмаас хогийн асуудал хүндэрч байна вэ?", opts:["Хүн ам буурснаас","Хүн ам нэмэгдснээс","Цаг агаараас","Мөнгөнөөс"], answer:1},
+     {q:"明ямар зүйлийг бас чухал гэж үзэж байна вэ?", opts:["Илүү их худалдан авалт","Хуванцар уут хэрэглээг багасгах","Илүү олон машин","Илүү олон дэлгүүр"], answer:1},
+   ]},
+  {title:"Найзтайгаа зөрчилдсөн нь", desc:"明,芳жижиг зөрчлөө шийдвэрлэж байна",
+   lines:[
+     {spk:"芳", hz:"你昨天为什么没告诉我你要迟到？", py:"Nǐ zuótiān wèishénme méi gàosu wǒ nǐ yào chídào?", mn:"Чи өчигдөр яагаад оройтоно гэдгээ надад хэлээгүй юм бэ?"},
+     {spk:"明", hz:"对不起，当时手机没电了，我没办法联系你。", py:"Duìbuqǐ, dāngshí shǒujī méi diàn le, wǒ méi bànfǎ liánxì nǐ.", mn:"Уучлаарай, тэр үед утасны цэнэг дуусчихсан байсан, чамтай холбогдох аргагүй байсан."},
+     {spk:"芳", hz:"既然这样，那我就不生气了。", py:"Jìrán zhèyàng, nà wǒ jiù bù shēngqì le.", mn:"Ийм байсан бол би цаашид уурлахгүй ээ."},
+     {spk:"明", hz:"谢谢你理解，下次我会提前说的。", py:"Xièxie nǐ lǐjiě, xiàcì wǒ huì tíqián shuō de.", mn:"Ойлгосонд чинь баярлалаа, дараагийн удаа урьдчилан хэлье."},
+   ],
+   questions:[
+     {q:"明яагаад芳-д мэдэгдээгүй бэ?", opts:["Мартсан","Утасны цэнэг дуусчихсан","Дургүй байсан","Завгүй байсан"], answer:1},
+     {q:"Эцэст нь芳ямар байдалтай болов?", opts:["Улам уурлав","Уурлахаа больсон","Юу ч хэлэлгүй явлаа","Уйлав"], answer:1},
+   ]},
 ],
 hsk5:[
   {title:"Төлөвлөгөө хэлэлцэх", desc:"Хэцүү ч гэсэн төслөө үргэлжлүүлэх эсэхийг ярилцаж байна",
@@ -2646,6 +3079,26 @@ hsk5:[
    questions:[
      {q:"Уур амьсгал өөрчлөгдвөл ямар үр дагавартай вэ?", opts:["Ямар ч нөлөө үзүүлэхгүй","Амьтад гэр орноо алдана","Хүн ам нэмэгдэнэ","Эдийн засаг сайжирна"], answer:1},
      {q:"芳ямар дүгнэлт хийж байна вэ?", opts:["Хамаагүй","Хүн бүр байгаль хамгаалах ёстой","Зөвхөн засгийн газар хариуцна","Хэн ч юу хийж чадахгүй"], answer:1},
+   ]},
+  {title:"Мэдээ хэлэлцэх", desc:"明,芳нийгмийн сүлжээний нөлөөллийн тухай ярилцаж байна",
+   lines:[
+     {spk:"明", hz:"甚至连小孩子都离不开手机了，这让我很担心。", py:"Shènzhì lián xiǎoháizi dōu líbukāi shǒujī le, zhè ràng wǒ hěn dānxīn.", mn:"Тэр ч бүү хэл жижиг хүүхдүүд ч гар утаснаасаа салдаггүй болсон нь намайг их санаа зовоож байна."},
+     {spk:"芳", hz:"确实，与其一味地限制，不如引导孩子合理使用。", py:"Quèshí, yǔqí yíwèi de xiànzhì, bùrú yǐndǎo háizi hélǐ shǐyòng.", mn:"Үнэхээр, ганцхан хязгаарлахаас илүү хүүхдүүдийг зохистой хэрэглэхэд нь чиглүүлсэн нь дээр."},
+     {spk:"明", hz:"你说得对，问题不在于手机本身，而在于怎么用。", py:"Nǐ shuō de duì, wèntí bú zàiyú shǒujī běnshēn, ér zàiyú zěnme yòng.", mn:"Чиний зөв байна, асуудал нь утсанд өөрөө биш, харин хэрхэн ашиглахад нь байгаа юм."},
+   ],
+   questions:[
+     {q:"明юугаас санаа зовж байна вэ?", opts:["Хүүхдүүд ном уншихгүй байгаагаас","Хүүхдүүд гар утаснаасаа салдаггүй болсноос","Хүүхдүүд тоглодоггүй болсноос","Хүүхдүүд идэхгүй байгаагаас"], answer:1},
+     {q:"芳ямар шийдэл санал болгож байна вэ?", opts:["Бүрэн хориглох","Зохистой хэрэглэхэд чиглүүлэх","Юу ч хийхгүй байх","Утсыг устгах"], answer:1},
+   ]},
+  {title:"Ажлын шийдвэр", desc:"明ажлаа солих эсэхийг芳-тай зөвлөлдөж байна",
+   lines:[
+     {spk:"明", hz:"我在考虑要不要换工作，现在这份工作压力太大了。", py:"Wǒ zài kǎolǜ yào bu yào huàn gōngzuò, xiànzài zhè fèn gōngzuò yālì tài dà le.", mn:"Би ажлаа солих уу гэж бодож байна, одоогийн энэ ажил дарамт хэтэрхий их байна."},
+     {spk:"芳", hz:"这件事不能只看眼前，得从长远考虑。", py:"Zhè jiàn shì bùnéng zhǐ kàn yǎnqián, děi cóng chángyuǎn kǎolǜ.", mn:"Энэ асуудлыг зөвхөн нэг л өнцгөөс биш, урт хугацааны хувьд бодох хэрэгтэй."},
+     {spk:"明", hz:"你说得有道理，也许我应该再坚持一段时间。", py:"Nǐ shuō de yǒu dàolǐ, yěxǔ wǒ yīnggāi zài jiānchí yíduàn shíjiān.", mn:"Чиний үг учиртай юм, магадгүй би дахиад бага зэрэг тэсвэрлэх ёстой байх."},
+   ],
+   questions:[
+     {q:"明яагаад ажлаа солих талаар бодож байна вэ?", opts:["Цалин бага учир","Дарамт их учир","Хол учир","Найз байхгүй учир"], answer:1},
+     {q:"芳ямар зөвлөгөө өгч байна вэ?", opts:["Даруй ажлаа солих","Урт хугацааны хувьд бодох","Юу ч бодохгүй байх","Амарч байх"], answer:1},
    ]},
 ],
 };
@@ -3010,7 +3463,7 @@ let gamesMode = "scramble";
 function renderGamesIntro(){
   const box = document.getElementById("games-mode-filters");
   box.innerHTML = "";
-  [["scramble","🧩 Өгүүлбэр угсрах"], ["match","🔗 Ижил/Эсрэг утга"], ["listen","🎧 Сонсгол"], ["dialogue","🗣️ Харилцан яриа"], ["speaking","🎙️ HSKK бэлтгэл"]].forEach(([key,label])=>{
+  [["scramble","🧩 Өгүүлбэр угсрах"], ["match","🔗 Ижил/Эсрэг утга"], ["homophone","🔀 Ижил дуудлагатай"], ["listen","🎧 Сонсгол"], ["dialogue","🗣️ Харилцан яриа"], ["speaking","🎙️ HSKK бэлтгэл"]].forEach(([key,label])=>{
     const chip = document.createElement("button");
     chip.className = "chip"+(key===gamesMode?" active":"");
     chip.textContent = label;
@@ -3032,6 +3485,9 @@ function renderGamesIntro(){
   } else if(gamesMode==="match"){
     if(!matchRound) newMatchRound();
     renderMatchGame();
+  } else if(gamesMode==="homophone"){
+    if(!homophoneRound) newHomophoneRound();
+    renderHomophoneGame();
   } else if(gamesMode==="listen"){
     renderListenFilters();
     if(!listenRound) newListenRound();
@@ -3043,6 +3499,34 @@ function renderGamesIntro(){
     renderSpeakingFilters();
     renderSpeakingGame();
   }
+}
+
+/* ============================= ХУВИЙН ЗОРИЛГО (шалгалтын countdown) =============================
+   Lets a learner pin a target HSK level + exam date to their own progress
+   (stored on srs.examGoal so it's synced like everything else); renders a
+   simple day-countdown banner wherever examCountdownHtml() is used. */
+function examCountdownHtml(){
+  const g = srs.examGoal;
+  if(!g || !g.level || !g.date) return "";
+  const label = LEVEL_META[g.level] ? LEVEL_META[g.level].label : g.level;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(g.date+"T00:00:00");
+  if(isNaN(target.getTime())) return "";
+  const diffDays = Math.round((target - today) / 86400000);
+  if(diffDays > 0){
+    return `<div class="exam-countdown">
+      <span class="exam-countdown-num">${diffDays}</span>
+      <span class="exam-countdown-label">хоног үлдлээ — <b>${escapeHtml(label)}</b> шалгалт хүртэл (${escapeHtml(g.date)})</span>
+    </div>`;
+  } else if(diffDays === 0){
+    return `<div class="exam-countdown exam-countdown-today">
+      <span class="exam-countdown-num">🎯</span>
+      <span class="exam-countdown-label">Өнөөдөр <b>${escapeHtml(label)}</b> шалгалт өгөх өдөр! Амжилт хүсье!</span>
+    </div>`;
+  }
+  return `<div class="exam-countdown exam-countdown-past">
+    <span class="exam-countdown-label"><b>${escapeHtml(label)}</b> шалгалт (${escapeHtml(g.date)}) өнгөрсөн байна. Профайл хуудаснаас шинэ огноо тохируулна уу.</span>
+  </div>`;
 }
 
 /* ============================= RENDER: PROGRESS (АХИЦ) ============================= */
@@ -3100,7 +3584,8 @@ function renderProgress(){
 
   const leeches = leechCards();
   const leechBlock = leeches.length ? `
-    <p class="prog-empty">${LEECH_THRESHOLD}+ удаа "Дахин" гэж давтагдсан үгс — эдгээрийг ⚠️ Хүндрэлтэй шүүлтүүрээр Давталт/Тест хэсэгт тусад нь дасгалжуулаарай.</p>
+    <p class="prog-empty">${LEECH_THRESHOLD}+ удаа Давталт дээр "Дахин" эсвэл Тестэд буруу хариулсан үгс.</p>
+    <button type="button" class="btn-primary" id="prog-leech-review-btn" style="margin-bottom:12px;">🔁 Эдгээрийг одоо давтах</button>
     <div class="vb-scroll" style="max-height:280px;">
       <table class="vb-table">
         <thead><tr><th>Ханз</th><th>Пиньин</th><th>Утга</th><th>Алдсан</th></tr></thead>
@@ -3126,7 +3611,9 @@ function renderProgress(){
       }).join("")}</tbody>
     </table>` : `<p class="prog-empty">Одоогоор тест өгөөгүй байна.</p>`;
 
+  const examGoalHtml = examCountdownHtml();
   body.innerHTML = `
+    ${examGoalHtml ? `<div class="prog-section exam-goal-section">${examGoalHtml}</div>` : ""}
     <div class="prog-grid">
       <div class="prog-card"><div class="pc-label">Нийт сурсан</div><div class="pc-value">${totalLearned}</div><div class="pc-sub">/ ${DECK.length} үг</div></div>
       <div class="prog-card"><div class="pc-label">Эзэмшсэн</div><div class="pc-value">${totalMastered}</div><div class="pc-sub">≥ 21 хоногийн интервал</div></div>
@@ -3150,7 +3637,7 @@ function renderProgress(){
     </div>
 
     <div class="prog-section">
-      <h3>⚠️ Хүндрэлтэй үг (${leeches.length})</h3>
+      <h3>⚠️ Миний алдаа (${leeches.length})</h3>
       ${leechBlock}
     </div>
 
@@ -3177,6 +3664,14 @@ function renderProgress(){
   `;
   const gotoLb = document.getElementById("prog-goto-leaderboard");
   if(gotoLb) gotoLb.addEventListener("click", ()=>switchView("leaderboard"));
+  const leechReviewBtn = document.getElementById("prog-leech-review-btn");
+  if(leechReviewBtn) leechReviewBtn.addEventListener("click", startLeechReview);
+}
+// Jumps straight into a Review session scoped to just the leech words,
+// instead of making the user go to Давталт and pick "⚠️ Хүндрэлтэй" by hand.
+function startLeechReview(){
+  reviewFilter = "leeches";
+  switchView("review");
 }
 
 /* ============================= ПРОФАЙЛ ХУУДАС ============================= */
@@ -3259,6 +3754,21 @@ function renderProfilePage(){
       </div>
 
       <div class="prog-section">
+        <h3>🎯 Шалгалтын зорилго</h3>
+        <div class="pp-field-row">
+          <select id="pp-exam-level">
+            <option value="">-- Түвшин сонгох --</option>
+            ${OLD_LEVELS.map(lv=>`<option value="${lv}" ${(srs.examGoal&&srs.examGoal.level===lv)?"selected":""}>${LEVEL_META[lv].label}</option>`).join("")}
+          </select>
+          <input type="date" id="pp-exam-date" value="${escapeHtml((srs.examGoal&&srs.examGoal.date)||"")}">
+          <button type="button" class="btn-primary" id="pp-save-goal">Хадгалах</button>
+        </div>
+        <p class="pp-hint">Шалгалтынхаа түвшин, огноог тохируулбал Ахиц хуудсан дээр countdown харагдана.</p>
+        <div id="pp-goal-countdown">${examCountdownHtml()}</div>
+        <div id="pp-goal-msg" class="pp-msg"></div>
+      </div>
+
+      <div class="prog-section">
         <h3>Миний багцууд</h3>
         <div id="pp-deck-list">${decksHtml}</div>
         <button type="button" class="btn-ghost" id="pp-deck-create-toggle" style="margin-top:12px;">+ Шинэ багц үүсгэх</button>
@@ -3332,6 +3842,20 @@ function wireProfilePage(body){
       publishLeaderboardNow();
       renderProfileBlock();
       if(msg){ msg.textContent = "Хадгаллаа."; msg.className = "pp-msg pp-msg-ok"; }
+      return;
+    }
+    const saveGoalBtn = e.target.closest("#pp-save-goal");
+    if(saveGoalBtn){
+      const lvSel = document.getElementById("pp-exam-level");
+      const dateInp = document.getElementById("pp-exam-date");
+      const msg = document.getElementById("pp-goal-msg");
+      const level = lvSel ? lvSel.value : "";
+      const date = dateInp ? dateInp.value : "";
+      srs.examGoal = (level && date) ? {level, date} : null;
+      scheduleSave();
+      const countdownBox = document.getElementById("pp-goal-countdown");
+      if(countdownBox) countdownBox.innerHTML = examCountdownHtml();
+      if(msg){ msg.textContent = srs.examGoal ? "Зорилго хадгаллаа." : "Зорилгыг цэвэрлэлээ."; msg.className = "pp-msg pp-msg-ok"; }
       return;
     }
     const deckViewBtn = e.target.closest("[data-deck-view]");
@@ -3463,6 +3987,8 @@ function wireProfilePage(body){
 function switchView(view){
   if(view!=="quiz") clearExamTimer();
   document.getElementById("tab-lessons").classList.toggle("active", view==="lessons");
+  const tabGrammar = document.getElementById("tab-grammar");
+  if(tabGrammar) tabGrammar.classList.toggle("active", view==="grammar");
   document.getElementById("tab-review").classList.toggle("active", view==="review");
   document.getElementById("tab-quiz").classList.toggle("active", view==="quiz");
   document.getElementById("tab-games").classList.toggle("active", view==="games");
@@ -3470,6 +3996,8 @@ function switchView(view){
   const tabLb = document.getElementById("tab-leaderboard");
   if(tabLb) tabLb.classList.toggle("active", view==="leaderboard");
   document.getElementById("lessons-view").classList.toggle("hidden", view!=="lessons");
+  const grammarView = document.getElementById("grammar-view");
+  if(grammarView) grammarView.classList.toggle("active", view==="grammar");
   document.getElementById("review-view").classList.toggle("active", view==="review");
   document.getElementById("quiz-view").classList.toggle("active", view==="quiz");
   document.getElementById("games-view").classList.toggle("active", view==="games");
@@ -3478,6 +4006,7 @@ function switchView(view){
   if(lbView) lbView.classList.toggle("active", view==="leaderboard");
   const profileView = document.getElementById("profile-view");
   if(profileView) profileView.classList.toggle("active", view==="profile");
+  if(view==="grammar") renderGrammarIndex();
   if(view==="review") startSession();
   if(view==="quiz") renderQuizIntro();
   if(view==="games") renderGamesIntro();
@@ -3486,6 +4015,10 @@ function switchView(view){
   if(view==="profile") renderProfilePage();
 }
 document.getElementById("tab-lessons").addEventListener("click", ()=>switchView("lessons"));
+{
+  const tabGrammarBtn = document.getElementById("tab-grammar");
+  if(tabGrammarBtn) tabGrammarBtn.addEventListener("click", ()=>switchView("grammar"));
+}
 document.getElementById("tab-review").addEventListener("click", ()=>switchView("review"));
 document.getElementById("tab-quiz").addEventListener("click", ()=>switchView("quiz"));
 document.getElementById("tab-games").addEventListener("click", ()=>switchView("games"));

@@ -12,6 +12,7 @@ export const BODY_HTML = `<header class="top">
       </button>
       <div class="view-toggle" id="main-nav">
         <button id="tab-lessons" class="active"><span class="tab-ic">📖</span>Хичээл</button>
+        <button id="tab-grammar"><span class="tab-ic">📐</span>Дүрэм</button>
         <button id="tab-review"><span class="tab-ic">🗂️</span>Давталт</button>
         <button id="tab-quiz"><span class="tab-ic">✏️</span>Тест</button>
         <button id="tab-games"><span class="tab-ic">🎮</span>Тоглоом</button>
@@ -125,6 +126,7 @@ export const BODY_HTML = `<header class="top">
           </div>
           <select id="vb-topic"></select>
           <input type="text" id="vb-search" placeholder="Хайх: ханз, пиньин, монгол утга...">
+          <button type="button" class="btn-ghost" id="vb-print-btn" title="Одоогийн жагсаалтыг PDF шпаргалка болгож татах">🖨️ PDF</button>
         </div>
         <div class="vb-count" id="vb-count"></div>
         <div class="vb-scroll" id="vb-scroll">
@@ -133,6 +135,16 @@ export const BODY_HTML = `<header class="top">
         </div>
       </div>
     </div>
+  </section>
+
+  <section id="grammar-view">
+    <p class="intro">HSK 1-ээс 5 хүртэлх түвшний бүх дүрмийн цэгүүд нэг дор — хайж олоод, шууд холбогдох хичээл рүү очиж болно.</p>
+    <div class="grammar-head">
+      <input type="text" id="grammar-search" placeholder="Дүрэм хайх: жишээ нь 了, 把, 比...">
+      <span class="grammar-count" id="grammar-count"></span>
+    </div>
+    <div class="scope-filters" id="grammar-level-filters"></div>
+    <div id="grammar-body"></div>
   </section>
 
   <section id="review-view">
