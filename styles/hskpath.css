@@ -465,8 +465,8 @@
   #review-view.active, #quiz-view.active, #progress-view.active, #games-view.active, #leaderboard-view.active, #profile-view.active, #grammar-view.active{display:block;}
   #lessons-view.hidden{display:none;}
 
-  #ielts-vocab-view, #ielts-review-view, #ielts-reading-view, #ielts-listening-view, #ielts-writing-view, #ielts-speaking-view, #ielts-mock-view{display:none;}
-  #ielts-vocab-view.active, #ielts-review-view.active, #ielts-reading-view.active, #ielts-listening-view.active, #ielts-writing-view.active, #ielts-speaking-view.active, #ielts-mock-view.active{display:block;}
+  #ielts-vocab-view, #ielts-review-view, #ielts-game-view, #ielts-reading-view, #ielts-listening-view, #ielts-writing-view, #ielts-speaking-view, #ielts-mock-view{display:none;}
+  #ielts-vocab-view.active, #ielts-review-view.active, #ielts-game-view.active, #ielts-reading-view.active, #ielts-listening-view.active, #ielts-writing-view.active, #ielts-speaking-view.active, #ielts-mock-view.active{display:block;}
 
   .grammar-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;}
   .grammar-head input{
@@ -637,6 +637,7 @@
   }
   .match-chip .qhz{font-family:"Noto Serif SC",serif; font-size:1.1rem; font-weight:600; display:block;}
   .match-chip .qpy{font-size:.7rem; color:var(--ink-faint); display:block; margin-top:2px;}
+  .match-chip .ielts-mword{font-size:.86rem; font-weight:600; display:block;}
   .match-chip:hover:not([disabled]){border-color:var(--jade);}
   .match-chip.sel{border-color:var(--jade); background:var(--jade-soft);}
   .match-chip.matched{border-color:var(--jade); background:var(--jade-soft); opacity:.5; cursor:default;}
@@ -691,6 +692,17 @@
   }
   .ielts-vocab-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
   .ielts-vocab-word{font-weight:700; font-size:1rem;}
+  .ielts-vocab-tags{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .ielts-vocab-pron{
+    font-family:"JetBrains Mono",monospace; font-size:.72rem; color:var(--ink-soft);
+    background:var(--paper-raised); border:1px solid var(--border); border-radius:999px;
+    padding:2px 9px; cursor:help;
+  }
+  .ielts-vocab-pos{
+    font-size:.68rem; color:var(--ink-faint); background:var(--paper-sunken); border:1px solid var(--border);
+    border-radius:999px; padding:2px 8px; text-transform:uppercase; letter-spacing:.03em;
+  }
+  .ielts-vocab-topic-tag{font-size:.74rem; color:var(--ink-faint);}
   .ielts-vocab-ipa{font-family:"JetBrains Mono",monospace; font-size:.72rem; color:var(--ink-faint);}
   .ielts-vocab-head .ielts-vocab-reveal{margin-left:auto; font-size:.76rem; padding:6px 10px;}
   .ielts-vocab-detail{margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);}

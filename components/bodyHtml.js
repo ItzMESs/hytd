@@ -22,6 +22,7 @@ export const BODY_HTML = `<header class="top">
         <button id="tab-games" class="track-hsk"><span class="tab-ic">🎮</span>Тоглоом</button>
         <button id="tab-ielts-vocab" class="track-ielts" hidden><span class="tab-ic">📚</span>Үгийн сан</button>
         <button id="tab-ielts-review" class="track-ielts" hidden><span class="tab-ic">🗂️</span>Давталт</button>
+        <button id="tab-ielts-game" class="track-ielts" hidden><span class="tab-ic">🎮</span>Тоглоом</button>
         <button id="tab-ielts-reading" class="track-ielts" hidden><span class="tab-ic">📖</span>Reading</button>
         <button id="tab-ielts-listening" class="track-ielts" hidden><span class="tab-ic">🎧</span>Listening</button>
         <button id="tab-ielts-writing" class="track-ielts" hidden><span class="tab-ic">✍️</span>Writing</button>
@@ -233,6 +234,13 @@ export const BODY_HTML = `<header class="top">
         <button class="rate-btn rate-easy" data-r="easy">Амархан<small>дараа 7 хоног+</small></button>
       </div>
     </div>
+  </section>
+
+  <section id="ielts-game-view" class="track-ielts" hidden>
+    <p class="intro" style="max-width:100%;">Үгийн сангаа тоглоомоор бататгаарай — тохируулах болон сонголтот тестээс сонгож болно.</p>
+    <div class="scope-filters" id="ielts-game-mode-filters"></div>
+    <div class="scope-filters" id="ielts-game-level-filters"></div>
+    <div id="ielts-game-body"></div>
   </section>
 
   <section id="ielts-reading-view" class="track-ielts" hidden>

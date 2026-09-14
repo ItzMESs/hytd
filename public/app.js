@@ -4730,7 +4730,7 @@ const IELTS_LEVEL_META = {
   ielts6:{label:"IELTS 6", sub:"Ахисан шат"},
   ielts7:{label:"IELTS 7", sub:"Маш ахисан шат"},
 };
-const IELTS_TOPIC_LABELS = {environment:"🌍 Байгаль орчин", education:"🎓 Боловсрол", technology:"💻 Технологи", health:"🩺 Эрүүл мэнд"};
+const IELTS_TOPIC_LABELS = {environment:"🌍 Байгаль орчин", education:"🎓 Боловсрол", technology:"💻 Технологи", health:"🩺 Эрүүл мэнд", economy:"💼 Эдийн засаг", society:"🏙️ Нийгэм"};
 
 /* ============================= IELTS: ҮГИЙН САН (Vocabulary) ============================= */
 const IELTS_VOCAB_WORDS = [
@@ -4794,6 +4794,174 @@ const IELTS_VOCAB_WORDS = [
   {w:"well-being", ipa:"/ˌwel ˈbiːɪŋ/", pos:"n", mn:"сайн сайхан байдал", ex:"Exercise improves both physical and mental well-being.", topic:"health", level:"ielts1"},
   {w:"malnutrition", ipa:"/ˌmælnjuˈtrɪʃn/", pos:"n", mn:"тэжээлийн дутагдал", ex:"Malnutrition remains a serious issue in some developing regions.", topic:"health", level:"ielts6"},
   {w:"epidemic", ipa:"/ˌepɪˈdemɪk/", pos:"n", mn:"тахал өвчин", ex:"The obesity epidemic is linked to changes in modern diets.", topic:"health", level:"ielts6"},
+  {w:"litter", ipa:"/ˈlɪtər/", pos:"n", mn:"(гудамжинд хаягдсан) хог", ex:"Litter on the beach harms sea animals and looks ugly.", topic:"environment", level:"ielts1"},
+  {w:"recycle", ipa:"/ˌriːˈsaɪkl/", pos:"v", mn:"дахин боловсруулах", ex:"We should recycle plastic bottles instead of throwing them away.", topic:"environment", level:"ielts1"},
+  {w:"homework", ipa:"/ˈhoʊmwɜːrk/", pos:"n", mn:"гэрийн даалгавар", ex:"She always finishes her homework before dinner every day.", topic:"education", level:"ielts1"},
+  {w:"subject", ipa:"/ˈsʌbdʒɪkt/", pos:"n", mn:"хичээл", ex:"Mathematics is her favorite subject at school this year.", topic:"education", level:"ielts1"},
+  {w:"device", ipa:"/dɪˈvaɪs/", pos:"n", mn:"төхөөрөмж", ex:"Many students use a small device to record lectures.", topic:"technology", level:"ielts1"},
+  {w:"app", ipa:"/æp/", pos:"n", mn:"апп", ex:"I downloaded an app to help me practise English vocabulary.", topic:"technology", level:"ielts1"},
+  {w:"exercise", ipa:"/ˈeksərsaɪz/", pos:"n", mn:"дасгал хөдөлгөөн", ex:"Regular exercise keeps your heart and body strong and healthy.", topic:"health", level:"ielts1"},
+  {w:"illness", ipa:"/ˈɪlnəs/", pos:"n", mn:"өвчин", ex:"He stayed home from work because of a sudden illness.", topic:"health", level:"ielts1"},
+  {w:"job", ipa:"/dʒɑːb/", pos:"n", mn:"ажил", ex:"She found a good job at a local company last month.", topic:"economy", level:"ielts1"},
+  {w:"price", ipa:"/praɪs/", pos:"n", mn:"үнэ", ex:"The price of vegetables increased a lot last winter.", topic:"economy", level:"ielts1"},
+  {w:"neighbor", ipa:"/ˈneɪbər/", pos:"n", mn:"хөрш", ex:"Our neighbor always waters the plants outside her house.", topic:"society", level:"ielts1"},
+  {w:"crowd", ipa:"/kraʊd/", pos:"n", mn:"хүн олон", ex:"A large crowd gathered in the square to watch the show.", topic:"society", level:"ielts1"},
+  {w:"rubbish", ipa:"/ˈrʌbɪʃ/", pos:"n", mn:"хог хаягдал", ex:"The city collects rubbish from every street twice a week.", topic:"environment", level:"ielts2"},
+  {w:"wildlife", ipa:"/ˈwaɪldlaɪf/", pos:"n", mn:"зэрлэг амьтад", ex:"The national park protects wildlife from hunting and habitat loss.", topic:"environment", level:"ielts2"},
+  {w:"skill", ipa:"/skɪl/", pos:"n", mn:"ур чадвар", ex:"Reading is an important skill that students develop over time.", topic:"education", level:"ielts2"},
+  {w:"knowledge", ipa:"/ˈnɑːlɪdʒ/", pos:"n", mn:"мэдлэг", ex:"Teachers share knowledge that helps students understand the world better.", topic:"education", level:"ielts2"},
+  {w:"gadget", ipa:"/ˈɡædʒɪt/", pos:"n", mn:"гаджет", ex:"This new gadget can translate speech into another language instantly.", topic:"technology", level:"ielts2"},
+  {w:"upload", ipa:"/ʌpˈloʊd/", pos:"v", mn:"байршуулах", ex:"Students can upload their homework directly to the school website.", topic:"technology", level:"ielts2"},
+  {w:"diet", ipa:"/ˈdaɪət/", pos:"n", mn:"хоолны дэглэм", ex:"A balanced diet gives your body the energy it needs daily.", topic:"health", level:"ielts2"},
+  {w:"injury", ipa:"/ˈɪndʒəri/", pos:"n", mn:"гэмтэл", ex:"The football player suffered a knee injury during the match.", topic:"health", level:"ielts2"},
+  {w:"salary", ipa:"/ˈsæləri/", pos:"n", mn:"цалин", ex:"Her monthly salary increased after she finished the training course.", topic:"economy", level:"ielts2"},
+  {w:"customer", ipa:"/ˈkʌstəmər/", pos:"n", mn:"үйлчлүүлэгч", ex:"The shop offers a discount to every loyal customer this month.", topic:"economy", level:"ielts2"},
+  {w:"community", ipa:"/kəˈmjuːnəti/", pos:"n", mn:"олон нийт", ex:"The local community worked together to clean the small park.", topic:"society", level:"ielts2"},
+  {w:"tradition", ipa:"/trəˈdɪʃn/", pos:"n", mn:"уламжлал", ex:"Every family follows its own tradition during the New Year.", topic:"society", level:"ielts2"},
+  {w:"pesticide", ipa:"/ˈpestɪsaɪd/", pos:"n", mn:"хортон устгах бодис", ex:"Farmers use pesticide to protect crops from harmful insects.", topic:"environment", level:"ielts3"},
+  {w:"erosion", ipa:"/ɪˈroʊʒn/", pos:"n", mn:"хөрсний элэгдэл", ex:"Heavy rain caused serious soil erosion on the hillside farms.", topic:"environment", level:"ielts3"},
+  {w:"enrollment", ipa:"/ɪnˈroʊlmənt/", pos:"n", mn:"элсэлт", ex:"University enrollment rose sharply after the new scholarship programme began.", topic:"education", level:"ielts3"},
+  {w:"semester", ipa:"/sɪˈmestər/", pos:"n", mn:"семестр", ex:"She plans to study abroad during the spring semester.", topic:"education", level:"ielts3"},
+  {w:"software", ipa:"/ˈsɔːftwer/", pos:"n", mn:"программ хангамж", ex:"The company updated its software to fix several security problems.", topic:"technology", level:"ielts3"},
+  {w:"network", ipa:"/ˈnetwɜːrk/", pos:"n", mn:"сүлжээ", ex:"A fast internet network allows students to attend online classes.", topic:"technology", level:"ielts3"},
+  {w:"hygiene", ipa:"/ˈhaɪdʒiːn/", pos:"n", mn:"эрүүл ахуй", ex:"Good hygiene, like regular handwashing, helps prevent many common illnesses.", topic:"health", level:"ielts3"},
+  {w:"therapy", ipa:"/ˈθerəpi/", pos:"n", mn:"эмчилгээ", ex:"He attended physical therapy every week after his knee surgery.", topic:"health", level:"ielts3"},
+  {w:"inflation", ipa:"/ɪnˈfleɪʃn/", pos:"n", mn:"инфляц", ex:"Rising inflation made everyday groceries more expensive for families.", topic:"economy", level:"ielts3"},
+  {w:"investment", ipa:"/ɪnˈvestmənt/", pos:"n", mn:"хөрөнгө оруулалт", ex:"The government announced a new investment in public transport.", topic:"economy", level:"ielts3"},
+  {w:"diversity", ipa:"/daɪˈvɜːrsəti/", pos:"n", mn:"олон янз байдал", ex:"The city is famous for its cultural diversity and lively festivals.", topic:"society", level:"ielts3"},
+  {w:"migration", ipa:"/maɪˈɡreɪʃn/", pos:"n", mn:"шилжилт хөдөлгөөн", ex:"Migration to big cities has increased in the last decade.", topic:"society", level:"ielts3"},
+  {w:"contamination", ipa:"/kənˌtæmɪˈneɪʃn/", pos:"n", mn:"бохирдуулалт", ex:"Chemical contamination of the river killed hundreds of fish.", topic:"environment", level:"ielts4"},
+  {w:"habitat", ipa:"/ˈhæbɪtæt/", pos:"n", mn:"амьдрах орчин", ex:"Cutting down forests destroys the natural habitat of many animals.", topic:"environment", level:"ielts4"},
+  {w:"syllabus", ipa:"/ˈsɪləbəs/", pos:"n", mn:"хичээлийн хөтөлбөр", ex:"The teacher explained the syllabus on the very first day.", topic:"education", level:"ielts4"},
+  {w:"illiteracy", ipa:"/ɪˈlɪtərəsi/", pos:"n", mn:"бичиг үсэггүй байдал", ex:"The program aims to reduce illiteracy among adults in rural areas.", topic:"education", level:"ielts4"},
+  {w:"compatibility", ipa:"/kəmˌpætəˈbɪləti/", pos:"n", mn:"нийцтэй байдал", ex:"Check the software compatibility before installing it on your computer.", topic:"technology", level:"ielts4"},
+  {w:"malfunction", ipa:"/mælˈfʌŋkʃn/", pos:"n", mn:"эвдрэл", ex:"A sudden malfunction shut down the factory's main computer system.", topic:"technology", level:"ielts4"},
+  {w:"dosage", ipa:"/ˈdoʊsɪdʒ/", pos:"n", mn:"тун хэмжээ", ex:"Always follow the correct dosage written on the medicine label.", topic:"health", level:"ielts4"},
+  {w:"allergy", ipa:"/ˈælərdʒi/", pos:"n", mn:"харшил", ex:"His allergy to peanuts means he must read every food label.", topic:"health", level:"ielts4"},
+  {w:"recession", ipa:"/rɪˈseʃn/", pos:"n", mn:"эдийн засгийн уналт", ex:"Many small businesses closed during the economic recession last year.", topic:"economy", level:"ielts4"},
+  {w:"subsidy", ipa:"/ˈsʌbsədi/", pos:"n", mn:"татаас", ex:"The government gives farmers a subsidy to lower the cost of seeds.", topic:"economy", level:"ielts4"},
+  {w:"discrimination", ipa:"/dɪˌskrɪmɪˈneɪʃn/", pos:"n", mn:"ялгаварлан гадуурхалт", ex:"The new law protects workers from discrimination based on age.", topic:"society", level:"ielts4"},
+  {w:"urbanization", ipa:"/ˌɜːrbənaɪˈzeɪʃn/", pos:"n", mn:"хотжилт", ex:"Rapid urbanization has increased traffic and housing prices in the capital.", topic:"society", level:"ielts4"},
+  {w:"overfishing", ipa:"/ˌoʊvərˈfɪʃɪŋ/", pos:"n", mn:"загас агнуурын хэтрүүлэг", ex:"Overfishing has reduced fish populations in many coastal waters.", topic:"environment", level:"ielts5"},
+  {w:"irrigation", ipa:"/ˌɪrɪˈɡeɪʃn/", pos:"n", mn:"усалгаа", ex:"Modern irrigation systems help farmers grow crops during dry seasons.", topic:"environment", level:"ielts5"},
+  {w:"postgraduate", ipa:"/poʊstˈɡrædʒuət/", pos:"adj", mn:"бакалаврын дараах", ex:"She is doing a postgraduate degree in environmental science.", topic:"education", level:"ielts5"},
+  {w:"accreditation", ipa:"/əˌkredɪˈteɪʃn/", pos:"n", mn:"магадлан итгэмжлэл", ex:"The college lost its accreditation after failing several quality checks.", topic:"education", level:"ielts5"},
+  {w:"firmware", ipa:"/ˈfɜːrmwer/", pos:"n", mn:"тогтмол программ хангамж", ex:"Manufacturers release firmware updates to fix bugs in smart devices.", topic:"technology", level:"ielts5"},
+  {w:"streaming", ipa:"/ˈstriːmɪŋ/", pos:"n", mn:"стриминг (дамжуулан үзүүлэх)", ex:"Streaming has become the most popular way to watch movies and shows.", topic:"technology", level:"ielts5"},
+  {w:"rehabilitation", ipa:"/ˌriːəˌbɪlɪˈteɪʃn/", pos:"n", mn:"нөхөн сэргээх эмчилгээ", ex:"The clinic offers rehabilitation programmes for patients recovering from strokes.", topic:"health", level:"ielts5"},
+  {w:"insomnia", ipa:"/ɪnˈsɑːmniə/", pos:"n", mn:"нойргүйдэл", ex:"Stress at work often causes insomnia and constant tiredness.", topic:"health", level:"ielts5"},
+  {w:"unemployment", ipa:"/ˌʌnɪmˈplɔɪmənt/", pos:"n", mn:"ажилгүйдэл", ex:"Unemployment rose sharply after several factories closed down suddenly.", topic:"economy", level:"ielts5"},
+  {w:"entrepreneur", ipa:"/ˌɑːntrəprəˈnɜːr/", pos:"n", mn:"бизнес эрхлэгч", ex:"The young entrepreneur started a successful company straight after university.", topic:"economy", level:"ielts5"},
+  {w:"gentrification", ipa:"/ˌdʒentrɪfɪˈkeɪʃn/", pos:"n", mn:"хотын дүүргийг баяжуулах үйл явц", ex:"Gentrification pushed rent prices beyond what long-time residents could afford.", topic:"society", level:"ielts5"},
+  {w:"censorship", ipa:"/ˈsensərʃɪp/", pos:"n", mn:"цензур", ex:"Strict censorship prevented the newspaper from publishing the full story.", topic:"society", level:"ielts5"},
+  {w:"desertification", ipa:"/dɪˌzɜːrtɪfɪˈkeɪʃn/", pos:"n", mn:"цөлжилт", ex:"Desertification threatens farmland across large parts of the region.", topic:"environment", level:"ielts6"},
+  {w:"acidification", ipa:"/əˌsɪdɪfɪˈkeɪʃn/", pos:"n", mn:"хүчиллэгжилт", ex:"Ocean acidification is damaging coral reefs around the world.", topic:"environment", level:"ielts6"},
+  {w:"cognitive", ipa:"/ˈkɑːɡnətɪv/", pos:"adj", mn:"танин мэдэхүйн", ex:"Puzzles and reading can improve a child's cognitive development.", topic:"education", level:"ielts6"},
+  {w:"empirical", ipa:"/ɪmˈpɪrɪkl/", pos:"adj", mn:"туршилт судалгаанд суурилсан", ex:"The theory needed empirical evidence before scholars would accept it.", topic:"education", level:"ielts6"},
+  {w:"latency", ipa:"/ˈleɪtnsi/", pos:"n", mn:"хоцрогдол (сүлжээний)", ex:"High latency makes online video calls freeze and lag badly.", topic:"technology", level:"ielts6"},
+  {w:"scalability", ipa:"/ˌskeɪləˈbɪləti/", pos:"n", mn:"өргөтгөх чадвар", ex:"Investors were impressed by the scalability of the startup's platform.", topic:"technology", level:"ielts6"},
+  {w:"carcinogen", ipa:"/kɑːrˈsɪnədʒən/", pos:"n", mn:"хорт хавдар үүсгэгч бодис", ex:"Tobacco smoke contains many carcinogens linked to lung cancer.", topic:"health", level:"ielts6"},
+  {w:"pathogen", ipa:"/ˈpæθədʒən/", pos:"n", mn:"эмгэг төрүүлэгч", ex:"Clean water treatment removes harmful pathogens before people drink it.", topic:"health", level:"ielts6"},
+  {w:"monopoly", ipa:"/məˈnɑːpəli/", pos:"n", mn:"монополь", ex:"The company held a monopoly over the country's electricity supply.", topic:"economy", level:"ielts6"},
+  {w:"conglomerate", ipa:"/kənˈɡlɑːmərət/", pos:"n", mn:"конгломерат (олон салбарын том компани)", ex:"The conglomerate owns businesses in banking, media, and retail.", topic:"economy", level:"ielts6"},
+  {w:"stigma", ipa:"/ˈstɪɡmə/", pos:"n", mn:"нийгмийн гутамшиг", ex:"Society still attaches stigma to people living with mental illness.", topic:"society", level:"ielts6"},
+  {w:"propaganda", ipa:"/ˌprɑːpəˈɡændə/", pos:"n", mn:"суртал ухуулга", ex:"The government used propaganda to shape public opinion during the war.", topic:"society", level:"ielts6"},
+  {w:"anthropogenic", ipa:"/ˌænθrəpoʊˈdʒenɪk/", pos:"adj", mn:"хүний үйл ажиллагаанаас үүдэлтэй", ex:"Scientists blame anthropogenic emissions for the rapid rise in temperatures.", topic:"environment", level:"ielts7"},
+  {w:"bioaccumulation", ipa:"/ˌbaɪoʊəˌkjuːmjəˈleɪʃn/", pos:"n", mn:"бодисын биологийн хуримтлал", ex:"Bioaccumulation of toxins in fish can eventually harm human health.", topic:"environment", level:"ielts7"},
+  {w:"pedagogy", ipa:"/ˈpedəɡɑːdʒi/", pos:"n", mn:"сурган хүмүүжүүлэх ухаан", ex:"Modern pedagogy encourages teachers to focus on critical thinking.", topic:"education", level:"ielts7"},
+  {w:"didactic", ipa:"/daɪˈdæktɪk/", pos:"adj", mn:"сургамжлах зорилготой", ex:"Critics found the novel too didactic for a general audience.", topic:"education", level:"ielts7"},
+  {w:"ubiquitous", ipa:"/juːˈbɪkwɪtəs/", pos:"adj", mn:"хаа сайгүй тархсан", ex:"Smartphones have become ubiquitous in classrooms across the world.", topic:"technology", level:"ielts7"},
+  {w:"obfuscation", ipa:"/ˌɑːbfʌˈskeɪʃn/", pos:"n", mn:"далдлалт (санаатай ойлгомжгүй болгох)", ex:"Programmers sometimes use obfuscation to protect code from being copied.", topic:"technology", level:"ielts7"},
+  {w:"prognosis", ipa:"/prɑːɡˈnoʊsɪs/", pos:"n", mn:"эдгэрэх магадлалын таамаглал", ex:"Doctors gave the patient a positive prognosis after early treatment.", topic:"health", level:"ielts7"},
+  {w:"morbidity", ipa:"/mɔːrˈbɪdəti/", pos:"n", mn:"өвчлөлийн түвшин", ex:"The study measured morbidity rates linked to long-term air pollution.", topic:"health", level:"ielts7"},
+  {w:"fiscal", ipa:"/ˈfɪskl/", pos:"adj", mn:"төсвийн", ex:"The government introduced strict fiscal policies to reduce national debt.", topic:"economy", level:"ielts7"},
+  {w:"protectionism", ipa:"/prəˈtekʃənɪzəm/", pos:"n", mn:"хамгаалалтын бодлого", ex:"Rising protectionism led several countries to raise import tariffs.", topic:"economy", level:"ielts7"},
+  {w:"xenophobia", ipa:"/ˌzenəˈfoʊbiə/", pos:"n", mn:"харь гаралтай хүмүүсийг үзэн ядах үзэл", ex:"The report warned that xenophobia was increasing across several nations.", topic:"society", level:"ielts7"},
+  {w:"polarization", ipa:"/ˌpoʊlərɪˈzeɪʃn/", pos:"n", mn:"туйлшрал", ex:"Political polarization has made compromise increasingly difficult in parliament.", topic:"society", level:"ielts7"},
+  {w:"energy", ipa:"/ˈenədʒi/", pos:"n", mn:"эрчим хүч", ex:"Turning off the lights at night saves a lot of energy.", topic:"environment", level:"ielts1"},
+  {w:"planet", ipa:"/ˈplænɪt/", pos:"n", mn:"гараг", ex:"We must take care of our planet for future generations.", topic:"environment", level:"ielts1"},
+  {w:"teacher", ipa:"/ˈtiːtʃə/", pos:"n", mn:"багш", ex:"My teacher explained the new grammar rule very clearly.", topic:"education", level:"ielts1"},
+  {w:"classroom", ipa:"/ˈklɑːsruːm/", pos:"n", mn:"анги", ex:"The classroom was bright, clean, and full of books.", topic:"education", level:"ielts1"},
+  {w:"computer", ipa:"/kəmˈpjuːtə/", pos:"n", mn:"компьютер", ex:"She uses her computer every day to write reports.", topic:"technology", level:"ielts1"},
+  {w:"internet", ipa:"/ˈɪntənet/", pos:"n", mn:"интернет", ex:"Many students use the internet to find useful information.", topic:"technology", level:"ielts1"},
+  {w:"medicine", ipa:"/ˈmedɪsn/", pos:"n", mn:"эм", ex:"He took some medicine and felt better the next day.", topic:"health", level:"ielts1"},
+  {w:"hospital", ipa:"/ˈhɒspɪtl/", pos:"n", mn:"эмнэлэг", ex:"She went to the hospital for a routine check-up.", topic:"health", level:"ielts1"},
+  {w:"money", ipa:"/ˈmʌni/", pos:"n", mn:"мөнгө", ex:"Young people should learn how to save money wisely.", topic:"economy", level:"ielts1"},
+  {w:"shop", ipa:"/ʃɒp/", pos:"v", mn:"дэлгүүр хэсэх", ex:"Many families shop for fresh food every Saturday morning.", topic:"economy", level:"ielts1"},
+  {w:"family", ipa:"/ˈfæməli/", pos:"n", mn:"гэр бүл", ex:"Family plays a central role in Mongolian daily life.", topic:"society", level:"ielts1"},
+  {w:"culture", ipa:"/ˈkʌltʃə/", pos:"n", mn:"соёл", ex:"Every country has its own unique culture and customs.", topic:"society", level:"ielts1"},
+  {w:"environment", ipa:"/ɪnˈvaɪrənmənt/", pos:"n", mn:"байгаль орчин", ex:"Factories should avoid releasing harmful waste into the environment.", topic:"environment", level:"ielts2"},
+  {w:"solar panel", ipa:"/ˈsəʊlə ˈpænl/", pos:"n", mn:"нарны панель", ex:"The family installed solar panels to reduce their electricity bill.", topic:"environment", level:"ielts2"},
+  {w:"textbook", ipa:"/ˈtekstbʊk/", pos:"n", mn:"сурах бичиг", ex:"Every student needs a textbook for the new course.", topic:"education", level:"ielts2"},
+  {w:"grade", ipa:"/ɡreɪd/", pos:"v", mn:"дүн тавих", ex:"The teacher will grade our essays by next Friday.", topic:"education", level:"ielts2"},
+  {w:"download", ipa:"/ˌdaʊnˈləʊd/", pos:"v", mn:"татаж авах", ex:"You can download the app for free from the store.", topic:"technology", level:"ielts2"},
+  {w:"password", ipa:"/ˈpɑːswɜːd/", pos:"n", mn:"нууц үг", ex:"Never share your password with anyone you do not trust.", topic:"technology", level:"ielts2"},
+  {w:"stress", ipa:"/stres/", pos:"n", mn:"стресс", ex:"Too much stress at work can harm your physical health.", topic:"health", level:"ielts2"},
+  {w:"checkup", ipa:"/ˈtʃekʌp/", pos:"n", mn:"эрүүл мэндийн үзлэг", ex:"He has a regular checkup at the clinic every year.", topic:"health", level:"ielts2"},
+  {w:"budget", ipa:"/ˈbʌdʒɪt/", pos:"n", mn:"төсөв", ex:"The family made a budget to control their monthly spending.", topic:"economy", level:"ielts2"},
+  {w:"product", ipa:"/ˈprɒdʌkt/", pos:"n", mn:"бүтээгдэхүүн", ex:"This factory launches a new product almost every month.", topic:"economy", level:"ielts2"},
+  {w:"generation", ipa:"/ˌdʒenəˈreɪʃn/", pos:"n", mn:"үеийн хүмүүс", ex:"Younger generations use social media far more than older ones.", topic:"society", level:"ielts2"},
+  {w:"volunteer", ipa:"/ˌvɒlənˈtɪə/", pos:"n", mn:"сайн дурын ажилтан", ex:"Many volunteers helped clean up the local park last weekend.", topic:"society", level:"ielts2"},
+  {w:"biodegradable", ipa:"/ˌbaɪəʊdɪˈɡreɪdəbl/", pos:"adj", mn:"биологийн задралд ордог", ex:"Biodegradable packaging breaks down naturally without harming the soil.", topic:"environment", level:"ielts3"},
+  {w:"endangered", ipa:"/ɪnˈdeɪndʒəd/", pos:"adj", mn:"ховордсон", ex:"Endangered species need special protection from illegal hunting.", topic:"environment", level:"ielts3"},
+  {w:"academic", ipa:"/ˌækəˈdemɪk/", pos:"adj", mn:"сурлагын", ex:"Academic success requires both hard work and good study habits.", topic:"education", level:"ielts3"},
+  {w:"graduate", ipa:"/ˈɡrædʒueɪt/", pos:"v", mn:"төгсөх", ex:"She plans to graduate from university next summer with honors.", topic:"education", level:"ielts3"},
+  {w:"database", ipa:"/ˈdeɪtəbeɪs/", pos:"n", mn:"өгөгдлийн сан", ex:"The company stores all customer information in a secure database.", topic:"technology", level:"ielts3"},
+  {w:"troubleshoot", ipa:"/ˈtrʌblʃuːt/", pos:"v", mn:"алдаа засах", ex:"IT staff quickly troubleshoot problems with the school's network.", topic:"technology", level:"ielts3"},
+  {w:"prescription", ipa:"/prɪˈskrɪpʃn/", pos:"n", mn:"жор (эмийн)", ex:"The doctor wrote a prescription for a course of antibiotics.", topic:"health", level:"ielts3"},
+  {w:"infection", ipa:"/ɪnˈfekʃn/", pos:"n", mn:"халдвар", ex:"Washing your hands regularly helps prevent the spread of infection.", topic:"health", level:"ielts3"},
+  {w:"consumer", ipa:"/kənˈsjuːmə/", pos:"n", mn:"хэрэглэгч", ex:"Consumer demand for organic food has grown sharply this decade.", topic:"economy", level:"ielts3"},
+  {w:"revenue", ipa:"/ˈrevənjuː/", pos:"n", mn:"орлого (аж ахуйн нэгжийн)", ex:"The company's revenue grew by ten percent last financial year.", topic:"economy", level:"ielts3"},
+  {w:"urban", ipa:"/ˈɜːbən/", pos:"adj", mn:"хотын", ex:"Urban areas usually have much better access to public transport.", topic:"society", level:"ielts3"},
+  {w:"heritage", ipa:"/ˈherɪtɪdʒ/", pos:"n", mn:"өв соёл", ex:"The old temple is an important part of our cultural heritage.", topic:"society", level:"ielts3"},
+  {w:"biomass", ipa:"/ˈbaɪəʊmæs/", pos:"n", mn:"биомасс", ex:"Biomass energy is produced by burning organic plant and animal waste.", topic:"environment", level:"ielts4"},
+  {w:"toxic", ipa:"/ˈtɒksɪk/", pos:"adj", mn:"хортой", ex:"Toxic chemicals from the factory leaked into the nearby river.", topic:"environment", level:"ielts4"},
+  {w:"mentor", ipa:"/ˈmentɔː/", pos:"v", mn:"чиглүүлэн сургах", ex:"Experienced employees often mentor new graduates during their first year.", topic:"education", level:"ielts4"},
+  {w:"credential", ipa:"/krəˈdenʃl/", pos:"n", mn:"мэргэжлийн гэрчилгээ", ex:"Employers often check a candidate's academic credentials before hiring them.", topic:"education", level:"ielts4"},
+  {w:"server", ipa:"/ˈsɜːvə/", pos:"n", mn:"сервер", ex:"The website crashed because the server could not handle the traffic.", topic:"technology", level:"ielts4"},
+  {w:"diagnosis", ipa:"/ˌdaɪəɡˈnəʊsɪs/", pos:"n", mn:"оношилгоо", ex:"An early diagnosis can greatly improve a patient's treatment outcome.", topic:"health", level:"ielts4"},
+  {w:"metabolism", ipa:"/məˈtæbəlɪzəm/", pos:"n", mn:"бодисын солилцоо", ex:"Regular exercise can help speed up your body's metabolism.", topic:"health", level:"ielts4"},
+  {w:"tariff", ipa:"/ˈtærɪf/", pos:"n", mn:"гаалийн татвар", ex:"The government raised tariffs sharply on all imported steel products.", topic:"economy", level:"ielts4"},
+  {w:"shareholder", ipa:"/ˈʃeəhəʊldə/", pos:"n", mn:"хувьцаа эзэмшигч", ex:"Shareholders voted to approve the company's new business strategy.", topic:"economy", level:"ielts4"},
+  {w:"demographic", ipa:"/ˌdeməˈɡræfɪk/", pos:"adj", mn:"хүн ам зүйн", ex:"Demographic changes are steadily affecting the country's labor market.", topic:"society", level:"ielts4"},
+  {w:"welfare", ipa:"/ˈwelfeə/", pos:"n", mn:"нийгмийн халамж", ex:"The government increased welfare support for low-income families this year.", topic:"society", level:"ielts4"},
+  {w:"geolocation", ipa:"/ˌdʒiːəʊləʊˈkeɪʃn/", pos:"n", mn:"байршил тогтоох технологи", ex:"Geolocation technology allows delivery apps to track packages in real time.", topic:"technology", level:"ielts4"},
+  {w:"carbon-neutral", ipa:"/ˌkɑːbən ˈnjuːtrəl/", pos:"adj", mn:"нүүрстөрөгчийн саармаг", ex:"The company aims to become fully carbon-neutral by 2030.", topic:"environment", level:"ielts5"},
+  {w:"biofuel", ipa:"/ˈbaɪəʊfjuːəl/", pos:"n", mn:"биологийн түлш", ex:"Biofuel is produced from crops rather than fossil fuels.", topic:"environment", level:"ielts5"},
+  {w:"cohort", ipa:"/ˈkəʊhɔːt/", pos:"n", mn:"нэг үеийн бүлэг", ex:"This year's cohort of graduates faces a very competitive job market.", topic:"education", level:"ielts5"},
+  {w:"remedial", ipa:"/rɪˈmiːdiəl/", pos:"adj", mn:"нөхөн сургалтын", ex:"Remedial classes help students who are struggling with basic reading skills.", topic:"education", level:"ielts5"},
+  {w:"biometric", ipa:"/ˌbaɪəʊˈmetrɪk/", pos:"adj", mn:"биометрийн", ex:"Biometric security uses fingerprints or facial recognition to verify identity.", topic:"technology", level:"ielts5"},
+  {w:"digitize", ipa:"/ˈdɪdʒɪtaɪz/", pos:"v", mn:"тоон хэлбэрт шилжүүлэх", ex:"Libraries are digitizing old manuscripts to preserve them for future readers.", topic:"technology", level:"ielts5"},
+  {w:"resilience", ipa:"/rɪˈzɪliəns/", pos:"n", mn:"сэтгэл зүйн тэсвэр хатуужил", ex:"Building emotional resilience helps people cope better with daily stress.", topic:"health", level:"ielts5"},
+  {w:"hypertension", ipa:"/ˌhaɪpəˈtenʃn/", pos:"n", mn:"цусны даралт ихсэх", ex:"Hypertension is a major risk factor for serious heart disease.", topic:"health", level:"ielts5"},
+  {w:"outsourcing", ipa:"/ˈaʊtsɔːsɪŋ/", pos:"n", mn:"гадаад аутсорсинг", ex:"Outsourcing production abroad can significantly reduce a company's overall costs.", topic:"economy", level:"ielts5"},
+  {w:"stakeholder", ipa:"/ˈsteɪkhəʊldə/", pos:"n", mn:"сонирхогч тал", ex:"All stakeholders were consulted carefully before the policy was changed.", topic:"economy", level:"ielts5"},
+  {w:"assimilation", ipa:"/əˌsɪməˈleɪʃn/", pos:"n", mn:"соёлын шингэлт", ex:"Cultural assimilation can be a slow process for new immigrants.", topic:"society", level:"ielts5"},
+  {w:"social mobility", ipa:"/ˈsəʊʃl məʊˈbɪləti/", pos:"n", mn:"нийгмийн хөдөлгөөнт чанар", ex:"Education can greatly improve social mobility for children from poor families.", topic:"society", level:"ielts5"},
+  {w:"environmental degradation", ipa:"/ɪnˌvaɪrənˈmentl ˌdeɡrəˈdeɪʃn/", pos:"n", mn:"байгаль орчны доройтол", ex:"Environmental degradation threatens the livelihoods of many rural communities.", topic:"environment", level:"ielts6"},
+  {w:"particulate matter", ipa:"/pɑːˈtɪkjʊlət ˈmætə/", pos:"n", mn:"агаарын хатуу тоосонцор", ex:"Particulate matter in polluted air can cause serious respiratory problems.", topic:"environment", level:"ielts6"},
+  {w:"meritocracy", ipa:"/ˌmerɪˈtɒkrəsi/", pos:"n", mn:"чадвар дээр суурилсан нийгэм", ex:"Some argue that university admission should be based on meritocracy.", topic:"education", level:"ielts6"},
+  {w:"rote learning", ipa:"/rəʊt ˈlɜːnɪŋ/", pos:"n", mn:"цээжлэх сургалтын арга", ex:"Rote learning is far less effective than critical, independent thinking.", topic:"education", level:"ielts6"},
+  {w:"quantum computing", ipa:"/ˈkwɒntəm kəmˈpjuːtɪŋ/", pos:"n", mn:"квант тооцоолол", ex:"Quantum computing could eventually solve problems ordinary computers cannot.", topic:"technology", level:"ielts6"},
+  {w:"interoperability", ipa:"/ˌɪntərˌɒpərəˈbɪləti/", pos:"n", mn:"систем хоорондын нийцтэй байдал", ex:"Interoperability between systems allows hospitals to share patient records safely.", topic:"technology", level:"ielts6"},
+  {w:"prevalent", ipa:"/ˈprevələnt/", pos:"adj", mn:"түгээмэл тархсан", ex:"Obesity has become increasingly prevalent among children in wealthy nations.", topic:"health", level:"ielts6"},
+  {w:"biomarker", ipa:"/ˈbaɪəʊmɑːkə/", pos:"n", mn:"биомаркер", ex:"Researchers use biomarkers to detect certain diseases at an early stage.", topic:"health", level:"ielts6"},
+  {w:"oligopoly", ipa:"/ˌɒlɪˈɡɒpəli/", pos:"n", mn:"цөөн компанийн зах зээл эзэмшил", ex:"An oligopoly exists when only a few large firms dominate an industry.", topic:"economy", level:"ielts6"},
+  {w:"austerity", ipa:"/ɒˈsterəti/", pos:"n", mn:"хэмнэлтийн бодлого", ex:"The government introduced austerity measures to reduce the national debt.", topic:"economy", level:"ielts6"},
+  {w:"multiculturalism", ipa:"/ˌmʌltiˈkʌltʃərəlɪzəm/", pos:"n", mn:"олон соёлт байдал", ex:"Multiculturalism encourages respect for different traditions within one society.", topic:"society", level:"ielts6"},
+  {w:"social cohesion", ipa:"/ˈsəʊʃl kəʊˈhiːʒn/", pos:"n", mn:"нийгмийн эв нэгдэл", ex:"Strong social cohesion helps communities recover quickly after a crisis.", topic:"society", level:"ielts6"},
+  {w:"eutrophication", ipa:"/ˌjuːtrəfɪˈkeɪʃn/", pos:"n", mn:"усны хэт тэжээллэгжилт (эвтрофикаци)", ex:"Fertilizer runoff from farms can cause eutrophication in nearby lakes.", topic:"environment", level:"ielts7"},
+  {w:"carbon sequestration", ipa:"/ˌkɑːbən ˌsiːkwesˈtreɪʃn/", pos:"n", mn:"нүүрстөрөгч шингээж хадгалах", ex:"Forests play a crucial role in carbon sequestration around the world.", topic:"environment", level:"ielts7"},
+  {w:"scholarly", ipa:"/ˈskɒləli/", pos:"adj", mn:"эрдэм шинжилгээний", ex:"The journal publishes scholarly articles on educational psychology and research.", topic:"education", level:"ielts7"},
+  {w:"intellectual property", ipa:"/ˌɪntəˈlektʃuəl ˈprɒpəti/", pos:"n", mn:"оюуны өмч", ex:"Universities must protect the intellectual property created by their researchers.", topic:"education", level:"ielts7"},
+  {w:"deep learning", ipa:"/diːp ˈlɜːnɪŋ/", pos:"n", mn:"гүнзгий сургалт", ex:"Deep learning enables computers to recognize images and speech accurately.", topic:"technology", level:"ielts7"},
+  {w:"blockchain", ipa:"/ˈblɒktʃeɪn/", pos:"n", mn:"блокчэйн", ex:"Blockchain technology offers a secure and transparent way to record transactions.", topic:"technology", level:"ielts7"},
+  {w:"telemedicine", ipa:"/ˈtelɪˌmedɪsn/", pos:"n", mn:"зайны эмнэлгийн үйлчилгээ", ex:"Telemedicine allows patients in remote areas to consult doctors online.", topic:"health", level:"ielts7"},
+  {w:"antimicrobial resistance", ipa:"/ˌæntimaɪˈkrəʊbiəl rɪˈzɪstəns/", pos:"n", mn:"эсрэг микробын тэсвэржилт", ex:"Antimicrobial resistance makes some common infections much harder to treat.", topic:"health", level:"ielts7"},
+  {w:"quantitative easing", ipa:"/ˈkwɒntɪtətɪv ˈiːzɪŋ/", pos:"n", mn:"тоон хөнгөвчлөл", ex:"Quantitative easing was used to stimulate the economy after the crisis.", topic:"economy", level:"ielts7"},
+  {w:"macroeconomic", ipa:"/ˌmækrəʊˌiːkəˈnɒmɪk/", pos:"adj", mn:"макро эдийн засгийн", ex:"Macroeconomic stability is essential for encouraging long-term foreign investment.", topic:"economy", level:"ielts7"},
+  {w:"disenfranchisement", ipa:"/ˌdɪsɪnˈfræntʃaɪzmənt/", pos:"n", mn:"сонгуулийн эрхээс хасагдах", ex:"Disenfranchisement of minority voters remains a serious political concern.", topic:"society", level:"ielts7"},
+  {w:"socioeconomic", ipa:"/ˌsəʊsiəʊˌiːkəˈnɒmɪk/", pos:"adj", mn:"нийгэм эдийн засгийн", ex:"Socioeconomic status strongly influences access to quality education worldwide.", topic:"society", level:"ielts7"},
 ];
 function buildIeltsDeck(){
   return IELTS_VOCAB_WORDS.map((w,i)=>({id:"ielts:w:"+i, level:w.level, h:w.w, p:w.ipa, en:w.ex, m:w.mn, topic:w.topic}));
@@ -4832,8 +5000,12 @@ function renderIeltsVocab(){
     return `<div class="ielts-vocab-row">
       <div class="ielts-vocab-head">
         <span class="ielts-vocab-word">${escapeHtml(w.w)}</span>
-        <span class="ielts-vocab-ipa">${escapeHtml(w.ipa)} · ${escapeHtml(w.pos)} · ${escapeHtml(IELTS_TOPIC_LABELS[w.topic]||"")}</span>
         ${speakerBtnHtmlEn(w.w,"")}
+        <span class="ielts-vocab-tags">
+          <span class="ielts-vocab-pron" title="Энэ бол дуудлагын тэмдэглэгээ (IPA) — алдаа биш, дуудлагын тэмдэгтүүд юм. Хажуугийн 🔊 товчийг дарж жинхэнэ дуудлагыг сонсоорой.">${escapeHtml(w.ipa)}</span>
+          <span class="ielts-vocab-pos">${escapeHtml(w.pos)}</span>
+          <span class="ielts-vocab-topic-tag">${escapeHtml(IELTS_TOPIC_LABELS[w.topic]||"")}</span>
+        </span>
         <button type="button" class="btn-ghost ielts-vocab-reveal" data-w="${escapeHtml(w.w)}">${revealed?"Нуух":"Утга харах"}</button>
       </div>
       ${revealed?`<div class="ielts-vocab-detail">
@@ -4847,7 +5019,7 @@ function renderIeltsVocab(){
     </div>`;
   }).join("");
   box.innerHTML = `
-    <p class="intro" style="max-width:100%;">Түвшин 1-7 нь энгийнээс ахисан руу жигдэрсэн IELTS үгсийн сан юм (HSK-ийн түвшний дугаарлалттай адил төстэй, гэхдээ албан ёсны band score биш). Үг дээрх "Утга харах" товчийг дарж утга, жишээ өгүүлбэрийг үзээд өөрийгөө үнэлээрэй. Бататгахын тулд "Давталт" таб руу орж Anki маягийн флаш картаар давт.</p>
+    <p class="intro" style="max-width:100%;">Түвшин 1-7 нь энгийнээс ахисан руу жигдэрсэн IELTS үгсийн сан юм (HSK-ийн түвшний дугаарлалттай адил төстэй, гэхдээ албан ёсны band score биш). Үгийн ард харагдах хэлбэлзэлтэй тэмдэгтүүд (жишээ нь /pəˈluːʃn/) бол алдаа биш — англи дуудлагын албан ёсны тэмдэглэгээ (IPA) юм; жинхэнэ дуудлагыг сонсохын тулд 🔊 товчийг дарна уу. Дараа нь "Утга харах" товчийг дарж утга, жишээ өгүүлбэрийг үзээд өөрийгөө үнэлээрэй. Бататгахын тулд "Давталт" таб руу орж Anki маягийн флаш картаар давт.</p>
     <div class="ielts-vocab-progress">Мэдэж байгаа: <b>${knownCount}</b> / ${words.length}</div>
     ${rowsHtml}
   `;
@@ -4954,7 +5126,7 @@ function renderIeltsCard(){
       ${speakerBtnHtmlEn(card.h, "flash-spk")}
       ${starBtnHtml(card.id, "flash-star")}
       <div class="front-hz">${escapeHtml(card.h)}</div>
-      <div class="back-py">${escapeHtml(card.p)}</div>
+      <div class="back-py" title="Дуудлагын тэмдэглэгээ (IPA) — алдаа биш">${escapeHtml(card.p)} <span style="font-size:.62em; opacity:.7; font-family:inherit;">(IPA дуудлага)</span></div>
       <div class="back-en">${escapeHtml(card.m)}</div>
       <div class="back-en" style="font-style:italic;">${escapeHtml(card.en)}</div>
       ${noteBoxHtml(card.id, "flash-note-box")}
@@ -4977,6 +5149,180 @@ function renderIeltsCard(){
       renderIeltsCard();
     });
   }
+}
+
+/* ============================= IELTS: ТОГЛООМ (үгийн сангийн тоглоом) =============================
+   Two short vocab-drilling games reusing the HSK "games" tab's visual
+   patterns (.match-grid/.match-chip for matching, .quiz-options/.qopt for
+   multiple choice) but built on IELTS_VOCAB_WORDS' English/Mongolian pairs
+   instead of hanzi. Kept fully separate from matchRound/gamesMode etc. so
+   there is zero risk of colliding state with the HSK games tab. */
+let ieltsGameMode = "match"; // "match" | "quiz"
+let ieltsGameLevel = "all";  // "all" or ielts1..ielts7
+let ieltsMatchRound = null;
+let ieltsMatchStats = {correct:0, total:0};
+let ieltsQuizRound = null;
+let ieltsQuizStats = {correct:0, total:0};
+
+function ieltsGamePool(){
+  return ieltsGameLevel==="all" ? IELTS_VOCAB_WORDS : IELTS_VOCAB_WORDS.filter(w=>w.level===ieltsGameLevel);
+}
+
+function newIeltsMatchRound(){
+  const pool = ieltsGamePool();
+  const count = Math.min(6, pool.length);
+  const chosen = shuffle(pool).slice(0, count).map((w,i)=>({id:i, en:w.w, mn:w.mn}));
+  ieltsMatchRound = {
+    pairs: chosen,
+    leftOrder: shuffle(chosen.map(p=>p.id)),
+    rightOrder: shuffle(chosen.map(p=>p.id)),
+    matched: new Set(),
+    selLeft: null, selRight: null, wrongFlash: false,
+  };
+}
+
+function renderIeltsMatchGame(){
+  const box = document.getElementById("ielts-game-body");
+  if(!box) return;
+  if(!ieltsMatchRound) newIeltsMatchRound();
+  const r = ieltsMatchRound;
+  if(!r.pairs.length){
+    box.innerHTML = `<div class="empty-state"><div class="big">🤔</div><h3>Энэ түвшинд үг алга байна</h3></div>`;
+    return;
+  }
+  const chipHtml = (id, side)=>{
+    const p = r.pairs.find(pp=>pp.id===id);
+    const text = side==="l" ? p.en : p.mn;
+    const isMatched = r.matched.has(id);
+    const isSel = (side==="l" ? r.selLeft : r.selRight)===id;
+    const wrongCls = (r.wrongFlash && isSel) ? "wrong" : "";
+    return `<button type="button" class="match-chip ielts-match-chip ${isMatched?"matched":""} ${isSel?"sel":""} ${wrongCls}" data-side="${side}" data-id="${id}" ${isMatched?"disabled":""}>
+      <span class="ielts-mword">${escapeHtml(text)}</span>
+    </button>`;
+  };
+  const leftHtml = r.leftOrder.map(id=>chipHtml(id,"l")).join("");
+  const rightHtml = r.rightOrder.map(id=>chipHtml(id,"r")).join("");
+  const done = r.matched.size===r.pairs.length;
+  box.innerHTML = `
+    <div class="session-count" style="text-align:center;margin-bottom:10px;">Тохирсон: ${r.matched.size}/${r.pairs.length} · Нийт оноо: ${ieltsMatchStats.correct}/${ieltsMatchStats.total}</div>
+    <p class="score-sub" style="text-align:center;">Англи үгийг баруун талын монгол утгатай нь тохируулаарай.</p>
+    <div class="match-grid">
+      <div class="match-col">${leftHtml}</div>
+      <div class="match-col">${rightHtml}</div>
+    </div>
+    ${done ? `<div class="quiz-actions" style="margin-top:18px;justify-content:center;"><button class="btn-primary" id="ielts-match-next">Дараах багц</button></div>` : ""}
+  `;
+  box.querySelectorAll(".ielts-match-chip").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(r.wrongFlash) return;
+      const side = btn.dataset.side;
+      const id = Number(btn.dataset.id);
+      if(r.matched.has(id)) return;
+      if(side==="l") r.selLeft = (r.selLeft===id ? null : id);
+      else r.selRight = (r.selRight===id ? null : id);
+      if(r.selLeft!=null && r.selRight!=null){
+        ieltsMatchStats.total += 1;
+        if(r.selLeft===r.selRight){
+          r.matched.add(r.selLeft);
+          ieltsMatchStats.correct += 1;
+          r.selLeft=null; r.selRight=null;
+        } else {
+          r.wrongFlash = true;
+          setTimeout(()=>{ r.selLeft=null; r.selRight=null; r.wrongFlash=false; renderIeltsMatchGame(); }, 700);
+        }
+      }
+      renderIeltsMatchGame();
+    });
+  });
+  const nextBtn = document.getElementById("ielts-match-next");
+  if(nextBtn) nextBtn.addEventListener("click", ()=>{ newIeltsMatchRound(); renderIeltsMatchGame(); });
+}
+
+function newIeltsQuizRound(){
+  const pool = ieltsGamePool();
+  if(pool.length < 4){ ieltsQuizRound = null; return; }
+  const word = shuffle(pool)[0];
+  const distractorPool = pool.filter(w=>w.w!==word.w);
+  const distractors = shuffle(distractorPool).slice(0,3).map(w=>w.mn);
+  const options = shuffle([word.mn].concat(distractors));
+  ieltsQuizRound = { word, options, answerIdx: options.indexOf(word.mn), picked: null };
+}
+
+function renderIeltsQuizGame(){
+  const box = document.getElementById("ielts-game-body");
+  if(!box) return;
+  if(!ieltsQuizRound) newIeltsQuizRound();
+  if(!ieltsQuizRound){
+    box.innerHTML = `<div class="empty-state"><div class="big">🤔</div><h3>Энэ түвшинд хангалттай үг алга (доод тал нь 4 хэрэгтэй)</h3></div>`;
+    return;
+  }
+  const r = ieltsQuizRound;
+  const answered = r.picked != null;
+  const optsHtml = r.options.map((opt,oi)=>{
+    let cls = "qopt ielts-quiz-opt";
+    if(answered){
+      if(oi===r.answerIdx) cls += " correct";
+      else if(oi===r.picked) cls += " wrong";
+    }
+    return `<button class="${cls}" data-oi="${oi}" ${answered?"disabled":""}><span class="qtxt">${escapeHtml(opt)}</span></button>`;
+  }).join("");
+  box.innerHTML = `
+    <div class="session-count" style="text-align:center;margin-bottom:10px;">Нийт оноо: ${ieltsQuizStats.correct}/${ieltsQuizStats.total}</div>
+    <p class="score-sub" style="text-align:center;">Энэ англи үгийн зөв монгол утгыг сонгоорой.</p>
+    <div style="text-align:center;margin:18px 0;">
+      <div class="front-hz" style="font-size:clamp(1.8rem,7vw,2.4rem);">${escapeHtml(r.word.w)} ${speakerBtnHtmlEn(r.word.w,"")}</div>
+    </div>
+    <div class="quiz-options">${optsHtml}</div>
+    ${answered ? `<div class="quiz-actions" style="margin-top:18px;justify-content:center;"><button class="btn-primary" id="ielts-quiz-next">Дараах үг</button></div>` : ""}
+  `;
+  box.querySelectorAll(".ielts-quiz-opt").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(answered) return;
+      const oi = Number(btn.dataset.oi);
+      r.picked = oi;
+      ieltsQuizStats.total += 1;
+      if(oi===r.answerIdx) ieltsQuizStats.correct += 1;
+      renderIeltsQuizGame();
+    });
+  });
+  const nextBtn = document.getElementById("ielts-quiz-next");
+  if(nextBtn) nextBtn.addEventListener("click", ()=>{ newIeltsQuizRound(); renderIeltsQuizGame(); });
+}
+
+function renderIeltsGameFilters(){
+  const modeBox = document.getElementById("ielts-game-mode-filters");
+  const levelBox = document.getElementById("ielts-game-level-filters");
+  if(!modeBox || !levelBox) return;
+  modeBox.innerHTML = "";
+  [["match","🔗 Тохируулах"],["quiz","🎯 Сонголтот тест"]].forEach(([key,label])=>{
+    const chip = document.createElement("button");
+    chip.className = "chip"+(key===ieltsGameMode?" active":"");
+    chip.textContent = label;
+    chip.addEventListener("click", ()=>{
+      ieltsGameMode = key;
+      if(key==="match") newIeltsMatchRound(); else newIeltsQuizRound();
+      renderIeltsGameFilters();
+      renderIeltsGame();
+    });
+    modeBox.appendChild(chip);
+  });
+  levelBox.innerHTML = "";
+  ["all"].concat(IELTS_LEVELS).forEach(key=>{
+    const chip = document.createElement("button");
+    chip.className = "chip"+(key===ieltsGameLevel?" active":"");
+    chip.textContent = key==="all" ? "Бүх түвшин" : IELTS_LEVEL_META[key].label;
+    chip.addEventListener("click", ()=>{
+      ieltsGameLevel = key;
+      if(ieltsGameMode==="match") newIeltsMatchRound(); else newIeltsQuizRound();
+      renderIeltsGameFilters();
+      renderIeltsGame();
+    });
+    levelBox.appendChild(chip);
+  });
+}
+function renderIeltsGame(){
+  if(ieltsGameMode==="match") renderIeltsMatchGame();
+  else renderIeltsQuizGame();
 }
 
 /* ============================= IELTS: READING ============================= */
@@ -5024,6 +5370,61 @@ const IELTS_READING_PASSAGES = [
       {q:"In healthcare, how can AI assist doctors, according to the passage?", opts:["By detecting diseases in medical scans","By replacing all doctors permanently","By reducing the need for hospitals","By writing medical textbooks"], answer:0},
       {q:"TRUE, FALSE or NOT GIVEN: AI algorithms can never produce unfair outcomes.", opts:["TRUE","FALSE","NOT GIVEN"], answer:1},
       {q:"TRUE, FALSE or NOT GIVEN: Self-driving vehicles use AI to react to road conditions.", opts:["TRUE","FALSE","NOT GIVEN"], answer:0},
+    ]},
+  {title:"The Growth of Online Education", desc:"Онлайн боловсрол · Анхан түвшин",
+    paragraphs:[
+      "In the past, students had to attend a classroom to learn from a teacher. Today, anyone with an internet connection can study almost any subject online. Universities, schools, and private companies now offer thousands of online courses, and millions of people around the world join them every year.",
+      "Online learning has many benefits. Students can study at any time that suits them, and they do not need to travel to a classroom. Courses are often cheaper than traditional programmes, and learners can choose from a huge range of subjects, from cooking to computer programming. For people who live far from a university, online courses make education possible for the first time.",
+      "Even so, online education has some drawbacks. Without a teacher in the room, some students find it hard to stay motivated and often give up before finishing a course. It can also be difficult to ask questions immediately or to work closely with classmates. For these reasons, many schools now combine online lessons with some face-to-face classes, a method known as blended learning.",
+    ],
+    questions:[
+      {q:"According to the passage, what is one benefit of online learning?", opts:["Students can study at a time that suits them.","Online courses are always free.","Teachers visit students at home.","Classrooms become larger."], answer:0},
+      {q:"TRUE, FALSE or NOT GIVEN: Online courses are more expensive than traditional programmes.", opts:["TRUE","FALSE","NOT GIVEN"], answer:1},
+      {q:"TRUE, FALSE or NOT GIVEN: Blended learning combines online lessons with face-to-face classes.", opts:["TRUE","FALSE","NOT GIVEN"], answer:0},
+    ]},
+  {title:"Why Sleep Matters", desc:"Нойр, эрүүл мэнд · Дундаж түвшин",
+    paragraphs:[
+      "Scientists have long known that sleep is essential for physical health, but recent research shows it is equally important for the brain. During deep sleep, the brain removes waste products that build up during waking hours and consolidates memories formed during the day. Adults typically need between seven and nine hours of sleep each night, yet surveys suggest that a large proportion of people in industrialised countries regularly sleep less than this.",
+      "The consequences of chronic sleep deprivation extend far beyond simple tiredness. Studies have linked insufficient sleep to a weakened immune system, poor concentration, and an increased risk of conditions such as obesity, diabetes, and heart disease. Sleep-deprived individuals also perform worse on tasks requiring quick decision-making, which has obvious implications for activities such as driving.",
+      "Improving sleep quality does not always require medical intervention. Experts recommend maintaining a consistent bedtime, limiting exposure to bright screens before bed, and avoiding caffeine in the afternoon. Creating a dark, quiet, and cool sleeping environment can also make a significant difference. While such changes may seem minor, research indicates that they can substantially improve both the duration and quality of sleep over time.",
+    ],
+    questions:[
+      {q:"What happens during deep sleep, according to the passage?", opts:["The brain removes waste products and consolidates memories.","The body temperature increases sharply.","Muscles grow at their fastest rate.","The immune system stops functioning."], answer:0},
+      {q:"TRUE, FALSE or NOT GIVEN: Most adults need less than six hours of sleep per night.", opts:["TRUE","FALSE","NOT GIVEN"], answer:1},
+      {q:"TRUE, FALSE or NOT GIVEN: Avoiding caffeine in the afternoon can help improve sleep.", opts:["TRUE","FALSE","NOT GIVEN"], answer:0},
+    ]},
+  {title:"Plastic in Our Oceans", desc:"Далайн бохирдол · Дундаж түвшин",
+    paragraphs:[
+      "Every year, an estimated eight million tonnes of plastic waste enters the world's oceans, arriving from rivers, coastal cities, and fishing activities. Unlike organic waste, plastic does not decompose quickly; instead, it breaks down into smaller and smaller fragments known as microplastics, which can persist in the marine environment for hundreds of years.",
+      "The impact on marine life is severe. Sea turtles, seabirds, and fish frequently mistake plastic fragments for food, leading to injury, starvation, and death. Microplastics have now been detected in fish tissue, sea salt, and even drinking water, raising concerns about the long-term effects on human health as these particles move up the food chain.",
+      "Addressing the crisis requires action at multiple levels. Some governments have banned single-use plastic items such as bags and straws, while companies are investing in biodegradable packaging alternatives. Environmental organisations argue that these measures, although useful, are insufficient on their own; they insist that a fundamental shift toward reducing overall plastic production is necessary if the problem is to be solved rather than merely managed.",
+    ],
+    questions:[
+      {q:"According to the passage, what happens to plastic in the ocean over time?", opts:["It breaks down into smaller fragments called microplastics.","It dissolves completely within a few weeks.","It sinks immediately to the ocean floor.","It transforms into organic matter."], answer:0},
+      {q:"TRUE, FALSE or NOT GIVEN: Microplastics have been found in drinking water.", opts:["TRUE","FALSE","NOT GIVEN"], answer:0},
+      {q:"TRUE, FALSE or NOT GIVEN: All governments have banned single-use plastic bags.", opts:["TRUE","FALSE","NOT GIVEN"], answer:1},
+    ]},
+  {title:"The Shift Toward Electric Vehicles", desc:"Цахилгаан машин · Дундаж түвшин",
+    paragraphs:[
+      "Sales of electric vehicles (EVs) have risen dramatically over the past decade, driven by falling battery costs, stricter emissions regulations, and growing public concern about climate change. In several countries, EVs now account for more than one in five new car sales, a figure that was almost unimaginable just ten years ago.",
+      "Proponents argue that widespread EV adoption could substantially reduce greenhouse gas emissions from the transport sector, which remains one of the largest contributors to global carbon output. Electric motors are also considerably more energy-efficient than internal combustion engines, converting a much higher proportion of stored energy into motion rather than heat.",
+      "Nevertheless, significant obstacles remain. Charging infrastructure is still inadequate in many rural areas, and the batteries themselves rely on minerals such as lithium and cobalt, whose extraction raises serious environmental and ethical concerns. Critics also note that if the electricity used to charge vehicles comes from coal-fired power plants, the overall environmental benefit is considerably diminished. Governments and manufacturers are therefore under pressure to address the entire supply chain, not merely the vehicles themselves.",
+    ],
+    questions:[
+      {q:"What is mentioned as a reason for the rise in EV sales?", opts:["Falling battery costs","Rising fuel efficiency of petrol cars","A decrease in emissions regulations","Lower vehicle taxes worldwide"], answer:0},
+      {q:"TRUE, FALSE or NOT GIVEN: Electric motors convert more stored energy into motion than combustion engines.", opts:["TRUE","FALSE","NOT GIVEN"], answer:0},
+      {q:"TRUE, FALSE or NOT GIVEN: Charging infrastructure is equally developed in rural and urban areas.", opts:["TRUE","FALSE","NOT GIVEN"], answer:1},
+    ]},
+  {title:"The New Era of Space Exploration", desc:"Сансар судлал · Ахисан түвшин",
+    paragraphs:[
+      "For much of the twentieth century, space exploration was the exclusive domain of national governments, whose space agencies possessed the vast financial resources and technical expertise required to launch missions beyond Earth's atmosphere. In recent decades, however, this landscape has been transformed by the emergence of private aerospace companies, which have dramatically reduced the cost of reaching orbit through reusable rocket technology.",
+      "This commercialisation of spaceflight has accelerated the pace of innovation considerably. Private firms now routinely deliver satellites into orbit, resupply the International Space Station, and compete to develop spacecraft capable of transporting astronauts to the Moon and, eventually, Mars. Some analysts contend that this competitive pressure has achieved in a matter of years what government-led programmes alone might have taken decades to accomplish.",
+      "Yet the rapid expansion of commercial space activity has also generated considerable controversy. Critics point to the growing problem of orbital debris, arguing that an increasing number of satellites raises the risk of collisions that could render certain orbits unusable for generations. Others question whether resources devoted to interplanetary ambitions might be better spent addressing pressing terrestrial challenges, such as poverty and climate change, and whether the benefits of space exploration are being distributed equitably among nations.",
+    ],
+    questions:[
+      {q:"What has enabled private companies to reduce the cost of reaching orbit?", opts:["Reusable rocket technology","Government subsidies alone","The elimination of orbital debris","Slower rates of satellite launches"], answer:0},
+      {q:"TRUE, FALSE or NOT GIVEN: All analysts agree that private companies have outperformed government programmes.", opts:["TRUE","FALSE","NOT GIVEN"], answer:1},
+      {q:"TRUE, FALSE or NOT GIVEN: Critics have raised concerns about orbital debris caused by increased satellite numbers.", opts:["TRUE","FALSE","NOT GIVEN"], answer:0},
     ]},
 ];
 let ieltsReadActive = null;
@@ -5132,6 +5533,71 @@ const IELTS_LISTENING_ITEMS = [
       {q:"Where does the tour begin?", opts:["The ancient civilizations gallery","The café","The gift shop","The car park"], answer:0},
       {q:"What is not allowed in the art galleries?", opts:["Flash photography","Talking quietly","Walking slowly","Taking notes"], answer:0},
     ]},
+  {title:"Joining a Gym", desc:"Section 1 · Өдөр тутмын яриа",
+    script:[
+      "Hi there, I'm interested in joining your gym. Could you tell me about your membership options?",
+      "Of course. We offer a monthly plan for forty-five dollars, or an annual plan for four hundred and fifty dollars, which works out cheaper per month.",
+      "That sounds good. Does the membership include access to the swimming pool?",
+      "The pool is included with the annual plan, but monthly members need to pay an extra ten dollars per visit.",
+      "I see. In that case, I'll sign up for the annual plan, please.",
+      "Great choice. I just need your name and a form of identification to get started.",
+    ],
+    questions:[
+      {q:"Which plan gives free access to the swimming pool?", opts:["The monthly plan","The annual plan","Neither plan","Both plans equally"], answer:1},
+      {q:"What does the caller decide to do?", opts:["Sign up for the monthly plan","Cancel the membership","Sign up for the annual plan","Ask for a discount"], answer:2},
+    ]},
+  {title:"Opening of Riverside Shopping Centre", desc:"Section 2 · Зар мэдээ",
+    script:[
+      "Good morning, everyone, and welcome to the grand opening of Riverside Shopping Centre.",
+      "We're delighted to announce that the centre is now open seven days a week, from nine in the morning until ten at night.",
+      "On the ground floor, you'll find our supermarket and several cafes, while the first floor is dedicated entirely to clothing and footwear stores.",
+      "For the first month, all visitors who spend more than fifty dollars will receive a free reusable shopping bag at the information desk.",
+      "Free parking is available for the first two hours, after which a small hourly charge applies.",
+      "We hope you enjoy exploring everything Riverside Shopping Centre has to offer.",
+    ],
+    questions:[
+      {q:"What can be found on the first floor?", opts:["Supermarket and cafes","Clothing and footwear stores","The information desk","A car park"], answer:1},
+      {q:"How long is parking free for?", opts:["One hour","Two hours","Three hours","All day"], answer:1},
+    ]},
+  {title:"Planning a Group Presentation", desc:"Section 3 · Сургалтын яриа",
+    script:[
+      "So, for our presentation on urban planning, I think we should start with a short introduction and then move into the case studies.",
+      "That makes sense. I can research the case study on Singapore, since I already found some good sources for it.",
+      "Perfect. I'll take care of the introduction and the section on transport policy.",
+      "What about the conclusion? Should we write that together, or should one of us draft it first?",
+      "Let's draft it together during our next meeting, once we've both finished our sections.",
+      "Sounds good. Let's also make sure the slides are ready two days before the presentation so we have time to practise.",
+    ],
+    questions:[
+      {q:"Who will research the Singapore case study?", opts:["Both students together","The first speaker","The second speaker","Neither student"], answer:2},
+      {q:"When do they plan to have the slides ready?", opts:["The day of the presentation","One week before","Two days before","Immediately after the meeting"], answer:2},
+    ]},
+  {title:"The Science of Memory", desc:"Section 4 · Лекц",
+    script:[
+      "Today's lecture examines how human memory is formed, stored, and sometimes lost.",
+      "Psychologists generally divide memory into three stages: encoding, storage, and retrieval, each of which can be affected by different factors.",
+      "Encoding refers to the process of converting information into a form the brain can store, and it is strongly influenced by attention; information we do not pay attention to is rarely encoded successfully.",
+      "Storage involves maintaining that information over time, and research shows that memories are not stored in a single location but are distributed across multiple regions of the brain.",
+      "Finally, retrieval is the process of accessing stored information, and it can be disrupted by interference from similar memories or simply by the passage of time.",
+      "Understanding these three stages has important implications for education, as it suggests that techniques improving attention and reducing interference can significantly enhance learning outcomes.",
+    ],
+    questions:[
+      {q:"According to the lecture, what are the three stages of memory?", opts:["Encoding, storage, and retrieval","Attention, interference, and recall","Learning, forgetting, and relearning","Perception, storage, and deletion"], answer:0},
+      {q:"What does the lecturer say about where memories are stored?", opts:["In a single part of the brain","Across multiple regions of the brain","Only in the short-term memory centre","Outside the brain entirely"], answer:1},
+    ]},
+  {title:"Local Library Orientation", desc:"Section 2 · Зар мэдээ",
+    script:[
+      "Welcome to Greenfield Public Library. I'd like to take a few minutes to explain how the library works.",
+      "Membership is completely free for all local residents, and you can borrow up to eight items at a time.",
+      "Books can be kept for three weeks, while DVDs and audiobooks must be returned within one week.",
+      "If you need more time, you can renew items online through our website, as long as no one else has requested them.",
+      "We also offer free Wi-Fi and a quiet study room on the second floor, which can be booked in advance at the front desk.",
+      "Overdue items are charged at twenty cents per day, so please try to return everything on time.",
+    ],
+    questions:[
+      {q:"How many items can a member borrow at one time?", opts:["Four","Six","Eight","Ten"], answer:2},
+      {q:"What is the daily charge for overdue items?", opts:["Ten cents","Twenty cents","Fifty cents","One dollar"], answer:1},
+    ]},
 ];
 let ieltsListenActive = null;
 let ieltsListenAnswers = {};
@@ -5212,6 +5678,22 @@ const IELTS_WRITING_PROMPTS = [
     tips:["Асуултад шууд хариулт өгөх төлөвлөгөө гарга (advantages outweigh disadvantages эсвэл эсрэгээр).","Давуу болон сул талыг тэнцвэртэй авч үзэх.","Жишээ баримт, тодорхой нөхцөл байдал ашиглаж бодлоо баталгаажуул.","Дүгнэлтдээ өөрийн байр сууриа тодорхой илэрхийл."],
     phrases:["a growing number of...","one of the main benefits/drawbacks is...","despite these challenges...","to conclude..."],
     sample:"In recent years, an increasing number of employees have chosen to work from home rather than commute to a traditional office. While this shift brings clear benefits, it also creates certain challenges, and in my opinion, the advantages generally outweigh the disadvantages for most workers.\n\nOne of the main benefits of working from home is the time and money saved by not commuting. This extra time can be used for rest, family, or personal development, which often leads to a better work-life balance and reduced stress. In addition, many employees report being more productive at home, since they can create a working environment suited to their own needs and avoid frequent office interruptions.\n\nHowever, working from home is not without its drawbacks. Some employees find it difficult to separate their professional and personal lives when both take place in the same physical space, which can lead to longer working hours and burnout. Isolation is another common issue, as remote workers may miss the social interaction and spontaneous collaboration that an office environment provides, potentially affecting teamwork and mental well-being.\n\nDespite these challenges, I believe the benefits of remote work outweigh the drawbacks for the majority of people, particularly when companies actively support employees by encouraging regular breaks and maintaining opportunities for social connection, such as occasional in-person meetings. To conclude, although working from home presents some challenges, its advantages in terms of flexibility, cost savings, and overall well-being make it a positive development for most modern workers."},
+  {task:1, title:"Transport to work bar chart", prompt:"The bar chart below shows the percentage of workers commuting by car, bus, bicycle and on foot in a European city in 2000 and 2020.\n\nCar: 2000 – 58%, 2020 – 34%\nBus: 2000 – 22%, 2020 – 25%\nBicycle: 2000 – 8%, 2020 – 29%\nOn foot: 2000 – 12%, 2020 – 12%\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.",
+    tips:["Оршилдоо графикийн ерөнхий сэдвийг өөрийн үгээр товч бичнэ.","Хамгийн их өөрчлөгдсөн болон хамгийн бага өөрчлөгдсөн ангилалыг overview хэсэгт дурьдана.","Он тус бүрийн тоог зөвхөн жагсаахгүй, өсөлт бууралтыг харьцуулж тайлбарла.","Тоо баримт бүрийг дэлгэрэнгүй тайлбарлахын оронд гол хандлагад анхаараарай."],
+    phrases:["there was a marked increase/decrease in...","in contrast to...","the most/least popular means of...","whereas...","by 2020, ... had overtaken..."],
+    sample:"The bar chart compares the percentage of workers who used four different modes of transport to get to work in a European city in 2000 and 2020.\n\nOverall, cycling became considerably more popular over the period, while car use declined sharply. Bus travel and walking remained relatively stable in comparison.\n\nIn 2000, the car was by far the most common way to commute, used by 58% of workers, more than twice the proportion who travelled by bus (22%). Walking accounted for 12% of journeys, while only 8% of workers cycled to work, making it the least popular option at that time.\n\nBy 2020, however, the picture had changed considerably. The proportion of car commuters fell to just 34%, whereas cycling rose dramatically to 29%, almost matching bus use, which increased slightly to 25%. The percentage of people walking to work remained unchanged at 12% throughout the twenty-year period."},
+  {task:1, title:"The water cycle diagram", prompt:"The diagram below shows the water cycle, the process by which water circulates between the earth's surface and the atmosphere.\n\nStages: 1) The sun heats water in oceans, rivers and lakes, causing evaporation. 2) Water vapour rises and cools, forming clouds through condensation. 3) Water falls back to earth as precipitation (rain or snow). 4) Some water flows into rivers and back to the sea (surface run-off), while some soaks into the ground (infiltration) and eventually returns to rivers or oceans.\n\nSummarise the information by describing the main stages of the process. Write at least 150 words.",
+    tips:["Диаграммыг тайлбарлахдаа он цагийн дараалал биш, процессын дараалалд анхаар.","Passive voice (жишээ нь: water is heated, water is evaporated) ашиглах нь илүү зохимжтой.","Дараалал заасан үг хэллэг (first, then, after that, finally) ашиглан холбоос үгсийг олон янзаар хэрэглэ.","Диаграм тойрог/циклтэй бол эхлэл, төгсгөлгүй болохыг тэмдэглэж болно."],
+    phrases:["the process begins when...","this is followed by...","as a result of...","the cycle then repeats itself","once..., ... is/are..."],
+    sample:"The diagram illustrates how water moves between the earth's surface and the atmosphere in a continuous natural cycle.\n\nOverall, the process consists of four main stages – evaporation, condensation, precipitation and collection – and it repeats indefinitely, meaning there is no fixed starting or ending point.\n\nThe cycle begins when heat from the sun causes water in oceans, rivers and lakes to evaporate, turning it into water vapour that rises into the atmosphere. As this vapour rises, it cools and condenses to form clouds. Once the clouds become saturated, the water falls back to the earth's surface as precipitation, in the form of either rain or snow.\n\nAfter reaching the ground, the water follows one of two paths. Some of it flows over the land as surface run-off, eventually making its way back into rivers and, ultimately, the sea. The remainder soaks into the soil through a process known as infiltration, before slowly seeping back into rivers and oceans. At this point, the entire cycle starts again."},
+  {task:2, title:"Technology's effect on children's social skills", prompt:"Some people believe that technology, such as smartphones and tablets, has a negative effect on children's social skills, while others disagree. Discuss both views and give your own opinion. Write at least 250 words.",
+    tips:["Оршилд асуултыг товч дахин бичиж, эссений бүтцийг тодорхойлно (discuss both views + opinion).","Нэг талын үзэл бодлыг нэг догол мөрөнд, нөгөө талыг өөр догол мөрөнд бич.","Жишээ татахдаа бодит амьдралаас ойлгомжтой, тодорхой жишээ сонго (жишээ нь: гэр бүлийн цаг, найз нөхөдтэй харьцах байдал).","Дүгнэлтдээ өөрийн байр суурийг тодорхой давтан бич."],
+    phrases:["a growing number of people argue that...","proponents of this view claim that...","however, others contend that...","from my perspective...","all things considered..."],
+    sample:"Children today spend an increasing amount of time using smartphones, tablets and computers, and there is ongoing debate about whether this harms their ability to interact with others. While some argue that excessive screen time weakens children's social skills, others believe technology can actually support social development. This essay will discuss both perspectives before giving my own opinion.\n\nThose who believe technology damages social skills point out that children who spend hours alone playing games or watching videos have fewer opportunities to practise face-to-face communication. Skills such as reading body language, taking turns in conversation, and resolving disagreements in person are often best learned through direct interaction, and excessive screen use can leave children feeling more comfortable online than in real social situations. Some psychologists have also linked heavy device use in childhood to higher levels of social anxiety in later life.\n\nOn the other hand, supporters of technology argue that many apps and online platforms actually encourage social interaction, allowing children to stay connected with friends and family, collaborate on school projects, or join communities with shared interests. Video calls, for example, enable children to maintain relationships with relatives who live far away, something that would have been far more difficult a generation ago. Used in moderation, technology can therefore complement rather than replace traditional social skills.\n\nIn my opinion, the impact of technology on children's social development depends largely on how it is used and how closely parents monitor it. Rather than banning devices altogether, parents and schools should encourage a healthy balance between screen time and face-to-face activities such as sports, family meals and outdoor play. With appropriate guidance, children can benefit from technology without losing essential social skills."},
+  {task:2, title:"University education vs vocational training", prompt:"Some people think that university education is the best route to a successful career, while others believe that vocational or practical training is more beneficial. Discuss both views and give your own opinion. Write at least 250 words.",
+    tips:["Хоёр талын давуу талыг тэнцвэртэй танилцуулж, аль нэгийг үл тоомсорлож болохгүй.","Мэргэжлийн чиглэл (жишээ нь: инженер, механик, эмч) жишээ болгон ашиглаж болно.","Эдийн засаг, ажлын байрны шаардлагатай холбоотой аргумент оруулж болно.","Дүгнэлтдээ тухайн хүний зорилго, чадвараас шалтгаалдгийг дурьдвал илүү тэнцвэртэй болно."],
+    phrases:["it is widely believed that...","a strong case can be made for...","in terms of employability...","not everyone is suited to...","ultimately, the best choice depends on..."],
+    sample:"As young people plan their futures, they must often choose between pursuing a university degree and undertaking vocational training. While many still regard a university education as the surest path to a successful career, others argue that practical, skills-based training offers equally strong, if not better, career prospects. This essay will examine both viewpoints before presenting my own opinion.\n\nSupporters of university education argue that a degree provides not only specialised knowledge but also transferable skills such as critical thinking, research and independent study, which are valued across a wide range of professions. A university qualification can also open doors to higher-paying jobs and leadership positions, particularly in fields such as medicine, law and engineering, where formal academic training is essential. Furthermore, the university experience often broadens students' outlook through exposure to diverse ideas and people.\n\nHowever, advocates of vocational training point out that many well-paid, secure careers, such as electricians, chefs and IT technicians, require practical skills rather than academic theory. Vocational courses tend to be shorter and more affordable than a university degree, and they allow students to enter the workforce, and start earning, more quickly. In addition, because such training is directly linked to a specific trade, graduates often find it easier to secure employment immediately after completing their studies, avoiding the underemployment that some university graduates face.\n\nIn my view, neither path is inherently superior; the right choice depends on an individual's interests, strengths and career goals. Someone aiming to become a doctor clearly needs a university education, whereas a person passionate about carpentry would likely benefit more from hands-on training. Societies should therefore continue to invest in both academic and vocational routes, ensuring that young people have real choices rather than being pushed towards one over the other."},
 ];
 let ieltsWritingFilter = "all";
 let ieltsWritingRevealed = {};
@@ -5260,7 +5742,10 @@ const IELTS_SPEAKING = {
     {q:"Do you work or are you a student?", sample:"I'm currently a student. I'm studying business administration at university, and I'm in my second year. I chose this subject because I've always been interested in how companies operate."},
     {q:"What do you like to do in your free time?", sample:"In my free time, I enjoy reading novels and going hiking with friends. I find reading relaxing after a busy day, and hiking helps me stay active and clear my mind."},
     {q:"What kind of food do you like?", sample:"I really enjoy traditional Mongolian dishes like buuz, but I also love trying different cuisines, especially Korean and Italian food. I think trying new food is a great way to learn about other cultures."},
-    {q:"Do you prefer spending time indoors or outdoors?", sample:"It depends on the season, but generally I prefer outdoors. I like walking, playing sports, and just being in nature. However, during winter, I tend to stay indoors and read or watch films."},
+    {q:"Do you prefer spending time indoors or outdoors?", sample:"It depends on the season, but generally I prefer outdoors. I like walking, playing sports, and just being in nature. However, during winter, I tend to stay indoors and read or watch films."},    {q:"What hobbies or interests do you have?", sample:"I really enjoy photography in my free time, especially taking pictures of nature and street scenes. I also like reading, mostly fiction and books about history. These hobbies help me relax and see things from different perspectives."},
+    {q:"Can you describe your typical daily routine?", sample:"On a normal day, I wake up around seven and have a quick breakfast before heading to work or class. My afternoons are usually busy with studying or meetings, and in the evening I like to relax by watching a show or going for a short walk. It's a fairly simple routine, but it works well for me."},
+    {q:"What's your favourite season of the year, and why?", sample:"I'd say autumn is my favourite season because the weather is mild and comfortable, not too hot or too cold. I also love the colours of the leaves changing, which makes the city look really beautiful. It's the perfect time for outdoor walks."},
+
   ]},
   part2:{label:"Part 2 (Cue Card)", cards:[
     {title:"Describe a skill you would like to learn.", bullets:["what the skill is","why you want to learn it","how you would learn it","and explain how this skill would help you in the future"],
@@ -5268,14 +5753,21 @@ const IELTS_SPEAKING = {
     {title:"Describe a memorable journey you have taken.", bullets:["where you went","who you went with","what you did there","and explain why it was memorable"],
       sample:"I'd like to talk about a trip I took to Lake Khuvsgul in northern Mongolia two summers ago. I went there with three close friends from university during our summer break.\n\nWe travelled by car, which took almost two days, but the journey itself was part of the adventure, as we stopped in small towns along the way and saw some beautiful countryside. Once we arrived, we spent five days camping right next to the lake, swimming, hiking in the surrounding hills, and cooking meals together over a fire.\n\nThis journey was memorable for several reasons. First, the scenery was absolutely stunning, unlike anything I had seen before. Second, spending so much uninterrupted time with close friends, away from phones and daily responsibilities, made us much closer as a group. We still talk about that trip whenever we meet.\n\nOverall, it wasn't a luxurious holiday, but it was one of the most meaningful trips I've ever taken, mainly because of the people I shared it with and the natural beauty we experienced together."},
     {title:"Describe a piece of technology that you find useful.", bullets:["what it is","how often you use it","what you use it for","and explain why you find it useful"],
-      sample:"The piece of technology I find most useful is probably my smartphone, although I know that's a fairly common answer. Still, I think it genuinely plays a huge role in my daily life.\n\nI use it constantly, probably dozens of times a day, for everything from communicating with friends and family to checking my university timetable and reading the news. I also rely on it heavily for navigation whenever I'm in an unfamiliar area of the city.\n\nWhat I find most useful specifically is the combination of a good camera and instant access to the internet. I can take a photo of something interesting, look up information about it immediately, and share it with friends within seconds. Before smartphones existed, all of that would have required several separate devices.\n\nThe reason I find it so useful is simply how much time and effort it saves me. It has essentially replaced a camera, a map, a diary, and a telephone all in one device, which makes daily life significantly more convenient and efficient."},
+      sample:"The piece of technology I find most useful is probably my smartphone, although I know that's a fairly common answer. Still, I think it genuinely plays a huge role in my daily life.\n\nI use it constantly, probably dozens of times a day, for everything from communicating with friends and family to checking my university timetable and reading the news. I also rely on it heavily for navigation whenever I'm in an unfamiliar area of the city.\n\nWhat I find most useful specifically is the combination of a good camera and instant access to the internet. I can take a photo of something interesting, look up information about it immediately, and share it with friends within seconds. Before smartphones existed, all of that would have required several separate devices.\n\nThe reason I find it so useful is simply how much time and effort it saves me. It has essentially replaced a camera, a map, a diary, and a telephone all in one device, which makes daily life significantly more convenient and efficient."},    {title:"Describe a book you have read that you enjoyed.", bullets:["what the book was about","when you read it","why you decided to read it","and explain why you enjoyed it so much"],
+      sample:"One book that I really enjoyed reading is called 'The Alchemist' by Paulo Coelho. It's a novel about a young shepherd boy from Spain named Santiago, who travels all the way to Egypt in search of a hidden treasure, but along the way he learns much deeper lessons about following his dreams and listening to his heart.\n\nI first read this book about three years ago, during a school holiday when I had a lot of free time. A close friend of mine had recommended it to me, saying it was one of the most inspiring books she had ever read, so I decided to give it a try even though I wasn't usually a big fan of fiction at the time.\n\nWhat I enjoyed most about the book was how simple yet meaningful the story was. Even though the language was easy to follow, the ideas behind it were quite profound, especially the message that the journey itself is often more important than the destination. I also liked how the story combined adventure with philosophy, which made it both entertaining and thought-provoking at the same time.\n\nOverall, this book had a real impact on how I think about setting goals and dealing with challenges. Whenever I feel unmotivated or unsure about a decision, I sometimes think back to Santiago's journey, and it reminds me to stay patient and keep believing in what I'm working towards. That's why I would definitely recommend it to almost anyone."},
+    {title:"Describe a person who has inspired you.", bullets:["who this person is","how you know them","what they have done","and explain why this person inspires you"],
+      sample:"The person who has inspired me the most is my grandmother, who is now in her seventies but still one of the most hard-working and positive people I know. She raised five children mostly on her own after my grandfather passed away early, working long hours while still managing to keep the family together.\n\nI've known her my entire life, of course, since she practically helped raise me as well while my parents were busy working. Growing up, I spent a lot of weekends at her house, and I got to see first-hand how she handled difficulties without ever complaining.\n\nWhat she has done that inspires me most isn't one single achievement, but rather the way she approached everyday life. Despite having very little formal education herself, she made sure all of her children finished school, sometimes taking on extra work just to pay for books or tuition. She also never lost her sense of humour, even during the hardest times, which I think says a lot about her character.\n\nShe inspires me because she taught me, without ever really giving lectures about it, that resilience and hard work can get you through almost anything. Whenever I'm facing a difficult exam or a stressful period, I think about how she managed to overcome much bigger challenges with so much grace, and it motivates me to keep going instead of giving up."},
+
   ]},
   part3:{label:"Part 3", qa:[
     {q:"Do you think schools should teach more practical skills, or focus mainly on academic subjects?", sample:"I think schools should aim for a balance between the two, although I do believe more practical skills could be introduced. Academic subjects like mathematics and science are essential for developing logical thinking, but many students leave school without knowing how to manage money or cook a basic meal. Including some practical skills alongside academic subjects would prepare students more fully for adult life."},
     {q:"How has technology changed the way people travel compared to the past?", sample:"Technology has transformed travel enormously. In the past, people relied on printed maps and travel agents to plan a trip, whereas now almost everything can be arranged instantly through a smartphone, from booking flights to finding accommodation and reading reviews from other travellers. Navigation apps have also made it much easier to explore unfamiliar places confidently without getting lost."},
     {q:"Do you think people rely too much on technology nowadays?", sample:"In some ways, yes, I think many people do rely too heavily on technology, particularly smartphones. It's common to see people struggle with basic tasks, like remembering phone numbers or reading a paper map, because technology has always done it for them. That said, I don't think this reliance is entirely negative, since technology also allows us to be more efficient and connected than ever before."},
     {q:"What skills do you think will be most important for young people in the future?", sample:"I believe adaptability and digital literacy will be particularly important, since technology and job markets are changing so quickly that people will likely need to learn new skills throughout their careers. Beyond that, soft skills like communication and critical thinking will remain valuable, because they are difficult for machines or automation to replace."},
-    {q:"Some people say travelling is the best way to learn about the world. Do you agree?", sample:"I largely agree, because travelling exposes you directly to different cultures, languages and ways of life in a way that books or the internet simply cannot replicate. That said, I don't think it's the only way to learn about the world; reading, documentaries and conversations with people from different backgrounds can also broaden your understanding, especially for those who don't have the opportunity to travel often."},
+    {q:"Some people say travelling is the best way to learn about the world. Do you agree?", sample:"I largely agree, because travelling exposes you directly to different cultures, languages and ways of life in a way that books or the internet simply cannot replicate. That said, I don't think it's the only way to learn about the world; reading, documentaries and conversations with people from different backgrounds can also broaden your understanding, especially for those who don't have the opportunity to travel often."},    {q:"Do you think there are big differences between how older and younger generations view life?", sample:"Yes, I think there are quite significant differences, largely because of how much technology and society have changed. Older generations often value stability, such as staying in one job for a long time, whereas younger people today tend to prioritise flexibility and personal fulfilment, partly because the job market itself has changed so much. That said, I think both generations still share core values like family and hard work, even if they express them differently."},
+    {q:"How do you think the media influences public opinion nowadays?", sample:"I think the media has an enormous influence on how people think, sometimes even more than in the past because of social media. News outlets and online platforms can shape which issues people consider important simply by choosing what to report on and how to frame it. At the same time, this makes it quite risky, because misinformation can spread very quickly, so people need to be more critical about where their information comes from."},
+    {q:"What are the main effects of urbanization on a country's culture and lifestyle?", sample:"Urbanization tends to bring both positive and negative changes to a country's culture. On one hand, cities create more job opportunities and access to services like healthcare and education, which can improve people's overall standard of living. On the other hand, rapid urbanization can weaken traditional community ties, since people in cities often live more individually and have less contact with extended family, unlike in rural areas where communities tend to be closer-knit."},
+
   ]},
 };
 let ieltsSpkPart = "part1";
@@ -5615,7 +6107,7 @@ function setTrack(track, opts){
 function switchIeltsView(view){
   currentIeltsView = view;
   if(view!=="mock") clearMockTimer();
-  ["vocab","review","reading","listening","writing","speaking","mock"].forEach(v=>{
+  ["vocab","review","game","reading","listening","writing","speaking","mock"].forEach(v=>{
     const tab = document.getElementById("tab-ielts-"+v);
     if(tab) tab.classList.toggle("active", v===view);
     const sec = document.getElementById("ielts-"+v+"-view");
@@ -5623,6 +6115,7 @@ function switchIeltsView(view){
   });
   if(view==="vocab"){ renderIeltsVocabFilters(); renderIeltsVocab(); }
   if(view==="review"){ startIeltsSession(); }
+  if(view==="game"){ renderIeltsGameFilters(); renderIeltsGame(); }
   if(view==="reading"){ ieltsReadActive=null; renderIeltsReading(); }
   if(view==="listening"){ ieltsListenActive=null; renderIeltsListening(); }
   if(view==="writing"){ renderIeltsWritingFilters(); renderIeltsWriting(); }
@@ -5686,7 +6179,7 @@ document.getElementById("tab-progress").addEventListener("click", ()=>switchView
   if(trackHskBtn) trackHskBtn.addEventListener("click", ()=>setTrack("hsk"));
   if(trackIeltsBtn) trackIeltsBtn.addEventListener("click", ()=>setTrack("ielts"));
 }
-["vocab","review","reading","listening","writing","speaking","mock"].forEach(v=>{
+["vocab","review","game","reading","listening","writing","speaking","mock"].forEach(v=>{
   const btn = document.getElementById("tab-ielts-"+v);
   if(btn) btn.addEventListener("click", ()=>switchIeltsView(v));
 });
