@@ -465,8 +465,8 @@
   #review-view.active, #quiz-view.active, #progress-view.active, #games-view.active, #leaderboard-view.active, #profile-view.active, #grammar-view.active{display:block;}
   #lessons-view.hidden{display:none;}
 
-  #ielts-vocab-view, #ielts-reading-view, #ielts-listening-view, #ielts-writing-view, #ielts-speaking-view{display:none;}
-  #ielts-vocab-view.active, #ielts-reading-view.active, #ielts-listening-view.active, #ielts-writing-view.active, #ielts-speaking-view.active{display:block;}
+  #ielts-vocab-view, #ielts-review-view, #ielts-reading-view, #ielts-listening-view, #ielts-writing-view, #ielts-speaking-view, #ielts-mock-view{display:none;}
+  #ielts-vocab-view.active, #ielts-review-view.active, #ielts-reading-view.active, #ielts-listening-view.active, #ielts-writing-view.active, #ielts-speaking-view.active, #ielts-mock-view.active{display:block;}
 
   .grammar-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;}
   .grammar-head input{

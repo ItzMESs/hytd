@@ -20,11 +20,13 @@ export const BODY_HTML = `<header class="top">
         <button id="tab-review" class="track-hsk"><span class="tab-ic">🗂️</span>Давталт</button>
         <button id="tab-quiz" class="track-hsk"><span class="tab-ic">✏️</span>Тест</button>
         <button id="tab-games" class="track-hsk"><span class="tab-ic">🎮</span>Тоглоом</button>
-        <button id="tab-ielts-vocab" class="track-ielts" hidden><span class="tab-ic">🗂️</span>Үгийн сан</button>
+        <button id="tab-ielts-vocab" class="track-ielts" hidden><span class="tab-ic">📚</span>Үгийн сан</button>
+        <button id="tab-ielts-review" class="track-ielts" hidden><span class="tab-ic">🗂️</span>Давталт</button>
         <button id="tab-ielts-reading" class="track-ielts" hidden><span class="tab-ic">📖</span>Reading</button>
         <button id="tab-ielts-listening" class="track-ielts" hidden><span class="tab-ic">🎧</span>Listening</button>
         <button id="tab-ielts-writing" class="track-ielts" hidden><span class="tab-ic">✍️</span>Writing</button>
         <button id="tab-ielts-speaking" class="track-ielts" hidden><span class="tab-ic">🗣️</span>Speaking</button>
+        <button id="tab-ielts-mock" class="track-ielts" hidden><span class="tab-ic">🎯</span>Бүтэн сорил</button>
         <button id="tab-progress" class="track-hsk"><span class="tab-ic">📊</span>Ахиц</button>
         <button id="tab-leaderboard" class="track-hsk"><span class="tab-ic">🏆</span>Тэргүүлэгчид<span class="tab-badge" id="tab-leaderboard-badge" hidden>0</span></button>
       </div>
@@ -218,6 +220,21 @@ export const BODY_HTML = `<header class="top">
     <div id="ielts-vocab-body"></div>
   </section>
 
+  <section id="ielts-review-view" class="track-ielts" hidden>
+    <div class="scope-filters" id="ielts-review-filters"></div>
+    <div class="deck-stage">
+      <div class="session-progress"><i id="ielts-session-bar" style="width:0%"></i></div>
+      <div class="session-count" id="ielts-session-count">0 / 0</div>
+      <div id="ielts-flash-slot"></div>
+      <div class="rate-row" id="ielts-rate-row">
+        <button class="rate-btn rate-again" data-r="again">Дахин<small>&lt; 10 мин</small></button>
+        <button class="rate-btn rate-hard" data-r="hard">Хэцүү<small>маргааш орчим</small></button>
+        <button class="rate-btn rate-good" data-r="good">Сайн<small>хэдэн өдөр</small></button>
+        <button class="rate-btn rate-easy" data-r="easy">Амархан<small>дараа 7 хоног+</small></button>
+      </div>
+    </div>
+  </section>
+
   <section id="ielts-reading-view" class="track-ielts" hidden>
     <div id="ielts-reading-body"></div>
   </section>
@@ -234,6 +251,10 @@ export const BODY_HTML = `<header class="top">
   <section id="ielts-speaking-view" class="track-ielts" hidden>
     <div class="scope-filters" id="ielts-speaking-filters"></div>
     <div id="ielts-speaking-body"></div>
+  </section>
+
+  <section id="ielts-mock-view" class="track-ielts" hidden>
+    <div id="ielts-mock-body"></div>
   </section>
 
   <p class="save-note" id="save-note">Ахиц дэвшил автоматаар хадгалагдана.</p>

@@ -4719,78 +4719,88 @@ document.addEventListener("click", (e)=>{
   if(btn){ e.preventDefault(); e.stopPropagation(); speakEn(btn.dataset.sayEn); }
 }, true);
 
+/* ============================= IELTS: ТҮВШИН (1-7, HSK маягийн дугаарлалт) ============================= */
+const IELTS_LEVELS = ["ielts1","ielts2","ielts3","ielts4","ielts5","ielts6","ielts7"];
+const IELTS_LEVEL_META = {
+  ielts1:{label:"IELTS 1", sub:"Маш анхан шат"},
+  ielts2:{label:"IELTS 2", sub:"Анхан шат"},
+  ielts3:{label:"IELTS 3", sub:"Анхан ахисан шат"},
+  ielts4:{label:"IELTS 4", sub:"Дунд шат"},
+  ielts5:{label:"IELTS 5", sub:"Дунд ахисан шат"},
+  ielts6:{label:"IELTS 6", sub:"Ахисан шат"},
+  ielts7:{label:"IELTS 7", sub:"Маш ахисан шат"},
+};
+const IELTS_TOPIC_LABELS = {environment:"🌍 Байгаль орчин", education:"🎓 Боловсрол", technology:"💻 Технологи", health:"🩺 Эрүүл мэнд"};
+
 /* ============================= IELTS: ҮГИЙН САН (Vocabulary) ============================= */
-const IELTS_VOCAB_TOPICS = [
-  {key:"environment", label:"🌍 Байгаль орчин", words:[
-    {w:"sustainable", ipa:"/səˈsteɪnəbl/", pos:"adj", mn:"тогтвортой, удаан хугацаанд ашиглаж болохуйц", ex:"We need to find more sustainable ways to produce energy."},
-    {w:"pollution", ipa:"/pəˈluːʃn/", pos:"n", mn:"бохирдол", ex:"Air pollution is a serious problem in many big cities."},
-    {w:"renewable", ipa:"/rɪˈnjuːəbl/", pos:"adj", mn:"сэргээгдэх (эрчим хүч)", ex:"Solar and wind are examples of renewable energy sources."},
-    {w:"emission", ipa:"/ɪˈmɪʃn/", pos:"n", mn:"ялгарал (утаа, хий)", ex:"The government plans to cut carbon emissions by 2030."},
-    {w:"deforestation", ipa:"/diːˌfɒrɪˈsteɪʃn/", pos:"n", mn:"ойн хомсдол", ex:"Deforestation is destroying habitats for thousands of species."},
-    {w:"ecosystem", ipa:"/ˈiːkəʊsɪstəm/", pos:"n", mn:"экосистем", ex:"Coral reefs support a huge variety of marine ecosystems."},
-    {w:"drought", ipa:"/draʊt/", pos:"n", mn:"ган гачиг", ex:"Many farmers lost their crops during the drought."},
-    {w:"conservation", ipa:"/ˌkɒnsəˈveɪʃn/", pos:"n", mn:"хамгаалал, хадгалалт", ex:"Wildlife conservation programs protect endangered species."},
-    {w:"greenhouse gas", ipa:"/ˈɡriːnhaʊs ɡæs/", pos:"n", mn:"хүлэмжийн хий", ex:"Carbon dioxide is the most common greenhouse gas."},
-    {w:"biodiversity", ipa:"/ˌbaɪəʊdaɪˈvɜːsəti/", pos:"n", mn:"биологийн олон янз байдал", ex:"Rainforests contain an incredible level of biodiversity."},
-    {w:"carbon footprint", ipa:"/ˈkɑːbən ˈfʊtprɪnt/", pos:"n", mn:"нүүрстөрөгчийн ул мөр", ex:"Flying often increases a person's carbon footprint significantly."},
-    {w:"landfill", ipa:"/ˈlændfɪl/", pos:"n", mn:"хог хаягдлын цэг", ex:"Most of our rubbish ends up in a landfill."},
-    {w:"depletion", ipa:"/dɪˈpliːʃn/", pos:"n", mn:"шавхагдал, хомсдол", ex:"The depletion of natural resources worries scientists."},
-    {w:"climate change", ipa:"/ˈklaɪmət tʃeɪndʒ/", pos:"n", mn:"цаг уурын өөрчлөлт", ex:"Climate change is causing more extreme weather events."},
-    {w:"recyclable", ipa:"/riːˈsaɪkləbl/", pos:"adj", mn:"дахин боловсруулж болохуйц", ex:"Try to buy products with recyclable packaging."},
-  ]},
-  {key:"education", label:"🎓 Боловсрол", words:[
-    {w:"curriculum", ipa:"/kəˈrɪkjələm/", pos:"n", mn:"сургалтын хөтөлбөр", ex:"The school has updated its curriculum to include more technology classes."},
-    {w:"literacy", ipa:"/ˈlɪtərəsi/", pos:"n", mn:"бичиг үсэгт тайлагдсан байдал", ex:"Improving literacy rates is a national priority."},
-    {w:"tuition", ipa:"/tjuˈɪʃn/", pos:"n", mn:"сургалтын төлбөр", ex:"University tuition fees have risen sharply in recent years."},
-    {w:"scholarship", ipa:"/ˈskɒləʃɪp/", pos:"n", mn:"тэтгэлэг", ex:"She received a full scholarship to study abroad."},
-    {w:"lecture", ipa:"/ˈlektʃə(r)/", pos:"n", mn:"лекц", ex:"The professor gave an interesting lecture on ancient history."},
-    {w:"assessment", ipa:"/əˈsesmənt/", pos:"n", mn:"үнэлгээ", ex:"Continuous assessment is used instead of a single final exam."},
-    {w:"vocational", ipa:"/vəʊˈkeɪʃənl/", pos:"adj", mn:"мэргэжлийн (сургалт)", ex:"Vocational training prepares students for a specific trade."},
-    {w:"undergraduate", ipa:"/ˌʌndəˈɡrædʒuət/", pos:"n", mn:"бакалаврын оюутан", ex:"Most undergraduate courses take three or four years."},
-    {w:"plagiarism", ipa:"/ˈpleɪdʒərɪzəm/", pos:"n", mn:"эх сурвалж дурдалгүй хуулах", ex:"Plagiarism can lead to serious academic penalties."},
-    {w:"extracurricular", ipa:"/ˌekstrəkəˈrɪkjələ(r)/", pos:"adj", mn:"сургалтын хөтөлбөрөөс гадуурх", ex:"Extracurricular activities help students develop new skills."},
-    {w:"tutor", ipa:"/ˈtjuːtə(r)/", pos:"n", mn:"хувийн багш", ex:"He hired a tutor to help him with mathematics."},
-    {w:"dropout", ipa:"/ˈdrɒpaʊt/", pos:"n", mn:"сургууль завсардагч", ex:"The dropout rate has decreased thanks to new support programs."},
-    {w:"distance learning", ipa:"/ˈdɪstəns ˈlɜːnɪŋ/", pos:"n", mn:"зайны сургалт", ex:"Distance learning became far more common after 2020."},
-    {w:"faculty", ipa:"/ˈfækəlti/", pos:"n", mn:"тэнхим, багш нар (нийтэд нь)", ex:"The faculty voted to change the exam schedule."},
-    {w:"proficiency", ipa:"/prəˈfɪʃnsi/", pos:"n", mn:"чадамж, эзэмшил (хэл)", ex:"Students must show English proficiency before enrolling."},
-  ]},
-  {key:"technology", label:"💻 Технологи", words:[
-    {w:"innovation", ipa:"/ˌɪnəˈveɪʃn/", pos:"n", mn:"шинэлэг зүйл, инноваци", ex:"The company is known for its constant innovation."},
-    {w:"artificial intelligence", ipa:"/ˌɑːtɪˈfɪʃl ɪnˈtelɪdʒəns/", pos:"n", mn:"хиймэл оюун ухаан", ex:"Artificial intelligence is changing the way we work."},
-    {w:"algorithm", ipa:"/ˈælɡərɪðəm/", pos:"n", mn:"алгоритм", ex:"The app uses an algorithm to recommend new songs."},
-    {w:"bandwidth", ipa:"/ˈbændwɪdθ/", pos:"n", mn:"зурвасын өргөн", ex:"Video calls require a lot of internet bandwidth."},
-    {w:"encryption", ipa:"/ɪnˈkrɪpʃn/", pos:"n", mn:"шифрлэлт", ex:"Encryption keeps your online banking details secure."},
-    {w:"malware", ipa:"/ˈmælweə(r)/", pos:"n", mn:"хортой програм хангамж", ex:"The email contained a link that installed malware."},
-    {w:"automation", ipa:"/ˌɔːtəˈmeɪʃn/", pos:"n", mn:"автоматжуулалт", ex:"Automation has replaced many repetitive factory jobs."},
-    {w:"breakthrough", ipa:"/ˈbreɪkθruː/", pos:"n", mn:"томоохон ахиц, нээлт", ex:"Scientists announced a major breakthrough in battery technology."},
-    {w:"connectivity", ipa:"/ˌkɒnekˈtɪvəti/", pos:"n", mn:"холболт", ex:"Rural areas often struggle with poor internet connectivity."},
-    {w:"obsolete", ipa:"/ˈɒbsəliːt/", pos:"adj", mn:"хоцрогдсон, хэрэглээгүй болсон", ex:"Many older devices quickly become obsolete."},
-    {w:"surveillance", ipa:"/səˈveɪləns/", pos:"n", mn:"хяналт, ажиглалт", ex:"The use of surveillance cameras raises privacy concerns."},
-    {w:"glitch", ipa:"/ɡlɪtʃ/", pos:"n", mn:"жижиг алдаа (техник)", ex:"A software glitch delayed the flight for two hours."},
-    {w:"streamline", ipa:"/ˈstriːmlaɪn/", pos:"v", mn:"хялбарчлах, оновчтой болгох", ex:"The new system streamlines the entire ordering process."},
-    {w:"interface", ipa:"/ˈɪntəfeɪs/", pos:"n", mn:"интерфейс", ex:"The app has a very simple, user-friendly interface."},
-    {w:"cybersecurity", ipa:"/ˈsaɪbəsɪˌkjʊərəti/", pos:"n", mn:"кибер аюулгүй байдал", ex:"Companies are investing more in cybersecurity every year."},
-  ]},
-  {key:"health", label:"🩺 Эрүүл мэнд", words:[
-    {w:"obesity", ipa:"/əʊˈbiːsəti/", pos:"n", mn:"таргалалт", ex:"Obesity rates have doubled over the past two decades."},
-    {w:"immune system", ipa:"/ɪˈmjuːn ˈsɪstəm/", pos:"n", mn:"дархлааны систем", ex:"A healthy diet helps strengthen your immune system."},
-    {w:"sedentary", ipa:"/ˈsedntri/", pos:"adj", mn:"хөдөлгөөн багатай (амьдралын хэв маяг)", ex:"A sedentary lifestyle increases the risk of heart disease."},
-    {w:"nutrient", ipa:"/ˈnjuːtriənt/", pos:"n", mn:"шим тэжээл", ex:"Vegetables are rich in essential nutrients."},
-    {w:"chronic", ipa:"/ˈkrɒnɪk/", pos:"adj", mn:"архаг (өвчин)", ex:"Diabetes is a chronic condition that requires lifelong management."},
-    {w:"outbreak", ipa:"/ˈaʊtbreɪk/", pos:"n", mn:"дэгдэлт (өвчний)", ex:"Health officials responded quickly to the disease outbreak."},
-    {w:"vaccination", ipa:"/ˌvæksɪˈneɪʃn/", pos:"n", mn:"вакцинжуулалт", ex:"Vaccination has greatly reduced cases of measles worldwide."},
-    {w:"life expectancy", ipa:"/laɪf ɪkˈspektənsi/", pos:"n", mn:"дундаж наслалт", ex:"Life expectancy has risen thanks to better healthcare."},
-    {w:"mental health", ipa:"/ˈmentl helθ/", pos:"n", mn:"сэтгэцийн эрүүл мэнд", ex:"More people are now openly discussing mental health issues."},
-    {w:"remedy", ipa:"/ˈremədi/", pos:"n", mn:"эмчилгээ, эм", ex:"Honey and lemon is a popular remedy for a sore throat."},
-    {w:"symptom", ipa:"/ˈsɪmptəm/", pos:"n", mn:"шинж тэмдэг", ex:"A high fever is a common symptom of infection."},
-    {w:"addiction", ipa:"/əˈdɪkʃn/", pos:"n", mn:"донтолт, хамааралт байдал", ex:"Smartphone addiction is becoming a growing concern among teenagers."},
-    {w:"well-being", ipa:"/ˌwel ˈbiːɪŋ/", pos:"n", mn:"сайн сайхан байдал", ex:"Exercise improves both physical and mental well-being."},
-    {w:"malnutrition", ipa:"/ˌmælnjuˈtrɪʃn/", pos:"n", mn:"тэжээлийн дутагдал", ex:"Malnutrition remains a serious issue in some developing regions."},
-    {w:"epidemic", ipa:"/ˌepɪˈdemɪk/", pos:"n", mn:"тахал өвчин", ex:"The obesity epidemic is linked to changes in modern diets."},
-  ]},
+const IELTS_VOCAB_WORDS = [
+  {w:"sustainable", ipa:"/səˈsteɪnəbl/", pos:"adj", mn:"тогтвортой, удаан хугацаанд ашиглаж болохуйц", ex:"We need to find more sustainable ways to produce energy.", topic:"environment", level:"ielts5"},
+  {w:"pollution", ipa:"/pəˈluːʃn/", pos:"n", mn:"бохирдол", ex:"Air pollution is a serious problem in many big cities.", topic:"environment", level:"ielts1"},
+  {w:"renewable", ipa:"/rɪˈnjuːəbl/", pos:"adj", mn:"сэргээгдэх (эрчим хүч)", ex:"Solar and wind are examples of renewable energy sources.", topic:"environment", level:"ielts3"},
+  {w:"emission", ipa:"/ɪˈmɪʃn/", pos:"n", mn:"ялгарал (утаа, хий)", ex:"The government plans to cut carbon emissions by 2030.", topic:"environment", level:"ielts4"},
+  {w:"deforestation", ipa:"/diːˌfɒrɪˈsteɪʃn/", pos:"n", mn:"ойн хомсдол", ex:"Deforestation is destroying habitats for thousands of species.", topic:"environment", level:"ielts6"},
+  {w:"ecosystem", ipa:"/ˈiːkəʊsɪstəm/", pos:"n", mn:"экосистем", ex:"Coral reefs support a huge variety of marine ecosystems.", topic:"environment", level:"ielts4"},
+  {w:"drought", ipa:"/draʊt/", pos:"n", mn:"ган гачиг", ex:"Many farmers lost their crops during the drought.", topic:"environment", level:"ielts2"},
+  {w:"conservation", ipa:"/ˌkɒnsəˈveɪʃn/", pos:"n", mn:"хамгаалал, хадгалалт", ex:"Wildlife conservation programs protect endangered species.", topic:"environment", level:"ielts3"},
+  {w:"greenhouse gas", ipa:"/ˈɡriːnhaʊs ɡæs/", pos:"n", mn:"хүлэмжийн хий", ex:"Carbon dioxide is the most common greenhouse gas.", topic:"environment", level:"ielts3"},
+  {w:"biodiversity", ipa:"/ˌbaɪəʊdaɪˈvɜːsəti/", pos:"n", mn:"биологийн олон янз байдал", ex:"Rainforests contain an incredible level of biodiversity.", topic:"environment", level:"ielts7"},
+  {w:"carbon footprint", ipa:"/ˈkɑːbən ˈfʊtprɪnt/", pos:"n", mn:"нүүрстөрөгчийн ул мөр", ex:"Flying often increases a person's carbon footprint significantly.", topic:"environment", level:"ielts6"},
+  {w:"landfill", ipa:"/ˈlændfɪl/", pos:"n", mn:"хог хаягдлын цэг", ex:"Most of our rubbish ends up in a landfill.", topic:"environment", level:"ielts4"},
+  {w:"depletion", ipa:"/dɪˈpliːʃn/", pos:"n", mn:"шавхагдал, хомсдол", ex:"The depletion of natural resources worries scientists.", topic:"environment", level:"ielts7"},
+  {w:"climate change", ipa:"/ˈklaɪmət tʃeɪndʒ/", pos:"n", mn:"цаг уурын өөрчлөлт", ex:"Climate change is causing more extreme weather events.", topic:"environment", level:"ielts1"},
+  {w:"recyclable", ipa:"/riːˈsaɪkləbl/", pos:"adj", mn:"дахин боловсруулж болохуйц", ex:"Try to buy products with recyclable packaging.", topic:"environment", level:"ielts2"},
+  {w:"curriculum", ipa:"/kəˈrɪkjələm/", pos:"n", mn:"сургалтын хөтөлбөр", ex:"The school has updated its curriculum to include more technology classes.", topic:"education", level:"ielts4"},
+  {w:"literacy", ipa:"/ˈlɪtərəsi/", pos:"n", mn:"бичиг үсэгт тайлагдсан байдал", ex:"Improving literacy rates is a national priority.", topic:"education", level:"ielts3"},
+  {w:"tuition", ipa:"/tjuˈɪʃn/", pos:"n", mn:"сургалтын төлбөр", ex:"University tuition fees have risen sharply in recent years.", topic:"education", level:"ielts3"},
+  {w:"scholarship", ipa:"/ˈskɒləʃɪp/", pos:"n", mn:"тэтгэлэг", ex:"She received a full scholarship to study abroad.", topic:"education", level:"ielts2"},
+  {w:"lecture", ipa:"/ˈlektʃə(r)/", pos:"n", mn:"лекц", ex:"The professor gave an interesting lecture on ancient history.", topic:"education", level:"ielts1"},
+  {w:"assessment", ipa:"/əˈsesmənt/", pos:"n", mn:"үнэлгээ", ex:"Continuous assessment is used instead of a single final exam.", topic:"education", level:"ielts3"},
+  {w:"vocational", ipa:"/vəʊˈkeɪʃənl/", pos:"adj", mn:"мэргэжлийн (сургалт)", ex:"Vocational training prepares students for a specific trade.", topic:"education", level:"ielts6"},
+  {w:"undergraduate", ipa:"/ˌʌndəˈɡrædʒuət/", pos:"n", mn:"бакалаврын оюутан", ex:"Most undergraduate courses take three or four years.", topic:"education", level:"ielts4"},
+  {w:"plagiarism", ipa:"/ˈpleɪdʒərɪzəm/", pos:"n", mn:"эх сурвалж дурдалгүй хуулах", ex:"Plagiarism can lead to serious academic penalties.", topic:"education", level:"ielts7"},
+  {w:"extracurricular", ipa:"/ˌekstrəkəˈrɪkjələ(r)/", pos:"adj", mn:"сургалтын хөтөлбөрөөс гадуурх", ex:"Extracurricular activities help students develop new skills.", topic:"education", level:"ielts5"},
+  {w:"tutor", ipa:"/ˈtjuːtə(r)/", pos:"n", mn:"хувийн багш", ex:"He hired a tutor to help him with mathematics.", topic:"education", level:"ielts1"},
+  {w:"dropout", ipa:"/ˈdrɒpaʊt/", pos:"n", mn:"сургууль завсардагч", ex:"The dropout rate has decreased thanks to new support programs.", topic:"education", level:"ielts5"},
+  {w:"distance learning", ipa:"/ˈdɪstəns ˈlɜːnɪŋ/", pos:"n", mn:"зайны сургалт", ex:"Distance learning became far more common after 2020.", topic:"education", level:"ielts2"},
+  {w:"faculty", ipa:"/ˈfækəlti/", pos:"n", mn:"тэнхим, багш нар (нийтэд нь)", ex:"The faculty voted to change the exam schedule.", topic:"education", level:"ielts6"},
+  {w:"proficiency", ipa:"/prəˈfɪʃnsi/", pos:"n", mn:"чадамж, эзэмшил (хэл)", ex:"Students must show English proficiency before enrolling.", topic:"education", level:"ielts7"},
+  {w:"innovation", ipa:"/ˌɪnəˈveɪʃn/", pos:"n", mn:"шинэлэг зүйл, инноваци", ex:"The company is known for its constant innovation.", topic:"technology", level:"ielts3"},
+  {w:"artificial intelligence", ipa:"/ˌɑːtɪˈfɪʃl ɪnˈtelɪdʒəns/", pos:"n", mn:"хиймэл оюун ухаан", ex:"Artificial intelligence is changing the way we work.", topic:"technology", level:"ielts2"},
+  {w:"algorithm", ipa:"/ˈælɡərɪðəm/", pos:"n", mn:"алгоритм", ex:"The app uses an algorithm to recommend new songs.", topic:"technology", level:"ielts4"},
+  {w:"bandwidth", ipa:"/ˈbændwɪdθ/", pos:"n", mn:"зурвасын өргөн", ex:"Video calls require a lot of internet bandwidth.", topic:"technology", level:"ielts6"},
+  {w:"encryption", ipa:"/ɪnˈkrɪpʃn/", pos:"n", mn:"шифрлэлт", ex:"Encryption keeps your online banking details secure.", topic:"technology", level:"ielts7"},
+  {w:"malware", ipa:"/ˈmælweə(r)/", pos:"n", mn:"хортой програм хангамж", ex:"The email contained a link that installed malware.", topic:"technology", level:"ielts5"},
+  {w:"automation", ipa:"/ˌɔːtəˈmeɪʃn/", pos:"n", mn:"автоматжуулалт", ex:"Automation has replaced many repetitive factory jobs.", topic:"technology", level:"ielts5"},
+  {w:"breakthrough", ipa:"/ˈbreɪkθruː/", pos:"n", mn:"томоохон ахиц, нээлт", ex:"Scientists announced a major breakthrough in battery technology.", topic:"technology", level:"ielts5"},
+  {w:"connectivity", ipa:"/ˌkɒnekˈtɪvəti/", pos:"n", mn:"холболт", ex:"Rural areas often struggle with poor internet connectivity.", topic:"technology", level:"ielts4"},
+  {w:"obsolete", ipa:"/ˈɒbsəliːt/", pos:"adj", mn:"хоцрогдсон, хэрэглээгүй болсон", ex:"Many older devices quickly become obsolete.", topic:"technology", level:"ielts6"},
+  {w:"surveillance", ipa:"/səˈveɪləns/", pos:"n", mn:"хяналт, ажиглалт", ex:"The use of surveillance cameras raises privacy concerns.", topic:"technology", level:"ielts7"},
+  {w:"glitch", ipa:"/ɡlɪtʃ/", pos:"n", mn:"жижиг алдаа (техник)", ex:"A software glitch delayed the flight for two hours.", topic:"technology", level:"ielts1"},
+  {w:"streamline", ipa:"/ˈstriːmlaɪn/", pos:"v", mn:"хялбарчлах, оновчтой болгох", ex:"The new system streamlines the entire ordering process.", topic:"technology", level:"ielts7"},
+  {w:"interface", ipa:"/ˈɪntəfeɪs/", pos:"n", mn:"интерфейс", ex:"The app has a very simple, user-friendly interface.", topic:"technology", level:"ielts1"},
+  {w:"cybersecurity", ipa:"/ˈsaɪbəsɪˌkjʊərəti/", pos:"n", mn:"кибер аюулгүй байдал", ex:"Companies are investing more in cybersecurity every year.", topic:"technology", level:"ielts5"},
+  {w:"obesity", ipa:"/əʊˈbiːsəti/", pos:"n", mn:"таргалалт", ex:"Obesity rates have doubled over the past two decades.", topic:"health", level:"ielts2"},
+  {w:"immune system", ipa:"/ɪˈmjuːn ˈsɪstəm/", pos:"n", mn:"дархлааны систем", ex:"A healthy diet helps strengthen your immune system.", topic:"health", level:"ielts3"},
+  {w:"sedentary", ipa:"/ˈsedntri/", pos:"adj", mn:"хөдөлгөөн багатай (амьдралын хэв маяг)", ex:"A sedentary lifestyle increases the risk of heart disease.", topic:"health", level:"ielts7"},
+  {w:"nutrient", ipa:"/ˈnjuːtriənt/", pos:"n", mn:"шим тэжээл", ex:"Vegetables are rich in essential nutrients.", topic:"health", level:"ielts3"},
+  {w:"chronic", ipa:"/ˈkrɒnɪk/", pos:"adj", mn:"архаг (өвчин)", ex:"Diabetes is a chronic condition that requires lifelong management.", topic:"health", level:"ielts4"},
+  {w:"outbreak", ipa:"/ˈaʊtbreɪk/", pos:"n", mn:"дэгдэлт (өвчний)", ex:"Health officials responded quickly to the disease outbreak.", topic:"health", level:"ielts5"},
+  {w:"vaccination", ipa:"/ˌvæksɪˈneɪʃn/", pos:"n", mn:"вакцинжуулалт", ex:"Vaccination has greatly reduced cases of measles worldwide.", topic:"health", level:"ielts2"},
+  {w:"life expectancy", ipa:"/laɪf ɪkˈspektənsi/", pos:"n", mn:"дундаж наслалт", ex:"Life expectancy has risen thanks to better healthcare.", topic:"health", level:"ielts5"},
+  {w:"mental health", ipa:"/ˈmentl helθ/", pos:"n", mn:"сэтгэцийн эрүүл мэнд", ex:"More people are now openly discussing mental health issues.", topic:"health", level:"ielts1"},
+  {w:"remedy", ipa:"/ˈremədi/", pos:"n", mn:"эмчилгээ, эм", ex:"Honey and lemon is a popular remedy for a sore throat.", topic:"health", level:"ielts2"},
+  {w:"symptom", ipa:"/ˈsɪmptəm/", pos:"n", mn:"шинж тэмдэг", ex:"A high fever is a common symptom of infection.", topic:"health", level:"ielts2"},
+  {w:"addiction", ipa:"/əˈdɪkʃn/", pos:"n", mn:"донтолт, хамааралт байдал", ex:"Smartphone addiction is becoming a growing concern among teenagers.", topic:"health", level:"ielts4"},
+  {w:"well-being", ipa:"/ˌwel ˈbiːɪŋ/", pos:"n", mn:"сайн сайхан байдал", ex:"Exercise improves both physical and mental well-being.", topic:"health", level:"ielts1"},
+  {w:"malnutrition", ipa:"/ˌmælnjuˈtrɪʃn/", pos:"n", mn:"тэжээлийн дутагдал", ex:"Malnutrition remains a serious issue in some developing regions.", topic:"health", level:"ielts6"},
+  {w:"epidemic", ipa:"/ˌepɪˈdemɪk/", pos:"n", mn:"тахал өвчин", ex:"The obesity epidemic is linked to changes in modern diets.", topic:"health", level:"ielts6"},
 ];
-let ieltsVocabTopic = "environment";
+function buildIeltsDeck(){
+  return IELTS_VOCAB_WORDS.map((w,i)=>({id:"ielts:w:"+i, level:w.level, h:w.w, p:w.ipa, en:w.ex, m:w.mn, topic:w.topic}));
+}
+const IELTS_DECK = buildIeltsDeck();
+
+let ieltsVocabLevel = "ielts1";
 let ieltsVocabRevealed = {};
 function ieltsVocabWordStatus(word){ return (srs.ielts && srs.ielts.vocabKnown && srs.ielts.vocabKnown[word]) || null; }
 function setIeltsVocabStatus(word, status){
@@ -4803,19 +4813,18 @@ function renderIeltsVocabFilters(){
   const box = document.getElementById("ielts-vocab-filters");
   if(!box) return;
   box.innerHTML = "";
-  IELTS_VOCAB_TOPICS.forEach(t=>{
+  IELTS_LEVELS.forEach(lv=>{
     const chip = document.createElement("button");
-    chip.className = "chip"+(t.key===ieltsVocabTopic?" active":"");
-    chip.textContent = t.label;
-    chip.addEventListener("click", ()=>{ ieltsVocabTopic=t.key; ieltsVocabRevealed={}; renderIeltsVocabFilters(); renderIeltsVocab(); });
+    chip.className = "chip"+(lv===ieltsVocabLevel?" active":"");
+    chip.textContent = IELTS_LEVEL_META[lv].label;
+    chip.addEventListener("click", ()=>{ ieltsVocabLevel=lv; ieltsVocabRevealed={}; renderIeltsVocabFilters(); renderIeltsVocab(); });
     box.appendChild(chip);
   });
 }
 function renderIeltsVocab(){
   const box = document.getElementById("ielts-vocab-body");
   if(!box) return;
-  const topic = IELTS_VOCAB_TOPICS.find(t=>t.key===ieltsVocabTopic);
-  const words = topic ? topic.words : [];
+  const words = IELTS_VOCAB_WORDS.filter(w=>w.level===ieltsVocabLevel);
   const knownCount = words.filter(w=>ieltsVocabWordStatus(w.w)==="known").length;
   const rowsHtml = words.map(w=>{
     const revealed = !!ieltsVocabRevealed[w.w];
@@ -4823,7 +4832,7 @@ function renderIeltsVocab(){
     return `<div class="ielts-vocab-row">
       <div class="ielts-vocab-head">
         <span class="ielts-vocab-word">${escapeHtml(w.w)}</span>
-        <span class="ielts-vocab-ipa">${escapeHtml(w.ipa)} · ${escapeHtml(w.pos)}</span>
+        <span class="ielts-vocab-ipa">${escapeHtml(w.ipa)} · ${escapeHtml(w.pos)} · ${escapeHtml(IELTS_TOPIC_LABELS[w.topic]||"")}</span>
         ${speakerBtnHtmlEn(w.w,"")}
         <button type="button" class="btn-ghost ielts-vocab-reveal" data-w="${escapeHtml(w.w)}">${revealed?"Нуух":"Утга харах"}</button>
       </div>
@@ -4838,7 +4847,7 @@ function renderIeltsVocab(){
     </div>`;
   }).join("");
   box.innerHTML = `
-    <p class="intro" style="max-width:100%;">IELTS шалгалтад олонтаа таардаг сэдэвчилсэн үгсийн сан. Үг дээрх "Утга харах" товчийг дарж утга, жишээ өгүүлбэрийг үзээд өөрийгөө үнэлээрэй.</p>
+    <p class="intro" style="max-width:100%;">Түвшин 1-7 нь энгийнээс ахисан руу жигдэрсэн IELTS үгсийн сан юм (HSK-ийн түвшний дугаарлалттай адил төстэй, гэхдээ албан ёсны band score биш). Үг дээрх "Утга харах" товчийг дарж утга, жишээ өгүүлбэрийг үзээд өөрийгөө үнэлээрэй. Бататгахын тулд "Давталт" таб руу орж Anki маягийн флаш картаар давт.</p>
     <div class="ielts-vocab-progress">Мэдэж байгаа: <b>${knownCount}</b> / ${words.length}</div>
     ${rowsHtml}
   `;
@@ -4848,6 +4857,126 @@ function renderIeltsVocab(){
   box.querySelectorAll(".ielts-rate-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{ setIeltsVocabStatus(btn.dataset.w, btn.dataset.status); renderIeltsVocab(); });
   });
+}
+
+/* ============================= IELTS: ДАВТАЛТ (Anki маягийн SRS flashcard) ============================= */
+// HSK Давталт тайтай яг ижил spaced-repetition механизм (rate()/srs.cards) ашигладаг,
+// зөвхөн өөрийн гэсэн DOM элемент болон queue ашиглана — HSK-ийн session/DECK-тэй
+// огт холилдохгүй (card id-ууд "ielts:w:N" хэлбэртэй, HSK-ийн "hsk1:w:N"-тэй давхцахгүй).
+let ieltsReviewLevel = "all";
+let ieltsSession = {queue:[], pos:0, flipped:false};
+
+function ieltsDueCards(levelFilter){
+  const pool = levelFilter==="all" ? IELTS_DECK : IELTS_DECK.filter(c=>c.level===levelFilter);
+  const t = todayStr();
+  const due = pool.filter(c=>{ const st = srs.cards[c.id]; return st && st.due<=t; });
+  const fresh = pool.filter(c=>!srs.cards[c.id]).slice(0,10);
+  return shuffle(due.concat(fresh));
+}
+function renderIeltsReviewFilters(){
+  const box = document.getElementById("ielts-review-filters");
+  if(!box) return;
+  box.innerHTML = "";
+  ["all"].concat(IELTS_LEVELS).forEach(key=>{
+    const chip = document.createElement("button");
+    chip.className = "chip"+(key===ieltsReviewLevel?" active":"");
+    chip.textContent = key==="all" ? "Бүх түвшин" : IELTS_LEVEL_META[key].label;
+    chip.addEventListener("click", ()=>{ ieltsReviewLevel=key; startIeltsSession(); });
+    box.appendChild(chip);
+  });
+}
+function updateIeltsHeaderStats(){
+  const t = todayStr();
+  const due = IELTS_DECK.filter(c=>{ const st=srs.cards[c.id]; return st && st.due<=t; }).length
+    + IELTS_DECK.filter(c=>!srs.cards[c.id]).length;
+  const learned = IELTS_DECK.filter(c=>srs.cards[c.id]).length;
+  const dueEl = document.getElementById("ielts-session-count");
+  // session-count element already shows queue position — due/learned aren't
+  // shown in a header pill for IELTS (no shared header stats bar like HSK's),
+  // so this is intentionally a no-op placeholder kept symmetric with HSK's
+  // updateHeaderStats() in case a future header summary wants these numbers.
+  void due; void learned; void dueEl;
+}
+function startIeltsSession(){
+  renderIeltsReviewFilters();
+  ieltsSession = {queue: ieltsDueCards(ieltsReviewLevel), pos:0, flipped:false};
+  renderIeltsCard();
+}
+function renderIeltsCard(){
+  updateIeltsHeaderStats();
+  const slot = document.getElementById("ielts-flash-slot");
+  const rateRow = document.getElementById("ielts-rate-row");
+  const bar = document.getElementById("ielts-session-bar");
+  const count = document.getElementById("ielts-session-count");
+  if(!slot || !rateRow || !bar || !count) return;
+
+  const totalQ = ieltsSession.queue.length;
+  count.textContent = totalQ ? `${Math.min(ieltsSession.pos+1,totalQ)} / ${totalQ}` : "0 / 0";
+  bar.style.width = totalQ ? `${Math.min(100, Math.round(100*ieltsSession.pos/totalQ))}%` : "0%";
+
+  if(ieltsSession.pos>=totalQ || totalQ===0){
+    rateRow.classList.remove("show");
+    slot.innerHTML = `
+      <div class="empty-state">
+        <div class="big">✅</div>
+        <h3>Одоогоор давтах юм алга</h3>
+        <p>Энэ шүүлтүүрт due карт алга байна. Дараа дахин ирээрэй, эсвэл урьдчилж дасгал хийж болно.</p>
+        <button class="btn-primary" id="ielts-practice-ahead">Урьдчилж дасгал хийх</button>
+      </div>`;
+    const aheadBtn = document.getElementById("ielts-practice-ahead");
+    if(aheadBtn) aheadBtn.addEventListener("click", ()=>{
+      const pool = ieltsReviewLevel==="all" ? IELTS_DECK : IELTS_DECK.filter(c=>c.level===ieltsReviewLevel);
+      const sorted = pool.slice().sort((a,b)=>{
+        const da = srs.cards[a.id]?srs.cards[a.id].due:todayStr();
+        const db_ = srs.cards[b.id]?srs.cards[b.id].due:todayStr();
+        return da<db_?-1:da>db_?1:0;
+      });
+      ieltsSession = {queue: sorted.slice(0,15), pos:0, flipped:false};
+      renderIeltsCard();
+    });
+    return;
+  }
+
+  const card = ieltsSession.queue[ieltsSession.pos];
+  ieltsSession.flipped = false;
+  const el = document.createElement("div");
+  el.className = "flash";
+  el.innerHTML = `<span class="tag">${escapeHtml(IELTS_LEVEL_META[card.level].label)}</span>
+    ${speakerBtnHtmlEn(card.h, "flash-spk")}
+    ${starBtnHtml(card.id, "flash-star")}
+    <div class="front-hz">${escapeHtml(card.h)}</div>
+    <span class="hint">товшиж эргүүл</span>`;
+  el.addEventListener("click", ()=>{
+    if(ieltsSession.flipped) return;
+    ieltsSession.flipped = true;
+    el.classList.add("flipped");
+    el.innerHTML = `<span class="tag">${escapeHtml(IELTS_LEVEL_META[card.level].label)}</span>
+      ${speakerBtnHtmlEn(card.h, "flash-spk")}
+      ${starBtnHtml(card.id, "flash-star")}
+      <div class="front-hz">${escapeHtml(card.h)}</div>
+      <div class="back-py">${escapeHtml(card.p)}</div>
+      <div class="back-en">${escapeHtml(card.m)}</div>
+      <div class="back-en" style="font-style:italic;">${escapeHtml(card.en)}</div>
+      ${noteBoxHtml(card.id, "flash-note-box")}
+      ${noteBtnHtml(card.id, "flash-note")}`;
+    rateRow.classList.add("show");
+  });
+  slot.innerHTML = "";
+  slot.appendChild(el);
+  rateRow.classList.remove("show");
+}
+{
+  const ieltsRateRow = document.getElementById("ielts-rate-row");
+  if(ieltsRateRow){
+    ieltsRateRow.addEventListener("click", (e)=>{
+      const btn = e.target.closest(".rate-btn");
+      if(!btn || !ieltsSession.flipped) return;
+      const card = ieltsSession.queue[ieltsSession.pos];
+      rate(card.id, btn.dataset.r);
+      ieltsSession.pos += 1;
+      renderIeltsCard();
+    });
+  }
 }
 
 /* ============================= IELTS: READING ============================= */
@@ -5194,6 +5323,273 @@ function renderIeltsSpeaking(){
   });
 }
 
+/* ============================= IELTS: БҮТЭН СОРИЛ (mock exam, 4 ур чадвар нэг цагтай) ============================= */
+// Reading (20 мин) → Listening (10 мин) → Writing Task1+Task2 (20+40 мин) →
+// Speaking Part1/2(бэлдэх+ярих)/3 (~5+1+2+5 мин) → дүгнэлт. Reading/Listening
+// нь автоматаар оноологдоно; Writing/Speaking-ийг автоматаар шалгах боломжгүй
+// тул сорил дуусахад жишээ хариулттай харьцуулж өөрөө үнэлдэг.
+let mockExam = null;
+let mockTimerHandle = null;
+function clearMockTimer(){ if(mockTimerHandle){ clearInterval(mockTimerHandle); mockTimerHandle=null; } }
+function updateMockTimerDisplay(){
+  if(!mockExam || !mockExam.deadline) return;
+  const el = document.getElementById("ielts-mock-timer");
+  if(!el) return;
+  const remain = Math.max(0, mockExam.deadline-Date.now());
+  const mm = Math.floor(remain/60000), ss = Math.floor((remain%60000)/1000);
+  el.textContent = `⏱ ${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`;
+  el.classList.toggle("low", remain<60000);
+}
+function tickMockTimer(){
+  updateMockTimerDisplay();
+  if(!mockExam || !mockExam.deadline) return;
+  if(mockExam.deadline - Date.now() <= 0){ clearMockTimer(); advanceMockStage(); }
+}
+function startMockStageTimer(ms){
+  clearMockTimer();
+  mockExam.deadline = Date.now() + ms;
+  updateMockTimerDisplay();
+  mockTimerHandle = setInterval(tickMockTimer, 1000);
+}
+function resumeMockTimerIfNeeded(){
+  if(!mockExam || mockExam.stage==="summary" || !mockExam.deadline || mockTimerHandle) return;
+  if(mockExam.deadline - Date.now() <= 0){ advanceMockStage(); return; }
+  mockTimerHandle = setInterval(tickMockTimer, 1000);
+}
+function startMockExam(){
+  const t1 = shuffle(IELTS_WRITING_PROMPTS.filter(p=>p.task===1))[0];
+  const t2 = shuffle(IELTS_WRITING_PROMPTS.filter(p=>p.task===2))[0];
+  mockExam = {
+    stage:"reading",
+    readingPassages: shuffle(IELTS_READING_PASSAGES).slice(0,2),
+    readingAnswers: {},
+    listenItems: shuffle(IELTS_LISTENING_ITEMS).slice(0,2),
+    listenAnswers: {},
+    writingPrompts: [t1, t2],
+    writingIdx: 0,
+    speakingSubstage: "part1",
+    speakingPart2Card: IELTS_SPEAKING.part2.cards[Math.floor(Math.random()*IELTS_SPEAKING.part2.cards.length)],
+    deadline: null,
+  };
+  startMockStageTimer(20*60*1000);
+  renderIeltsMock();
+}
+function advanceMockStage(){
+  if(!mockExam) return;
+  if(mockExam.stage==="reading"){
+    mockExam.stage = "listening";
+    startMockStageTimer(10*60*1000);
+  } else if(mockExam.stage==="listening"){
+    mockExam.stage = "writing";
+    mockExam.writingIdx = 0;
+    startMockStageTimer(20*60*1000);
+  } else if(mockExam.stage==="writing"){
+    if(mockExam.writingIdx===0){
+      mockExam.writingIdx = 1;
+      startMockStageTimer(40*60*1000);
+    } else {
+      mockExam.stage = "speaking";
+      mockExam.speakingSubstage = "part1";
+      startMockStageTimer(5*60*1000);
+    }
+  } else if(mockExam.stage==="speaking"){
+    if(mockExam.speakingSubstage==="part1"){
+      mockExam.speakingSubstage = "part2prep";
+      startMockStageTimer(60*1000);
+    } else if(mockExam.speakingSubstage==="part2prep"){
+      mockExam.speakingSubstage = "part2speak";
+      startMockStageTimer(2*60*1000);
+    } else if(mockExam.speakingSubstage==="part2speak"){
+      mockExam.speakingSubstage = "part3";
+      startMockStageTimer(5*60*1000);
+    } else if(mockExam.speakingSubstage==="part3"){
+      mockExam.stage = "summary";
+      clearMockTimer();
+      mockExam.deadline = null;
+    }
+  }
+  renderIeltsMock();
+}
+function renderMockIntro(box){
+  box.innerHTML = `
+    <div class="quiz-intro">
+      <p>Энэ горим нь IELTS-ийн жинхэнэ шалгалттай төстэй, 4 ур чадварыг (Reading → Listening → Writing → Speaking) дараалуулан нэг удаад өгдөг "бүтэн сорил" юм.</p>
+      <p>Reading (20 мин) болон Listening (~10 мин) хэсэг цаг хугацаагаар хязгаарлагдаж, автоматаар оноологдоно. Writing 2 даалгавар (Task 1: 20 мин, Task 2: 40 мин), Speaking 3 хэсэгтэй (Part 2-т 1 минут бэлдэх, 2 минут ярих цаг өгнө). Writing болон Speaking хэсгийг автоматаар дүгнэх боломжгүй тул сорил дууссаны дараа жишээ хариулттай харьцуулж өөрөө үнэлнэ.</p>
+      <button type="button" class="btn-primary" id="ielts-mock-start">🎯 Сорил эхлүүлэх</button>
+    </div>`;
+  const btn = document.getElementById("ielts-mock-start");
+  if(btn) btn.addEventListener("click", startMockExam);
+}
+function renderMockReading(box){
+  const passagesHtml = mockExam.readingPassages.map((p,pi)=>{
+    const paraHtml = p.paragraphs.map(t=>`<p class="ielts-para">${escapeHtml(t)}</p>`).join("");
+    const qHtml = p.questions.map((q,qi)=>{
+      const key = pi+"-"+qi;
+      const selected = mockExam.readingAnswers[key];
+      const optsHtml = q.opts.map((opt,oi)=>{
+        const cls = "qopt"+(selected===oi?" correct":"");
+        return `<button class="${cls}" data-key="${key}" data-oi="${oi}"><span class="qtxt">${escapeHtml(opt)}</span></button>`;
+      }).join("");
+      return `<div class="spk-qa-item">
+        <div style="font-weight:600;margin-bottom:8px;font-size:.86rem;">${qi+1}. ${escapeHtml(q.q)}</div>
+        <div class="quiz-options" style="grid-template-columns:1fr 1fr;max-width:100%;">${optsHtml}</div>
+      </div>`;
+    }).join("");
+    return `<div class="grammar-card">
+      <h4 style="margin:0 0 10px;">Passage ${pi+1}: ${escapeHtml(p.title)}</h4>
+      ${paraHtml}
+      ${qHtml}
+    </div>`;
+  }).join("");
+  box.innerHTML = `
+    <div class="dlg-actions"><div class="exam-timer" id="ielts-mock-timer">⏱ --:--</div></div>
+    <p class="intro" style="max-width:100%;">📖 Reading хэсэг — 2 текст. Хариултаа сонгоод, бэлэн болмогц эсвэл цаг дуусахад автоматаар Listening хэсэг рүү шилжинэ.</p>
+    ${passagesHtml}
+    <div class="dlg-actions"><button type="button" class="btn-primary" id="ielts-mock-next">Listening руу шилжих →</button></div>
+  `;
+  box.querySelectorAll(".qopt[data-key]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      mockExam.readingAnswers[btn.dataset.key] = Number(btn.dataset.oi);
+      renderMockReading(box);
+    });
+  });
+  document.getElementById("ielts-mock-next").addEventListener("click", advanceMockStage);
+  updateMockTimerDisplay();
+}
+function renderMockListening(box){
+  const itemsHtml = mockExam.listenItems.map((it,ii)=>{
+    const qHtml = it.questions.map((q,qi)=>{
+      const key = ii+"-"+qi;
+      const selected = mockExam.listenAnswers[key];
+      const optsHtml = q.opts.map((opt,oi)=>{
+        const cls = "qopt"+(selected===oi?" correct":"");
+        return `<button class="${cls}" data-key="${key}" data-oi="${oi}"><span class="qtxt">${escapeHtml(opt)}</span></button>`;
+      }).join("");
+      return `<div class="spk-qa-item">
+        <div style="font-weight:600;margin-bottom:8px;font-size:.86rem;">${qi+1}. ${escapeHtml(q.q)}</div>
+        <div class="quiz-options" style="grid-template-columns:1fr 1fr;max-width:100%;">${optsHtml}</div>
+      </div>`;
+    }).join("");
+    return `<div class="grammar-card">
+      <div class="dlg-actions" style="justify-content:flex-start;gap:14px;">
+        <h4 style="margin:0;">Recording ${ii+1}: ${escapeHtml(it.title)}</h4>
+        ${ttsSupported?`<button type="button" class="btn-ghost" data-play="${ii}">▶ Тоглуулах</button>`:""}
+      </div>
+      ${qHtml}
+    </div>`;
+  }).join("");
+  box.innerHTML = `
+    <div class="dlg-actions"><div class="exam-timer" id="ielts-mock-timer">⏱ --:--</div></div>
+    <p class="intro" style="max-width:100%;">🎧 Listening хэсэг — жинхэнэ шалгалт шиг transcript (бичвэр) энэ үед харагдахгүй, зөвхөн сонсоод хариулаарай.</p>
+    ${itemsHtml}
+    <div class="dlg-actions"><button type="button" class="btn-primary" id="ielts-mock-next">Writing руу шилжих →</button></div>
+  `;
+  box.querySelectorAll("[data-play]").forEach(btn=>{
+    btn.addEventListener("click", ()=> speakEnSequence(mockExam.listenItems[Number(btn.dataset.play)].script) );
+  });
+  box.querySelectorAll(".qopt[data-key]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      mockExam.listenAnswers[btn.dataset.key] = Number(btn.dataset.oi);
+      renderMockListening(box);
+    });
+  });
+  document.getElementById("ielts-mock-next").addEventListener("click", advanceMockStage);
+  updateMockTimerDisplay();
+}
+function renderMockWriting(box){
+  const p = mockExam.writingPrompts[mockExam.writingIdx];
+  box.innerHTML = `
+    <div class="dlg-actions"><div class="exam-timer" id="ielts-mock-timer">⏱ --:--</div></div>
+    <p class="intro" style="max-width:100%;">✍️ Writing Task ${p.task} (${mockExam.writingIdx+1} / 2). Доор бичээрэй — энэ бичвэрийг автоматаар шалгахгүй, сорил дууссаны дараа жишээ бичвэртэй харьцуулж өөрийгөө үнэлнэ.</p>
+    <div class="grammar-card">
+      <div class="grammar-card-head"><span class="grammar-card-level">Task ${p.task}</span><b>${escapeHtml(p.title)}</b></div>
+      <p style="font-size:.86rem;margin:8px 0;white-space:pre-line;">${escapeHtml(p.prompt)}</p>
+      <textarea id="ielts-mock-writing-input" rows="10" style="width:100%;font:inherit;font-size:.86rem;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--paper-raised);color:var(--ink);resize:vertical;" placeholder="Энд бичнэ үү..."></textarea>
+    </div>
+    <div class="dlg-actions"><button type="button" class="btn-primary" id="ielts-mock-next">${mockExam.writingIdx===0?"Task 2 руу шилжих →":"Speaking руу шилжих →"}</button></div>
+  `;
+  document.getElementById("ielts-mock-next").addEventListener("click", advanceMockStage);
+  updateMockTimerDisplay();
+}
+function renderMockSpeaking(box){
+  const sub = mockExam.speakingSubstage;
+  let bodyHtml = "", nextLabel = "Дараах →";
+  if(sub==="part1"){
+    bodyHtml = `<p class="intro" style="max-width:100%;">🗣️ Speaking Part 1 — доорх асуултуудад дуугаараа өөрөө хариулж дадлага хийгээрэй.</p>` +
+      IELTS_SPEAKING.part1.qa.map(item=>`<div class="spk-qa-item"><div style="font-weight:600;font-size:.88rem;">${escapeHtml(item.q)} ${speakerBtnHtmlEn(item.q,"")}</div></div>`).join("");
+    nextLabel = "Part 2 руу шилжих →";
+  } else if(sub==="part2prep"){
+    const c = mockExam.speakingPart2Card;
+    bodyHtml = `<p class="intro" style="max-width:100%;">🗣️ Speaking Part 2 — Бэлдэх хугацаа (1 минут). Доорх сэдвийн талаар бодоод, түлхүүр үг тэмдэглээрэй.</p>
+      <div class="spk-desc-item">
+        <div style="font-weight:600;font-size:.9rem;margin-bottom:6px;">${escapeHtml(c.title)}</div>
+        <div class="ielts-cue-bullets"><i>You should say:</i><ul style="margin:6px 0 0 18px;padding:0;font-size:.82rem;">${c.bullets.map(b=>`<li>${escapeHtml(b)}</li>`).join("")}</ul></div>
+      </div>`;
+    nextLabel = "Ярьж эхлэх →";
+  } else if(sub==="part2speak"){
+    const c = mockExam.speakingPart2Card;
+    bodyHtml = `<p class="intro" style="max-width:100%;">🗣️ Speaking Part 2 — Ярих хугацаа (2 минут). Дуугаар чанга ярьж дадлага хийгээрэй.</p>
+      <div class="spk-desc-item">
+        <div style="font-weight:600;font-size:.9rem;margin-bottom:6px;">${escapeHtml(c.title)}</div>
+        <div class="ielts-cue-bullets"><i>You should say:</i><ul style="margin:6px 0 0 18px;padding:0;font-size:.82rem;">${c.bullets.map(b=>`<li>${escapeHtml(b)}</li>`).join("")}</ul></div>
+      </div>`;
+    nextLabel = "Part 3 руу шилжих →";
+  } else if(sub==="part3"){
+    bodyHtml = `<p class="intro" style="max-width:100%;">🗣️ Speaking Part 3 — гүнзгий ярилцлагын асуултууд.</p>` +
+      IELTS_SPEAKING.part3.qa.map(item=>`<div class="spk-qa-item"><div style="font-weight:600;font-size:.88rem;">${escapeHtml(item.q)} ${speakerBtnHtmlEn(item.q,"")}</div></div>`).join("");
+    nextLabel = "Сорилыг дуусгах →";
+  }
+  box.innerHTML = `
+    <div class="dlg-actions"><div class="exam-timer" id="ielts-mock-timer">⏱ --:--</div></div>
+    ${bodyHtml}
+    <div class="dlg-actions"><button type="button" class="btn-primary" id="ielts-mock-next">${nextLabel}</button></div>
+  `;
+  document.getElementById("ielts-mock-next").addEventListener("click", advanceMockStage);
+  updateMockTimerDisplay();
+}
+let ieltsMockWritingRevealed = {};
+function renderMockSummary(box){
+  let readCorrect=0, readTotal=0;
+  mockExam.readingPassages.forEach((p,pi)=>{ p.questions.forEach((q,qi)=>{ readTotal++; if(mockExam.readingAnswers[pi+"-"+qi]===q.answer) readCorrect++; }); });
+  let listenCorrect=0, listenTotal=0;
+  mockExam.listenItems.forEach((it,ii)=>{ it.questions.forEach((q,qi)=>{ listenTotal++; if(mockExam.listenAnswers[ii+"-"+qi]===q.answer) listenCorrect++; }); });
+  const pct = (readTotal+listenTotal) ? Math.round(100*(readCorrect+listenCorrect)/(readTotal+listenTotal)) : 0;
+  const tier = pct>=75 ? "Ахисан түвшин" : pct>=45 ? "Дунд түвшин" : "Анхан шат";
+  const writingHtml = mockExam.writingPrompts.map((p,i)=>{
+    const revealed = !!ieltsMockWritingRevealed[i];
+    return `<div class="grammar-card">
+      <div class="grammar-card-head"><span class="grammar-card-level">Task ${p.task}</span><b>${escapeHtml(p.title)}</b></div>
+      <button type="button" class="btn-ghost" data-mockw-reveal="${i}">${revealed?"Жишээ бичвэрийг нуух":"Жишээ бичвэр харах"}</button>
+      ${revealed?`<div class="spk-sample"><p style="font-size:.84rem;white-space:pre-line;">${escapeHtml(p.sample)}</p></div>`:""}
+    </div>`;
+  }).join("");
+  box.innerHTML = `
+    <div class="quiz-intro">
+      <h3 style="margin-top:0;">🎉 Сорил дууслаа!</h3>
+      <p>Reading: <b>${readCorrect} / ${readTotal}</b> зөв · Listening: <b>${listenCorrect} / ${listenTotal}</b> зөв</p>
+      <p>Ерөнхий гүйцэтгэл (Reading+Listening): <b>${pct}%</b> — ойролцоогоор <b>${tier}</b>. Энэ бол зөвхөн ойролцоо тоймч үзүүлэлт, албан ёсны IELTS band score биш.</p>
+      <p>Writing, Speaking хэсгийг доор жишээ хариулттай харьцуулж өөрөө үнэлээрэй:</p>
+    </div>
+    ${writingHtml}
+    <div class="dlg-actions"><button type="button" class="btn-primary" id="ielts-mock-restart">🔁 Дахин эхлэх</button></div>
+  `;
+  box.querySelectorAll("[data-mockw-reveal]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ const i=btn.dataset.mockwReveal; ieltsMockWritingRevealed[i]=!ieltsMockWritingRevealed[i]; renderMockSummary(box); });
+  });
+  document.getElementById("ielts-mock-restart").addEventListener("click", ()=>{ mockExam=null; ieltsMockWritingRevealed={}; startMockExam(); });
+}
+function renderIeltsMock(){
+  const box = document.getElementById("ielts-mock-body");
+  if(!box) return;
+  if(!mockExam){ renderMockIntro(box); return; }
+  if(mockExam.stage==="reading") renderMockReading(box);
+  else if(mockExam.stage==="listening") renderMockListening(box);
+  else if(mockExam.stage==="writing") renderMockWriting(box);
+  else if(mockExam.stage==="speaking") renderMockSpeaking(box);
+  else if(mockExam.stage==="summary") renderMockSummary(box);
+  resumeMockTimerIfNeeded();
+}
+
 /* ============================= HSK / IELTS ТРАК СЭЛГЭГЧ ============================= */
 let currentTrack = "hsk";
 let currentIeltsView = "vocab";
@@ -5210,6 +5606,7 @@ function setTrack(track, opts){
     scheduleSave();
   }
   if(track==="hsk"){
+    clearMockTimer();
     switchView("lessons");
   }else{
     switchIeltsView(currentIeltsView);
@@ -5217,17 +5614,20 @@ function setTrack(track, opts){
 }
 function switchIeltsView(view){
   currentIeltsView = view;
-  ["vocab","reading","listening","writing","speaking"].forEach(v=>{
+  if(view!=="mock") clearMockTimer();
+  ["vocab","review","reading","listening","writing","speaking","mock"].forEach(v=>{
     const tab = document.getElementById("tab-ielts-"+v);
     if(tab) tab.classList.toggle("active", v===view);
     const sec = document.getElementById("ielts-"+v+"-view");
     if(sec) sec.classList.toggle("active", v===view);
   });
   if(view==="vocab"){ renderIeltsVocabFilters(); renderIeltsVocab(); }
+  if(view==="review"){ startIeltsSession(); }
   if(view==="reading"){ ieltsReadActive=null; renderIeltsReading(); }
   if(view==="listening"){ ieltsListenActive=null; renderIeltsListening(); }
   if(view==="writing"){ renderIeltsWritingFilters(); renderIeltsWriting(); }
   if(view==="speaking"){ renderIeltsSpeakingFilters(); renderIeltsSpeaking(); }
+  if(view==="mock"){ renderIeltsMock(); }
 }
 
 /* ============================= VIEW SWITCH ============================= */
@@ -5286,7 +5686,7 @@ document.getElementById("tab-progress").addEventListener("click", ()=>switchView
   if(trackHskBtn) trackHskBtn.addEventListener("click", ()=>setTrack("hsk"));
   if(trackIeltsBtn) trackIeltsBtn.addEventListener("click", ()=>setTrack("ielts"));
 }
-["vocab","reading","listening","writing","speaking"].forEach(v=>{
+["vocab","review","reading","listening","writing","speaking","mock"].forEach(v=>{
   const btn = document.getElementById("tab-ielts-"+v);
   if(btn) btn.addEventListener("click", ()=>switchIeltsView(v));
 });
