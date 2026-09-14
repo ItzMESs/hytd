@@ -17,7 +17,7 @@ export const BODY_HTML = `<header class="top">
         <button id="tab-quiz"><span class="tab-ic">✏️</span>Тест</button>
         <button id="tab-games"><span class="tab-ic">🎮</span>Тоглоом</button>
         <button id="tab-progress"><span class="tab-ic">📊</span>Ахиц</button>
-        <button id="tab-leaderboard"><span class="tab-ic">🏆</span>Тэргүүлэгчид</button>
+        <button id="tab-leaderboard"><span class="tab-ic">🏆</span>Тэргүүлэгчид<span class="tab-badge" id="tab-leaderboard-badge" hidden>0</span></button>
       </div>
     </div>
     <div class="stats">
@@ -138,13 +138,24 @@ export const BODY_HTML = `<header class="top">
   </section>
 
   <section id="grammar-view">
-    <p class="intro">HSK 1-ээс 5 хүртэлх түвшний бүх дүрмийн цэгүүд нэг дор — хайж олоод, шууд холбогдох хичээл рүү очиж болно.</p>
-    <div class="grammar-head">
-      <input type="text" id="grammar-search" placeholder="Дүрэм хайх: жишээ нь 了, 把, 比...">
-      <span class="grammar-count" id="grammar-count"></span>
+    <div class="scope-filters" id="grammar-subtab-filters"></div>
+    <div id="grammar-main">
+      <p class="intro">HSK 1-ээс 5 хүртэлх түвшний бүх дүрмийн цэгүүд нэг дор — хайж олоод, шууд холбогдох хичээл рүү очиж болно.</p>
+      <div class="grammar-head">
+        <input type="text" id="grammar-search" placeholder="Дүрэм хайх: жишээ нь 了, 把, 比...">
+        <span class="grammar-count" id="grammar-count"></span>
+      </div>
+      <div class="scope-filters" id="grammar-level-filters"></div>
+      <div id="grammar-body"></div>
     </div>
-    <div class="scope-filters" id="grammar-level-filters"></div>
-    <div id="grammar-body"></div>
+    <div id="chengyu-main" hidden>
+      <p class="intro">Түгээмэл хэрэглэгддэг хятад хэлц үг (成语) — ахисан түвшний сурагчдад зориулав.</p>
+      <div class="grammar-head">
+        <input type="text" id="chengyu-search" placeholder="Хэлц үг хайх...">
+        <span class="grammar-count" id="chengyu-count"></span>
+      </div>
+      <div id="chengyu-body"></div>
+    </div>
   </section>
 
   <section id="review-view">
@@ -173,7 +184,10 @@ export const BODY_HTML = `<header class="top">
     <div class="scope-filters" id="games-mode-filters"></div>
     <div class="scope-filters" id="games-scramble-filters"></div>
     <div class="scope-filters" id="games-listen-filters"></div>
+    <div class="scope-filters" id="games-dictation-filters"></div>
     <div class="scope-filters" id="games-dialogue-filters"></div>
+    <div class="scope-filters" id="games-reading-filters"></div>
+    <div class="scope-filters" id="games-numbers-filters"></div>
     <div class="scope-filters" id="games-speaking-filters"></div>
     <div id="games-body"></div>
   </section>
@@ -226,6 +240,21 @@ export const BODY_HTML = `<header class="top">
       <button type="button" class="btn-ghost" id="stroke-modal-replay">↺ Дахин үзүүлэх</button>
     </div>
     <p class="stroke-modal-note">Зурааны дараалал эхний удаад ачаалахад интернэт холболт шаардлагатай.</p>
+  </div>
+</div>
+
+<div class="stroke-modal" id="message-modal" hidden>
+  <div class="stroke-modal-backdrop" id="message-modal-backdrop"></div>
+  <div class="stroke-modal-box" role="dialog" aria-modal="true" aria-label="Зурвас илгээх">
+    <button type="button" class="stroke-modal-close" id="message-modal-close" aria-label="Хаах">✕</button>
+    <div class="stroke-modal-head">
+      <div class="stroke-modal-word" id="message-modal-to">Зурвас илгээх</div>
+    </div>
+    <textarea id="message-modal-text" maxlength="300" rows="4" placeholder="Богино зурвасаа бичнэ үү (300 тэмдэгт хүртэл)..." style="width:100%;font:inherit;font-size:.88rem;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--paper-raised);color:var(--ink);resize:vertical;"></textarea>
+    <div class="stroke-modal-actions">
+      <button type="button" class="btn-primary" id="message-modal-send">Илгээх</button>
+    </div>
+    <div id="message-modal-msg" class="pp-msg"></div>
   </div>
 </div>
 `;

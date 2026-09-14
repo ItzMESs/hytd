@@ -644,6 +644,12 @@
   .dlg-bubble.hide-trans .dlg-py, .dlg-bubble.hide-trans .dlg-mn{display:none;}
   .dlg-actions{display:flex; gap:10px; justify-content:center; margin:6px 0 24px; flex-wrap:wrap;}
 
+  .read-sent{background:var(--paper-raised); border:1px solid var(--border); border-radius:14px; padding:12px 16px; margin-bottom:12px;}
+  .read-hz{font-family:"Noto Serif SC",serif; font-size:1.1rem; display:flex; align-items:center; gap:6px;}
+  .read-py{font-family:"JetBrains Mono",monospace; font-size:.74rem; color:var(--jade-strong); margin-top:4px;}
+  .read-mn{font-size:.8rem; color:var(--ink-soft); margin-top:4px; font-style:italic;}
+  .read-sent.hide-trans .read-py, .read-sent.hide-trans .read-mn{display:none;}
+
   /* speaking (HSKK) */
   .spk-section{margin-bottom:28px;}
   .spk-section h4{font-family:"Noto Serif SC",serif; font-size:.92rem; margin:0 0 12px;}
@@ -812,6 +818,27 @@
   }
   .lb-refresh-btn:hover{border-color:var(--jade); color:var(--jade-strong);}
   .lb-refresh-btn.spinning{animation:lb-spin .6s linear infinite;}
+
+  .lb-msg-btn{
+    flex-shrink:0; background:transparent; border:1px solid var(--border); border-radius:999px;
+    width:30px; height:30px; font-size:.95rem; cursor:pointer; transition:border-color .12s ease, background .12s ease;
+  }
+  .lb-msg-btn:hover{border-color:var(--jade); background:var(--jade-soft);}
+
+  .tab-badge{
+    display:inline-flex; align-items:center; justify-content:center; min-width:16px; height:16px;
+    padding:0 4px; margin-left:5px; border-radius:999px; background:var(--seal); color:#fff;
+    font-size:.62rem; font-weight:700; font-family:"JetBrains Mono",monospace; vertical-align:middle;
+  }
+
+  .lb-msg-item{
+    background:var(--paper-raised); border:1px solid var(--border); border-radius:12px;
+    padding:10px 14px; margin-bottom:8px; font-size:.82rem;
+  }
+  .lb-msg-item.unread{border-color:var(--jade); background:var(--jade-soft);}
+  .lb-msg-head{display:flex; justify-content:space-between; gap:10px; font-weight:700; margin-bottom:4px;}
+  .lb-msg-time{font-weight:400; color:var(--ink-faint); font-size:.72rem; white-space:nowrap;}
+  .lb-msg-text{color:var(--ink-soft); margin-bottom:8px; line-height:1.5;}
   @keyframes lb-spin{ to{ transform:rotate(360deg); } }
 
   /* ---- Профайл хуудас ---- */
@@ -1124,6 +1151,7 @@
   .stroke-modal-close:hover{border-color:var(--jade); color:var(--ink);}
   .stroke-modal-head{text-align:center; margin-bottom:14px;}
   .stroke-modal-word{font-family:"Noto Serif SC",serif; font-size:1.7rem; font-weight:700;}
+  #message-modal-to.stroke-modal-word{font-family:inherit; font-size:.95rem; font-weight:700;}
   .stroke-modal-py{font-family:"JetBrains Mono",monospace; font-size:.85rem; color:var(--ink-soft); margin-top:4px;}
   .stroke-modal-chars{
     display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:16px;

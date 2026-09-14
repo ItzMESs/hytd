@@ -33,6 +33,21 @@ const STATEMENTS = [
   // Added later (profile avatar picker) — IF NOT EXISTS makes this safe to
   // run again on a database that was already set up before this column existed.
   `ALTER TABLE "Progress" ADD COLUMN IF NOT EXISTS "avatarEmoji" TEXT NOT NULL DEFAULT ''`,
+  // Added later (leaderboard messaging) — short notes users on the
+  // leaderboard can send each other.
+  `CREATE TABLE IF NOT EXISTS "Message" (
+    "id" TEXT NOT NULL,
+    "fromUserId" TEXT NOT NULL,
+    "fromName" TEXT NOT NULL DEFAULT '',
+    "toUserId" TEXT NOT NULL,
+    "text" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "read" BOOLEAN NOT NULL DEFAULT false,
+    CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
+  )`,
+  `CREATE INDEX IF NOT EXISTS "Message_toUserId_createdAt_idx" ON "Message"("toUserId", "createdAt")`,
+  `ALTER TABLE "Message" ADD CONSTRAINT "Message_fromUserId_fkey" FOREIGN KEY ("fromUserId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE`,
+  `ALTER TABLE "Message" ADD CONSTRAINT "Message_toUserId_fkey" FOREIGN KEY ("toUserId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE`,
 ];
 
 export default async function handler(req, res) {

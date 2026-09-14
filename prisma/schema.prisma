@@ -20,6 +20,8 @@ model User {
   passwordHash String
   createdAt    DateTime  @default(now())
   progress     Progress?
+  sentMessages     Message[] @relation("MessagesSent")
+  receivedMessages Message[] @relation("MessagesReceived")
 }
 
 // One row per user. `data` holds the full SRS/progress JSON blob exactly as
@@ -40,4 +42,22 @@ model Progress {
   updatedAt   DateTime @updatedAt
 
   @@index([mastered])
+}
+
+// Short messages users on the leaderboard can send each other — a simple
+// one-directional note, not a full chat thread. `fromName` is denormalized
+// (copied at send time) so the inbox can render a sender name without a
+// join, and stays correct even if the sender later renames themself.
+model Message {
+  id         String   @id @default(cuid())
+  fromUserId String
+  fromUser   User     @relation("MessagesSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+  fromName   String   @default("")
+  toUserId   String
+  toUser     User     @relation("MessagesReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+  text       String
+  createdAt  DateTime @default(now())
+  read       Boolean  @default(false)
+
+  @@index([toUserId, createdAt])
 }
