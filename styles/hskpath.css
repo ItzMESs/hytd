@@ -56,6 +56,30 @@
   .brand .name{font-family:"Noto Serif SC",serif; font-weight:700; font-size:1.05rem; letter-spacing:.01em;}
   .brand .name small{display:block; font-family:"Noto Sans SC",sans-serif; font-weight:500; font-size:.66rem; color:var(--ink-soft); letter-spacing:.03em; margin-top:1px;}
 
+  .track-switch{display:flex; gap:4px; background:var(--paper-sunken); border-radius:10px; padding:3px; flex:0 0 auto;}
+  .track-switch-btn{
+    border:none; background:transparent; color:var(--ink-soft); cursor:pointer;
+    font:inherit; font-weight:700; font-size:.78rem; padding:7px 12px; border-radius:8px;
+    transition:background .15s ease, color .15s ease, box-shadow .15s ease;
+    white-space:nowrap;
+  }
+  .track-switch-btn:hover:not(.active){background:var(--paper-raised); color:var(--ink);}
+  .track-switch-btn.active{background:var(--jade); color:#fff; box-shadow:0 1px 4px rgba(47,111,94,.35);}
+  @media (max-width:560px){
+    .track-switch-btn{padding:6px 9px; font-size:.72rem;}
+  }
+
+  /* Track visibility: JS toggles a "hsk"/"ielts" attribute on <html data-track>
+     (same element used for data-theme), and these rules hide whichever side
+     isn't current. Nav buttons additionally get their [hidden] attribute
+     toggled directly by JS (kept in sync with these classes) so the
+     collapsed-dropdown open/close logic that reads .view-toggle button
+     children doesn't briefly show the wrong track's tabs while the menu
+     animates open. */
+  html[data-track="ielts"] .track-hsk{display:none !important;}
+  html[data-track="hsk"] .track-ielts{display:none !important;}
+  html:not([data-track]) .track-ielts{display:none !important;}
+
   .nav-wrap{position:relative;}
   /* The section tab list (Хичээл/Давталт/Тест/...) always collapses behind
      a ☰ button into a dropdown list, on every screen width — the same
@@ -441,6 +465,9 @@
   #review-view.active, #quiz-view.active, #progress-view.active, #games-view.active, #leaderboard-view.active, #profile-view.active, #grammar-view.active{display:block;}
   #lessons-view.hidden{display:none;}
 
+  #ielts-vocab-view, #ielts-reading-view, #ielts-listening-view, #ielts-writing-view, #ielts-speaking-view{display:none;}
+  #ielts-vocab-view.active, #ielts-reading-view.active, #ielts-listening-view.active, #ielts-writing-view.active, #ielts-speaking-view.active{display:block;}
+
   .grammar-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;}
   .grammar-head input{
     flex:1; min-width:220px; font:inherit; font-size:.88rem; padding:9px 13px;
@@ -649,6 +676,37 @@
   .read-py{font-family:"JetBrains Mono",monospace; font-size:.74rem; color:var(--jade-strong); margin-top:4px;}
   .read-mn{font-size:.8rem; color:var(--ink-soft); margin-top:4px; font-style:italic;}
   .read-sent.hide-trans .read-py, .read-sent.hide-trans .read-mn{display:none;}
+
+  /* IELTS: plain English paragraph/transcript text (no hz/py/mn stack needed) */
+  .ielts-para{
+    background:var(--paper-raised); border:1px solid var(--border); border-radius:12px;
+    padding:12px 16px; margin-bottom:10px; font-size:.86rem; line-height:1.6;
+  }
+  .ielts-transcript{margin-bottom:8px;}
+
+  .ielts-vocab-progress{font-size:.8rem; color:var(--ink-soft); margin-bottom:14px;}
+  .ielts-vocab-row{
+    background:var(--paper-raised); border:1px solid var(--border); border-radius:12px;
+    padding:12px 14px; margin-bottom:10px;
+  }
+  .ielts-vocab-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .ielts-vocab-word{font-weight:700; font-size:1rem;}
+  .ielts-vocab-ipa{font-family:"JetBrains Mono",monospace; font-size:.72rem; color:var(--ink-faint);}
+  .ielts-vocab-head .ielts-vocab-reveal{margin-left:auto; font-size:.76rem; padding:6px 10px;}
+  .ielts-vocab-detail{margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);}
+  .ielts-vocab-mn{font-size:.84rem; color:var(--ink-soft); margin-bottom:6px;}
+  .ielts-vocab-ex{font-size:.82rem; font-style:italic; margin-bottom:8px;}
+  .ielts-vocab-rate{display:flex; gap:8px; flex-wrap:wrap;}
+  .ielts-rate-btn{font-size:.76rem; padding:6px 10px;}
+  .ielts-rate-btn.active{border-color:var(--jade); background:var(--jade-soft); color:var(--jade-strong);}
+
+  .ielts-tips{font-size:.82rem; color:var(--ink-soft); margin-top:8px;}
+  .ielts-phrases{font-size:.8rem; margin-top:10px;}
+  .ielts-phrase-chip{
+    display:inline-block; background:var(--paper-sunken); border-radius:999px;
+    padding:3px 10px; margin:3px 4px 0 0; font-size:.74rem; color:var(--ink-soft);
+  }
+  .ielts-cue-bullets{font-size:.82rem; color:var(--ink-soft);}
 
   /* speaking (HSKK) */
   .spk-section{margin-bottom:28px;}

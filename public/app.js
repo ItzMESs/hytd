@@ -544,7 +544,7 @@ DECK.forEach(c=>{ WORD_TOPICS.set(c.id, topicsForWord(c.en, c.m)); });
 let srs = {cards:{}, streak:0, maxStreak:0, lastDay:null, total:0, quiz:{},
   dailyGoal:20, todayDate:null, todayCount:0, ratingCounts:{again:0, hard:0, good:0, easy:0},
   bookmarks:{}, notes:{}, nickname:"", challenge:"",
-  avatarEmoji:"", studyLog:{}, customDecks:{}};
+  avatarEmoji:"", studyLog:{}, customDecks:{}, examGoal:null, track:"hsk", ielts:{}};
 let saveTimer = null;
 const todayStr = ()=> new Date().toISOString().slice(0,10);
 
@@ -1062,6 +1062,7 @@ function mergeStateData(d){
     ratingCounts:Object.assign({again:0,hard:0,good:0,easy:0}, d.ratingCounts||{}),
     bookmarks:d.bookmarks||{}, notes:d.notes||{}, nickname:d.nickname||"", challenge:d.challenge||"",
     avatarEmoji:d.avatarEmoji||"", studyLog:d.studyLog||{}, customDecks:d.customDecks||{},
+    examGoal:d.examGoal||null, track:d.track||"hsk", ielts:d.ielts||{},
   };
   if(srs.todayDate!==todayStr()) srs.todayCount = 0;
 }
@@ -4663,6 +4664,572 @@ function wireProfilePage(body){
   });
 }
 
+/* ============================= IELTS: ENGLISH TTS ============================= */
+let enVoice = null;
+let enVoiceList = [];
+function enVoiceScore(v){
+  const name = (v.name||"").toLowerCase();
+  let score = 0;
+  if(/neural|enhanced|premium|natural|online/.test(name)) score += 5;
+  if(v.localService===false) score += 2;
+  if(/en-gb/i.test(v.lang)) score += 2;
+  else if(/en-us/i.test(v.lang)) score += 1;
+  return score;
+}
+function pickEnVoice(){
+  if(!ttsSupported) return;
+  const voices = window.speechSynthesis.getVoices();
+  enVoiceList = voices.filter(v=>/^en/i.test(v.lang)).sort((a,b)=>enVoiceScore(b)-enVoiceScore(a));
+  enVoice = enVoiceList[0] || null;
+}
+if(ttsSupported){
+  pickEnVoice();
+  window.speechSynthesis.addEventListener("voiceschanged", pickEnVoice);
+}
+function speakEn(text){
+  if(!ttsSupported || !text) return;
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-GB";
+    if(enVoice) u.voice = enVoice;
+    u.rate = 0.98;
+    window.speechSynthesis.speak(u);
+  }catch(e){ /* TTS unavailable — quietly ignore */ }
+}
+function speakEnSequence(items){
+  if(!ttsSupported || !items || !items.length) return;
+  window.speechSynthesis.cancel();
+  let i=0;
+  function next(){
+    if(i>=items.length) return;
+    const u = new SpeechSynthesisUtterance(items[i]);
+    u.lang = "en-GB"; if(enVoice) u.voice = enVoice; u.rate = 0.95;
+    u.onend = ()=>{ i++; next(); };
+    try{ window.speechSynthesis.speak(u); }catch(e){ /* ignore */ }
+  }
+  next();
+}
+function speakerBtnHtmlEn(text, extraClass){
+  if(!ttsSupported) return "";
+  return `<button type="button" class="spk-btn ${extraClass||""}" data-say-en="${escapeHtml(text)}" title="Listen" aria-label="Listen">🔊</button>`;
+}
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest(".spk-btn[data-say-en]");
+  if(btn){ e.preventDefault(); e.stopPropagation(); speakEn(btn.dataset.sayEn); }
+}, true);
+
+/* ============================= IELTS: ҮГИЙН САН (Vocabulary) ============================= */
+const IELTS_VOCAB_TOPICS = [
+  {key:"environment", label:"🌍 Байгаль орчин", words:[
+    {w:"sustainable", ipa:"/səˈsteɪnəbl/", pos:"adj", mn:"тогтвортой, удаан хугацаанд ашиглаж болохуйц", ex:"We need to find more sustainable ways to produce energy."},
+    {w:"pollution", ipa:"/pəˈluːʃn/", pos:"n", mn:"бохирдол", ex:"Air pollution is a serious problem in many big cities."},
+    {w:"renewable", ipa:"/rɪˈnjuːəbl/", pos:"adj", mn:"сэргээгдэх (эрчим хүч)", ex:"Solar and wind are examples of renewable energy sources."},
+    {w:"emission", ipa:"/ɪˈmɪʃn/", pos:"n", mn:"ялгарал (утаа, хий)", ex:"The government plans to cut carbon emissions by 2030."},
+    {w:"deforestation", ipa:"/diːˌfɒrɪˈsteɪʃn/", pos:"n", mn:"ойн хомсдол", ex:"Deforestation is destroying habitats for thousands of species."},
+    {w:"ecosystem", ipa:"/ˈiːkəʊsɪstəm/", pos:"n", mn:"экосистем", ex:"Coral reefs support a huge variety of marine ecosystems."},
+    {w:"drought", ipa:"/draʊt/", pos:"n", mn:"ган гачиг", ex:"Many farmers lost their crops during the drought."},
+    {w:"conservation", ipa:"/ˌkɒnsəˈveɪʃn/", pos:"n", mn:"хамгаалал, хадгалалт", ex:"Wildlife conservation programs protect endangered species."},
+    {w:"greenhouse gas", ipa:"/ˈɡriːnhaʊs ɡæs/", pos:"n", mn:"хүлэмжийн хий", ex:"Carbon dioxide is the most common greenhouse gas."},
+    {w:"biodiversity", ipa:"/ˌbaɪəʊdaɪˈvɜːsəti/", pos:"n", mn:"биологийн олон янз байдал", ex:"Rainforests contain an incredible level of biodiversity."},
+    {w:"carbon footprint", ipa:"/ˈkɑːbən ˈfʊtprɪnt/", pos:"n", mn:"нүүрстөрөгчийн ул мөр", ex:"Flying often increases a person's carbon footprint significantly."},
+    {w:"landfill", ipa:"/ˈlændfɪl/", pos:"n", mn:"хог хаягдлын цэг", ex:"Most of our rubbish ends up in a landfill."},
+    {w:"depletion", ipa:"/dɪˈpliːʃn/", pos:"n", mn:"шавхагдал, хомсдол", ex:"The depletion of natural resources worries scientists."},
+    {w:"climate change", ipa:"/ˈklaɪmət tʃeɪndʒ/", pos:"n", mn:"цаг уурын өөрчлөлт", ex:"Climate change is causing more extreme weather events."},
+    {w:"recyclable", ipa:"/riːˈsaɪkləbl/", pos:"adj", mn:"дахин боловсруулж болохуйц", ex:"Try to buy products with recyclable packaging."},
+  ]},
+  {key:"education", label:"🎓 Боловсрол", words:[
+    {w:"curriculum", ipa:"/kəˈrɪkjələm/", pos:"n", mn:"сургалтын хөтөлбөр", ex:"The school has updated its curriculum to include more technology classes."},
+    {w:"literacy", ipa:"/ˈlɪtərəsi/", pos:"n", mn:"бичиг үсэгт тайлагдсан байдал", ex:"Improving literacy rates is a national priority."},
+    {w:"tuition", ipa:"/tjuˈɪʃn/", pos:"n", mn:"сургалтын төлбөр", ex:"University tuition fees have risen sharply in recent years."},
+    {w:"scholarship", ipa:"/ˈskɒləʃɪp/", pos:"n", mn:"тэтгэлэг", ex:"She received a full scholarship to study abroad."},
+    {w:"lecture", ipa:"/ˈlektʃə(r)/", pos:"n", mn:"лекц", ex:"The professor gave an interesting lecture on ancient history."},
+    {w:"assessment", ipa:"/əˈsesmənt/", pos:"n", mn:"үнэлгээ", ex:"Continuous assessment is used instead of a single final exam."},
+    {w:"vocational", ipa:"/vəʊˈkeɪʃənl/", pos:"adj", mn:"мэргэжлийн (сургалт)", ex:"Vocational training prepares students for a specific trade."},
+    {w:"undergraduate", ipa:"/ˌʌndəˈɡrædʒuət/", pos:"n", mn:"бакалаврын оюутан", ex:"Most undergraduate courses take three or four years."},
+    {w:"plagiarism", ipa:"/ˈpleɪdʒərɪzəm/", pos:"n", mn:"эх сурвалж дурдалгүй хуулах", ex:"Plagiarism can lead to serious academic penalties."},
+    {w:"extracurricular", ipa:"/ˌekstrəkəˈrɪkjələ(r)/", pos:"adj", mn:"сургалтын хөтөлбөрөөс гадуурх", ex:"Extracurricular activities help students develop new skills."},
+    {w:"tutor", ipa:"/ˈtjuːtə(r)/", pos:"n", mn:"хувийн багш", ex:"He hired a tutor to help him with mathematics."},
+    {w:"dropout", ipa:"/ˈdrɒpaʊt/", pos:"n", mn:"сургууль завсардагч", ex:"The dropout rate has decreased thanks to new support programs."},
+    {w:"distance learning", ipa:"/ˈdɪstəns ˈlɜːnɪŋ/", pos:"n", mn:"зайны сургалт", ex:"Distance learning became far more common after 2020."},
+    {w:"faculty", ipa:"/ˈfækəlti/", pos:"n", mn:"тэнхим, багш нар (нийтэд нь)", ex:"The faculty voted to change the exam schedule."},
+    {w:"proficiency", ipa:"/prəˈfɪʃnsi/", pos:"n", mn:"чадамж, эзэмшил (хэл)", ex:"Students must show English proficiency before enrolling."},
+  ]},
+  {key:"technology", label:"💻 Технологи", words:[
+    {w:"innovation", ipa:"/ˌɪnəˈveɪʃn/", pos:"n", mn:"шинэлэг зүйл, инноваци", ex:"The company is known for its constant innovation."},
+    {w:"artificial intelligence", ipa:"/ˌɑːtɪˈfɪʃl ɪnˈtelɪdʒəns/", pos:"n", mn:"хиймэл оюун ухаан", ex:"Artificial intelligence is changing the way we work."},
+    {w:"algorithm", ipa:"/ˈælɡərɪðəm/", pos:"n", mn:"алгоритм", ex:"The app uses an algorithm to recommend new songs."},
+    {w:"bandwidth", ipa:"/ˈbændwɪdθ/", pos:"n", mn:"зурвасын өргөн", ex:"Video calls require a lot of internet bandwidth."},
+    {w:"encryption", ipa:"/ɪnˈkrɪpʃn/", pos:"n", mn:"шифрлэлт", ex:"Encryption keeps your online banking details secure."},
+    {w:"malware", ipa:"/ˈmælweə(r)/", pos:"n", mn:"хортой програм хангамж", ex:"The email contained a link that installed malware."},
+    {w:"automation", ipa:"/ˌɔːtəˈmeɪʃn/", pos:"n", mn:"автоматжуулалт", ex:"Automation has replaced many repetitive factory jobs."},
+    {w:"breakthrough", ipa:"/ˈbreɪkθruː/", pos:"n", mn:"томоохон ахиц, нээлт", ex:"Scientists announced a major breakthrough in battery technology."},
+    {w:"connectivity", ipa:"/ˌkɒnekˈtɪvəti/", pos:"n", mn:"холболт", ex:"Rural areas often struggle with poor internet connectivity."},
+    {w:"obsolete", ipa:"/ˈɒbsəliːt/", pos:"adj", mn:"хоцрогдсон, хэрэглээгүй болсон", ex:"Many older devices quickly become obsolete."},
+    {w:"surveillance", ipa:"/səˈveɪləns/", pos:"n", mn:"хяналт, ажиглалт", ex:"The use of surveillance cameras raises privacy concerns."},
+    {w:"glitch", ipa:"/ɡlɪtʃ/", pos:"n", mn:"жижиг алдаа (техник)", ex:"A software glitch delayed the flight for two hours."},
+    {w:"streamline", ipa:"/ˈstriːmlaɪn/", pos:"v", mn:"хялбарчлах, оновчтой болгох", ex:"The new system streamlines the entire ordering process."},
+    {w:"interface", ipa:"/ˈɪntəfeɪs/", pos:"n", mn:"интерфейс", ex:"The app has a very simple, user-friendly interface."},
+    {w:"cybersecurity", ipa:"/ˈsaɪbəsɪˌkjʊərəti/", pos:"n", mn:"кибер аюулгүй байдал", ex:"Companies are investing more in cybersecurity every year."},
+  ]},
+  {key:"health", label:"🩺 Эрүүл мэнд", words:[
+    {w:"obesity", ipa:"/əʊˈbiːsəti/", pos:"n", mn:"таргалалт", ex:"Obesity rates have doubled over the past two decades."},
+    {w:"immune system", ipa:"/ɪˈmjuːn ˈsɪstəm/", pos:"n", mn:"дархлааны систем", ex:"A healthy diet helps strengthen your immune system."},
+    {w:"sedentary", ipa:"/ˈsedntri/", pos:"adj", mn:"хөдөлгөөн багатай (амьдралын хэв маяг)", ex:"A sedentary lifestyle increases the risk of heart disease."},
+    {w:"nutrient", ipa:"/ˈnjuːtriənt/", pos:"n", mn:"шим тэжээл", ex:"Vegetables are rich in essential nutrients."},
+    {w:"chronic", ipa:"/ˈkrɒnɪk/", pos:"adj", mn:"архаг (өвчин)", ex:"Diabetes is a chronic condition that requires lifelong management."},
+    {w:"outbreak", ipa:"/ˈaʊtbreɪk/", pos:"n", mn:"дэгдэлт (өвчний)", ex:"Health officials responded quickly to the disease outbreak."},
+    {w:"vaccination", ipa:"/ˌvæksɪˈneɪʃn/", pos:"n", mn:"вакцинжуулалт", ex:"Vaccination has greatly reduced cases of measles worldwide."},
+    {w:"life expectancy", ipa:"/laɪf ɪkˈspektənsi/", pos:"n", mn:"дундаж наслалт", ex:"Life expectancy has risen thanks to better healthcare."},
+    {w:"mental health", ipa:"/ˈmentl helθ/", pos:"n", mn:"сэтгэцийн эрүүл мэнд", ex:"More people are now openly discussing mental health issues."},
+    {w:"remedy", ipa:"/ˈremədi/", pos:"n", mn:"эмчилгээ, эм", ex:"Honey and lemon is a popular remedy for a sore throat."},
+    {w:"symptom", ipa:"/ˈsɪmptəm/", pos:"n", mn:"шинж тэмдэг", ex:"A high fever is a common symptom of infection."},
+    {w:"addiction", ipa:"/əˈdɪkʃn/", pos:"n", mn:"донтолт, хамааралт байдал", ex:"Smartphone addiction is becoming a growing concern among teenagers."},
+    {w:"well-being", ipa:"/ˌwel ˈbiːɪŋ/", pos:"n", mn:"сайн сайхан байдал", ex:"Exercise improves both physical and mental well-being."},
+    {w:"malnutrition", ipa:"/ˌmælnjuˈtrɪʃn/", pos:"n", mn:"тэжээлийн дутагдал", ex:"Malnutrition remains a serious issue in some developing regions."},
+    {w:"epidemic", ipa:"/ˌepɪˈdemɪk/", pos:"n", mn:"тахал өвчин", ex:"The obesity epidemic is linked to changes in modern diets."},
+  ]},
+];
+let ieltsVocabTopic = "environment";
+let ieltsVocabRevealed = {};
+function ieltsVocabWordStatus(word){ return (srs.ielts && srs.ielts.vocabKnown && srs.ielts.vocabKnown[word]) || null; }
+function setIeltsVocabStatus(word, status){
+  if(!srs.ielts) srs.ielts = {};
+  if(!srs.ielts.vocabKnown) srs.ielts.vocabKnown = {};
+  srs.ielts.vocabKnown[word] = status;
+  scheduleSave();
+}
+function renderIeltsVocabFilters(){
+  const box = document.getElementById("ielts-vocab-filters");
+  if(!box) return;
+  box.innerHTML = "";
+  IELTS_VOCAB_TOPICS.forEach(t=>{
+    const chip = document.createElement("button");
+    chip.className = "chip"+(t.key===ieltsVocabTopic?" active":"");
+    chip.textContent = t.label;
+    chip.addEventListener("click", ()=>{ ieltsVocabTopic=t.key; ieltsVocabRevealed={}; renderIeltsVocabFilters(); renderIeltsVocab(); });
+    box.appendChild(chip);
+  });
+}
+function renderIeltsVocab(){
+  const box = document.getElementById("ielts-vocab-body");
+  if(!box) return;
+  const topic = IELTS_VOCAB_TOPICS.find(t=>t.key===ieltsVocabTopic);
+  const words = topic ? topic.words : [];
+  const knownCount = words.filter(w=>ieltsVocabWordStatus(w.w)==="known").length;
+  const rowsHtml = words.map(w=>{
+    const revealed = !!ieltsVocabRevealed[w.w];
+    const status = ieltsVocabWordStatus(w.w);
+    return `<div class="ielts-vocab-row">
+      <div class="ielts-vocab-head">
+        <span class="ielts-vocab-word">${escapeHtml(w.w)}</span>
+        <span class="ielts-vocab-ipa">${escapeHtml(w.ipa)} · ${escapeHtml(w.pos)}</span>
+        ${speakerBtnHtmlEn(w.w,"")}
+        <button type="button" class="btn-ghost ielts-vocab-reveal" data-w="${escapeHtml(w.w)}">${revealed?"Нуух":"Утга харах"}</button>
+      </div>
+      ${revealed?`<div class="ielts-vocab-detail">
+        <div class="ielts-vocab-mn">${escapeHtml(w.mn)}</div>
+        <div class="ielts-vocab-ex">${escapeHtml(w.ex)} ${speakerBtnHtmlEn(w.ex,"")}</div>
+        <div class="ielts-vocab-rate">
+          <button type="button" class="btn-ghost ielts-rate-btn${status==="known"?" active":""}" data-w="${escapeHtml(w.w)}" data-status="known">✓ Мэдэж байна</button>
+          <button type="button" class="btn-ghost ielts-rate-btn${status==="learning"?" active":""}" data-w="${escapeHtml(w.w)}" data-status="learning">↻ Дахин үзье</button>
+        </div>
+      </div>`:""}
+    </div>`;
+  }).join("");
+  box.innerHTML = `
+    <p class="intro" style="max-width:100%;">IELTS шалгалтад олонтаа таардаг сэдэвчилсэн үгсийн сан. Үг дээрх "Утга харах" товчийг дарж утга, жишээ өгүүлбэрийг үзээд өөрийгөө үнэлээрэй.</p>
+    <div class="ielts-vocab-progress">Мэдэж байгаа: <b>${knownCount}</b> / ${words.length}</div>
+    ${rowsHtml}
+  `;
+  box.querySelectorAll(".ielts-vocab-reveal").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ const w=btn.dataset.w; ieltsVocabRevealed[w]=!ieltsVocabRevealed[w]; renderIeltsVocab(); });
+  });
+  box.querySelectorAll(".ielts-rate-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ setIeltsVocabStatus(btn.dataset.w, btn.dataset.status); renderIeltsVocab(); });
+  });
+}
+
+/* ============================= IELTS: READING ============================= */
+const IELTS_READING_PASSAGES = [
+  {title:"The Rise of Remote Work", desc:"Ажлын байрны хандлага · Дундаж түвшин",
+    paragraphs:[
+      "Before 2020, most office employees travelled to a workplace every day. The COVID-19 pandemic forced millions of companies to allow staff to work from home almost overnight. What began as a temporary emergency measure has, for many organisations, become a permanent way of operating.",
+      "Supporters of remote work point to several advantages. Employees save time and money by not commuting, and many report feeling more productive when they can arrange their own schedule. Companies, meanwhile, can reduce the cost of renting large office spaces and can hire talented staff regardless of where they live.",
+      "However, remote work is not without its problems. Some employees feel isolated without daily face-to-face contact with colleagues, and separating work from home life can be difficult. Managers also report that training new staff and building a strong team culture is harder when everyone works apart. As a result, many businesses have adopted a hybrid model, in which staff spend part of the week in the office and part at home.",
+    ],
+    questions:[
+      {q:"What is one advantage of remote work mentioned in the passage?", opts:["Employees do not have to commute.","Employees always earn a higher salary.","Companies must rent bigger offices.","Meetings become more frequent."], answer:0},
+      {q:"TRUE, FALSE or NOT GIVEN: Remote work started as a long-term plan before 2020.", opts:["TRUE","FALSE","NOT GIVEN"], answer:1},
+      {q:"TRUE, FALSE or NOT GIVEN: Some managers find it harder to train new staff remotely.", opts:["TRUE","FALSE","NOT GIVEN"], answer:0},
+    ]},
+  {title:"Urban Green Spaces", desc:"Хот төлөвлөлт · Дундаж түвшин",
+    paragraphs:[
+      "As cities around the world continue to grow, urban planners are paying closer attention to green spaces such as parks, gardens and tree-lined streets. Far from being just decorative, these spaces play an important role in the health of a city and its residents.",
+      "Research shows that access to green space is linked to lower stress levels and better mental health. Parks also encourage physical activity, giving residents a free and convenient place to walk, run or play sport. In addition, trees and plants help to cool cities during hot weather and can reduce air pollution by absorbing certain gases.",
+      "Despite these benefits, green space is often the first thing to be sacrificed when land becomes expensive. Critics argue that city governments should protect a minimum amount of green space per resident, rather than allowing it to be replaced by new buildings. Some cities, such as Singapore, have responded by requiring new developments to include rooftop gardens or vertical greenery.",
+    ],
+    questions:[
+      {q:"According to the passage, green spaces help cool cities because...", opts:["trees and plants absorb heat and certain gases","they are built with reflective materials","governments water them constantly","they replace old buildings"], answer:0},
+      {q:"TRUE, FALSE or NOT GIVEN: Singapore has banned all new building developments.", opts:["TRUE","FALSE","NOT GIVEN"], answer:1},
+      {q:"TRUE, FALSE or NOT GIVEN: Green space is sometimes removed when land prices rise.", opts:["TRUE","FALSE","NOT GIVEN"], answer:0},
+    ]},
+  {title:"The Gig Economy", desc:"Эдийн засаг · Ахисан түвшин",
+    paragraphs:[
+      "The term 'gig economy' refers to a labour market characterised by short-term contracts and freelance work rather than permanent jobs. Driven by digital platforms that connect customers directly with workers, the gig economy has expanded rapidly over the past decade, covering everything from food delivery to graphic design.",
+      "For workers, the gig economy offers flexibility: they can choose when and how much to work, which appeals to students, parents and those seeking additional income. Companies also benefit, since they can adjust their workforce quickly according to demand without the long-term costs associated with full-time employees.",
+      "Critics, however, highlight significant downsides. Gig workers frequently lack the job security, sick pay and pension contributions that traditional employees receive. Income can also be unpredictable, fluctuating from week to week. Several governments are now examining whether gig workers should be reclassified as employees, which would grant them greater legal protection but could also increase costs for the platforms that rely on them.",
+    ],
+    questions:[
+      {q:"Why do companies benefit from the gig economy, according to the passage?", opts:["They can adjust their workforce quickly without long-term costs","They must pay workers a fixed monthly salary","They avoid using digital platforms","They are required to offer pensions"], answer:0},
+      {q:"TRUE, FALSE or NOT GIVEN: All gig workers receive the same benefits as full-time employees.", opts:["TRUE","FALSE","NOT GIVEN"], answer:1},
+      {q:"TRUE, FALSE or NOT GIVEN: Some governments are reviewing the legal status of gig workers.", opts:["TRUE","FALSE","NOT GIVEN"], answer:0},
+    ]},
+  {title:"Artificial Intelligence in Everyday Life", desc:"Технологи · Ахисан түвшин",
+    paragraphs:[
+      "Artificial intelligence, once confined to research laboratories and science fiction, now quietly shapes many aspects of daily life. From the recommendations offered by streaming services to the route suggested by a map application, AI systems analyse patterns in data to make predictions and decisions with minimal human involvement.",
+      "One of the most significant applications lies in healthcare, where AI can assist doctors in detecting diseases from medical scans, sometimes identifying patterns too subtle for the human eye. In transport, self-driving vehicles rely on AI to interpret their surroundings and react to changing road conditions in real time.",
+      "Nevertheless, the rapid spread of AI raises important questions. Algorithms trained on biased data can produce unfair outcomes, and the automation of certain tasks threatens to make some jobs redundant. Many experts argue that regulation must evolve alongside the technology itself, ensuring that the benefits of AI are shared widely while its risks are properly managed.",
+    ],
+    questions:[
+      {q:"In healthcare, how can AI assist doctors, according to the passage?", opts:["By detecting diseases in medical scans","By replacing all doctors permanently","By reducing the need for hospitals","By writing medical textbooks"], answer:0},
+      {q:"TRUE, FALSE or NOT GIVEN: AI algorithms can never produce unfair outcomes.", opts:["TRUE","FALSE","NOT GIVEN"], answer:1},
+      {q:"TRUE, FALSE or NOT GIVEN: Self-driving vehicles use AI to react to road conditions.", opts:["TRUE","FALSE","NOT GIVEN"], answer:0},
+    ]},
+];
+let ieltsReadActive = null;
+let ieltsReadAnswers = {};
+function renderIeltsReading(){
+  const box = document.getElementById("ielts-reading-body");
+  if(!box) return;
+  if(ieltsReadActive==null){
+    box.innerHTML = `<p class="intro" style="max-width:100%;">IELTS Reading хэсэгт таардаг төрлийн текстүүд — унших, дараа нь ойлголтын асуултад хариулаарай (сонголттой болон TRUE/FALSE/NOT GIVEN хэлбэртэй).</p>
+    <div class="dlg-picker">
+      ${IELTS_READING_PASSAGES.map((p,i)=>`<button class="dlg-pick-btn" data-i="${i}">
+        <div class="dlg-t">${escapeHtml(p.title)}</div>
+        <div class="dlg-sub">${escapeHtml(p.desc)}</div>
+      </button>`).join("")}
+    </div>`;
+    box.querySelectorAll(".dlg-pick-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{ ieltsReadActive=Number(btn.dataset.i); ieltsReadAnswers={}; renderIeltsReading(); });
+    });
+    return;
+  }
+  const p = IELTS_READING_PASSAGES[ieltsReadActive];
+  const paraHtml = p.paragraphs.map(t=>`<p class="ielts-para">${escapeHtml(t)}</p>`).join("");
+  const qHtml = p.questions.map((q,qi)=>{
+    const answered = ieltsReadAnswers[qi]!=null;
+    const optsHtml = q.opts.map((opt,oi)=>{
+      let cls = "qopt dlg-opt";
+      if(answered){
+        if(oi===q.answer) cls += " correct";
+        else if(oi===ieltsReadAnswers[qi]) cls += " wrong";
+      }
+      return `<button class="${cls}" data-q="${qi}" data-oi="${oi}" ${answered?"disabled":""}><span class="qtxt">${escapeHtml(opt)}</span></button>`;
+    }).join("");
+    return `<div class="spk-qa-item">
+      <div style="font-weight:600;margin-bottom:8px;font-size:.86rem;">${qi+1}. ${escapeHtml(q.q)}</div>
+      <div class="quiz-options" style="grid-template-columns:1fr 1fr;max-width:100%;">${optsHtml}</div>
+    </div>`;
+  }).join("");
+  box.innerHTML = `
+    <div class="dlg-stage">
+      <div class="dlg-actions">
+        <button class="btn-ghost" id="ielts-read-back">← Жагсаалт руу</button>
+      </div>
+      <h4 style="margin:0 0 10px;">${escapeHtml(p.title)}</h4>
+      ${paraHtml}
+      <h4 style="margin:22px 0 12px;">Ойлголтын асуулт</h4>
+      ${qHtml}
+    </div>`;
+  document.getElementById("ielts-read-back").addEventListener("click", ()=>{ ieltsReadActive=null; renderIeltsReading(); });
+  box.querySelectorAll(".dlg-opt").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const qi=Number(btn.dataset.q), oi=Number(btn.dataset.oi);
+      if(ieltsReadAnswers[qi]!=null) return;
+      ieltsReadAnswers[qi]=oi;
+      renderIeltsReading();
+    });
+  });
+}
+
+/* ============================= IELTS: LISTENING ============================= */
+const IELTS_LISTENING_ITEMS = [
+  {title:"Booking a Hotel Room", desc:"Section 1 · Өдөр тутмын яриа",
+    script:[
+      "Good afternoon, thank you for calling Lakeside Hotel.",
+      "I'd like to book a double room for three nights, starting on the fifteenth of July.",
+      "Certainly. That would be one hundred and twenty dollars per night, including breakfast.",
+      "Could I also request a room on a higher floor, away from the lift?",
+      "Of course, I've noted that — a room on the fifth floor with a lake view.",
+    ],
+    questions:[
+      {q:"How many nights does the caller want to stay?", opts:["Two nights","Three nights","Four nights","Five nights"], answer:1},
+      {q:"What does the room rate include?", opts:["Breakfast","Airport transfer","Parking","Dinner"], answer:0},
+    ]},
+  {title:"University Orientation Announcement", desc:"Section 2 · Танилцуулга",
+    script:[
+      "Welcome to the new student orientation at Milton University.",
+      "Today's session will cover library registration, timetable collection and campus tours.",
+      "Please make sure you bring your student ID card to every session.",
+      "The library will be open until eight o'clock this evening for new registrations.",
+      "If you have any questions, our student support desk is located on the ground floor of the main building.",
+    ],
+    questions:[
+      {q:"What should students bring to every session?", opts:["Their student ID card","A laptop","Cash only","A passport"], answer:0},
+      {q:"Where is the student support desk located?", opts:["On the ground floor of the main building","In the library basement","Outside the campus","In the dormitory"], answer:0},
+    ]},
+  {title:"A Talk on Renewable Energy", desc:"Section 4 · Лекц (ахисан түвшин)",
+    script:[
+      "Today I want to talk about the growth of renewable energy around the world.",
+      "Solar power has become significantly cheaper over the last ten years, making it accessible to more households.",
+      "Wind energy, on the other hand, is particularly effective in coastal regions with consistent strong winds.",
+      "One major challenge that remains is energy storage, since both solar and wind depend heavily on weather conditions.",
+      "Many researchers believe that improvements in battery technology will be the key to solving this problem in the next decade.",
+    ],
+    questions:[
+      {q:"According to the speaker, why has solar power become more accessible?", opts:["It has become significantly cheaper","Governments have banned other energy sources","It requires no equipment","It works only at night"], answer:0},
+      {q:"What does the speaker say is a major remaining challenge?", opts:["Energy storage","Finding wind","Building more roads","Training workers"], answer:0},
+    ]},
+  {title:"Museum Guided Tour Introduction", desc:"Section 3 · Аялал жуулчлал",
+    script:[
+      "Good morning everyone, and welcome to the National History Museum.",
+      "Our tour today will begin in the ancient civilizations gallery on the first floor.",
+      "Please note that photography is allowed, but flash photography is strictly prohibited in the art galleries.",
+      "We will take a short break at eleven o'clock near the café on the ground floor.",
+      "The tour will finish at approximately half past twelve, after which you are welcome to explore the museum independently.",
+    ],
+    questions:[
+      {q:"Where does the tour begin?", opts:["The ancient civilizations gallery","The café","The gift shop","The car park"], answer:0},
+      {q:"What is not allowed in the art galleries?", opts:["Flash photography","Talking quietly","Walking slowly","Taking notes"], answer:0},
+    ]},
+];
+let ieltsListenActive = null;
+let ieltsListenAnswers = {};
+let ieltsListenShowTranscript = false;
+function renderIeltsListening(){
+  const box = document.getElementById("ielts-listening-body");
+  if(!box) return;
+  if(ieltsListenActive==null){
+    box.innerHTML = `<p class="intro" style="max-width:100%;">Дуу хоолойгоор тоглуулж сонсоод, ойлголтын асуултад хариулаарай. Эхлээд бичвэрийг харахгүйгээр сонсож үзэхийг зөвлөж байна.</p>
+    <div class="dlg-picker">
+      ${IELTS_LISTENING_ITEMS.map((it,i)=>`<button class="dlg-pick-btn" data-i="${i}">
+        <div class="dlg-t">${escapeHtml(it.title)}</div>
+        <div class="dlg-sub">${escapeHtml(it.desc)}</div>
+      </button>`).join("")}
+    </div>`;
+    box.querySelectorAll(".dlg-pick-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{ ieltsListenActive=Number(btn.dataset.i); ieltsListenAnswers={}; ieltsListenShowTranscript=false; renderIeltsListening(); });
+    });
+    return;
+  }
+  const it = IELTS_LISTENING_ITEMS[ieltsListenActive];
+  const qHtml = it.questions.map((q,qi)=>{
+    const answered = ieltsListenAnswers[qi]!=null;
+    const optsHtml = q.opts.map((opt,oi)=>{
+      let cls = "qopt dlg-opt";
+      if(answered){
+        if(oi===q.answer) cls += " correct";
+        else if(oi===ieltsListenAnswers[qi]) cls += " wrong";
+      }
+      return `<button class="${cls}" data-q="${qi}" data-oi="${oi}" ${answered?"disabled":""}><span class="qtxt">${escapeHtml(opt)}</span></button>`;
+    }).join("");
+    return `<div class="spk-qa-item">
+      <div style="font-weight:600;margin-bottom:8px;font-size:.86rem;">${qi+1}. ${escapeHtml(q.q)}</div>
+      <div class="quiz-options" style="grid-template-columns:1fr 1fr;max-width:100%;">${optsHtml}</div>
+    </div>`;
+  }).join("");
+  box.innerHTML = `
+    <div class="dlg-stage">
+      <div class="dlg-actions">
+        <button class="btn-ghost" id="ielts-listen-back">← Жагсаалт руу</button>
+        ${ttsSupported?`<button class="btn-primary" id="ielts-listen-play">▶ Тоглуулах</button>`:""}
+      </div>
+      <label class="dlg-toggle"><input type="checkbox" id="ielts-transcript-toggle" ${ieltsListenShowTranscript?"checked":""}> Бичвэр (transcript) харуулах</label>
+      ${ieltsListenShowTranscript ? `<div class="ielts-transcript">${it.script.map(s=>`<p class="ielts-para">${escapeHtml(s)}</p>`).join("")}</div>` : ""}
+      <h4 style="margin:22px 0 12px;">Ойлголтын асуулт</h4>
+      ${qHtml}
+    </div>`;
+  document.getElementById("ielts-listen-back").addEventListener("click", ()=>{ ieltsListenActive=null; renderIeltsListening(); });
+  const playBtn = document.getElementById("ielts-listen-play");
+  if(playBtn) playBtn.addEventListener("click", ()=> speakEnSequence(it.script) );
+  const transToggle = document.getElementById("ielts-transcript-toggle");
+  if(transToggle) transToggle.addEventListener("change", (e)=>{ ieltsListenShowTranscript=e.target.checked; renderIeltsListening(); });
+  box.querySelectorAll(".dlg-opt").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const qi=Number(btn.dataset.q), oi=Number(btn.dataset.oi);
+      if(ieltsListenAnswers[qi]!=null) return;
+      ieltsListenAnswers[qi]=oi;
+      renderIeltsListening();
+    });
+  });
+}
+
+/* ============================= IELTS: WRITING ============================= */
+const IELTS_WRITING_PROMPTS = [
+  {task:1, title:"Internet access chart", prompt:"The table below shows the percentage of households with internet access in three countries between 2000 and 2020.\n\nCountry A: 2000 – 5%, 2010 – 45%, 2020 – 92%\nCountry B: 2000 – 20%, 2010 – 60%, 2020 – 85%\nCountry C: 2000 – 2%, 2010 – 15%, 2020 – 55%\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.",
+    tips:["Оршилдоо мэдээллийг өөрийн үгээр товч танилцуулна.","Ерөнхий чиг хандлагыг нэг өгүүлбэрээр дүгнэнэ (overview).","Тоо баримт бүрийг жагсаахын оронд харьцуулж бич.","Хувийн санал бодлоо оруулахгүй, зөвхөн мэдээллийг тайлбарла."],
+    phrases:["a significant/steady increase in...","in contrast to...","the proportion of... rose/fell sharply","by the end of the period...","overall, it is clear that..."],
+    sample:"The table compares internet access rates in three countries, Country A, B and C, over a twenty-year period from 2000 to 2020.\n\nOverall, all three countries experienced a substantial rise in the percentage of households with internet access, although the pace of growth varied considerably between them.\n\nIn 2000, Country B had by far the highest rate of internet access, at 20%, while Country A and Country C lagged behind with only 5% and 2% respectively. By 2010, however, Country A had caught up rapidly, reaching 45%, compared with 60% in Country B and just 15% in Country C.\n\nBy 2020, Country A had overtaken Country B to become the leader, with 92% of households connected, slightly ahead of Country B's 85%. Country C, despite tripling its rate from 2010, remained considerably behind the other two countries, reaching only 55%.\n\nIn summary, while Country B led initially, Country A ultimately achieved the highest level of internet access by the end of the period."},
+  {task:1, title:"Plastic bottle recycling process", prompt:"The diagram below shows the process of recycling plastic bottles. The stages are:\n(1) Collection from recycling bins\n(2) Sorting by type and colour\n(3) Washing and shredding into flakes\n(4) Melting the flakes into pellets\n(5) Moulding the pellets into new plastic products\n\nSummarise the information by describing the main stages of the process. Write at least 150 words.",
+    tips:["Процессийн эхлэл, төгсгөлийг тодорхой зааж өг.","Дараалал заасан үгсийг (first, next, after that, finally) ашигла.","Идэвхгүй хэлбэр (passive voice)-ийг байнга ашигла, учир нь процессыг хэн хийж буй нь чухал биш.","Өөрийн санал оруулахгүй, зөвхөн процессыг тайлбарла."],
+    phrases:["first of all...","once this stage is complete...","the next step involves...","finally, the... is/are..."],
+    sample:"The diagram illustrates the five stages involved in recycling a plastic bottle, from initial collection to the production of new plastic items.\n\nThe process begins when used plastic bottles are collected from recycling bins. Once collected, the bottles are transported to a sorting facility, where they are separated according to their type and colour. This ensures that only compatible types of plastic are processed together at later stages.\n\nAfter sorting, the bottles are washed to remove any remaining liquid or labels, and are then shredded into small flakes. These flakes are subsequently melted down and formed into small pellets, which are easier to store and transport than the original bottles.\n\nFinally, the pellets are moulded into new plastic products, completing the cycle. Overall, the process transforms discarded bottles into raw material that can be reused to manufacture entirely new items, in five clearly defined stages."},
+  {task:2, title:"Government vs individual responsibility for pollution", prompt:"Some people believe that the government should be responsible for reducing environmental pollution, while others think individuals should take responsibility. Discuss both views and give your own opinion. Write at least 250 words.",
+    tips:["Оршил хэсэгт асуултыг өөрийн үгээр товч дахин бич.","Хоёр талын үзэл бодлыг тус тусад нь тодорхой догол мөрөнд бич.","Өөрийн бодлыг тодорхой илэрхийл (эсвэл дүгнэлт хэсэгт).","Дүгнэлтдээ гол санааг товч давт."],
+    phrases:["on the one hand...","on the other hand...","in my view/opinion...","to conclude..."],
+    sample:"Environmental pollution is one of the most pressing issues facing the modern world, and there is disagreement about who should be primarily responsible for tackling it. While some argue that this responsibility lies with national governments, others believe that individual citizens should take the lead. In my opinion, meaningful progress requires action from both.\n\nOn the one hand, governments possess the authority and resources to implement large-scale solutions. They can introduce strict environmental regulations, invest in renewable energy infrastructure, and impose taxes on heavily polluting industries. Without such top-down measures, companies have little financial incentive to change their practices, since reducing pollution can be costly in the short term.\n\nOn the other hand, individuals also play a crucial role in reducing pollution through their everyday choices. Simple actions such as recycling, using public transport instead of private cars, and reducing energy consumption at home can collectively make a significant difference, particularly when adopted by large numbers of people. Furthermore, public pressure from environmentally conscious citizens often encourages both governments and businesses to act more responsibly.\n\nIn my view, neither governments nor individuals can solve the problem of pollution alone. Government policy sets the framework and provides the necessary incentives, while individual behaviour determines how effectively those policies are put into practice. To conclude, tackling environmental pollution effectively requires a combined effort, with governments providing leadership and regulation, and individuals taking personal responsibility for their own environmental impact."},
+  {task:2, title:"Working from home: advantages vs disadvantages", prompt:"In many countries, more and more people are choosing to work from home rather than in an office. Do the advantages of this outweigh the disadvantages? Write at least 250 words.",
+    tips:["Асуултад шууд хариулт өгөх төлөвлөгөө гарга (advantages outweigh disadvantages эсвэл эсрэгээр).","Давуу болон сул талыг тэнцвэртэй авч үзэх.","Жишээ баримт, тодорхой нөхцөл байдал ашиглаж бодлоо баталгаажуул.","Дүгнэлтдээ өөрийн байр сууриа тодорхой илэрхийл."],
+    phrases:["a growing number of...","one of the main benefits/drawbacks is...","despite these challenges...","to conclude..."],
+    sample:"In recent years, an increasing number of employees have chosen to work from home rather than commute to a traditional office. While this shift brings clear benefits, it also creates certain challenges, and in my opinion, the advantages generally outweigh the disadvantages for most workers.\n\nOne of the main benefits of working from home is the time and money saved by not commuting. This extra time can be used for rest, family, or personal development, which often leads to a better work-life balance and reduced stress. In addition, many employees report being more productive at home, since they can create a working environment suited to their own needs and avoid frequent office interruptions.\n\nHowever, working from home is not without its drawbacks. Some employees find it difficult to separate their professional and personal lives when both take place in the same physical space, which can lead to longer working hours and burnout. Isolation is another common issue, as remote workers may miss the social interaction and spontaneous collaboration that an office environment provides, potentially affecting teamwork and mental well-being.\n\nDespite these challenges, I believe the benefits of remote work outweigh the drawbacks for the majority of people, particularly when companies actively support employees by encouraging regular breaks and maintaining opportunities for social connection, such as occasional in-person meetings. To conclude, although working from home presents some challenges, its advantages in terms of flexibility, cost savings, and overall well-being make it a positive development for most modern workers."},
+];
+let ieltsWritingFilter = "all";
+let ieltsWritingRevealed = {};
+function renderIeltsWritingFilters(){
+  const box = document.getElementById("ielts-writing-filters");
+  if(!box) return;
+  box.innerHTML = "";
+  [["all","Бүгд"],["1","Task 1"],["2","Task 2"]].forEach(([key,label])=>{
+    const chip = document.createElement("button");
+    chip.className = "chip"+(key===ieltsWritingFilter?" active":"");
+    chip.textContent = label;
+    chip.addEventListener("click", ()=>{ ieltsWritingFilter=key; renderIeltsWritingFilters(); renderIeltsWriting(); });
+    box.appendChild(chip);
+  });
+}
+function renderIeltsWriting(){
+  const box = document.getElementById("ielts-writing-body");
+  if(!box) return;
+  const list = IELTS_WRITING_PROMPTS.filter(p=> ieltsWritingFilter==="all" || String(p.task)===ieltsWritingFilter);
+  const introHtml = `<p class="intro" style="max-width:100%;">IELTS Writing даалгаврын сангаас дадлага хийгээрэй. Эхлээд өөрөө бичээд, дараа нь бүтэц, хэрэгтэй хэллэг болон жишээ бичвэртэй харьцуулаарай. (Автомат үнэлгээ хийхгүй — өөрийгөө шалгах зориулалттай.)</p>`;
+  const cardsHtml = list.map(p=>{
+    const key = IELTS_WRITING_PROMPTS.indexOf(p);
+    const revealed = !!ieltsWritingRevealed[key];
+    return `<div class="grammar-card">
+      <div class="grammar-card-head">
+        <span class="grammar-card-level">Task ${p.task}</span>
+        <b>${escapeHtml(p.title)}</b>
+      </div>
+      <p style="font-size:.86rem;margin:8px 0;white-space:pre-line;">${escapeHtml(p.prompt)}</p>
+      <div class="ielts-tips"><b>Зөвлөмж:</b><ul style="margin:6px 0 0 18px;padding:0;font-size:.82rem;">${p.tips.map(t=>`<li>${escapeHtml(t)}</li>`).join("")}</ul></div>
+      <div class="ielts-phrases"><b>Хэрэгтэй хэллэг:</b> ${p.phrases.map(ph=>`<span class="ielts-phrase-chip">${escapeHtml(ph)}</span>`).join(" ")}</div>
+      <button type="button" class="btn-ghost" style="margin-top:10px;" data-reveal="${key}">${revealed?"Жишээ бичвэрийг нуух":"Жишээ бичвэр харах"}</button>
+      ${revealed?`<div class="spk-sample"><p style="font-size:.84rem;white-space:pre-line;">${escapeHtml(p.sample)}</p></div>`:""}
+    </div>`;
+  }).join("");
+  box.innerHTML = introHtml + cardsHtml;
+  box.querySelectorAll("[data-reveal]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ const k=btn.dataset.reveal; ieltsWritingRevealed[k]=!ieltsWritingRevealed[k]; renderIeltsWriting(); });
+  });
+}
+
+/* ============================= IELTS: SPEAKING ============================= */
+const IELTS_SPEAKING = {
+  part1:{label:"Part 1", qa:[
+    {q:"Can you describe the town or city where you grew up?", sample:"I grew up in a mid-sized city called Darkhan, in northern Mongolia. It's known for its industry, but it also has some nice parks and a river running through it. I lived there until I moved to the capital for university."},
+    {q:"Do you work or are you a student?", sample:"I'm currently a student. I'm studying business administration at university, and I'm in my second year. I chose this subject because I've always been interested in how companies operate."},
+    {q:"What do you like to do in your free time?", sample:"In my free time, I enjoy reading novels and going hiking with friends. I find reading relaxing after a busy day, and hiking helps me stay active and clear my mind."},
+    {q:"What kind of food do you like?", sample:"I really enjoy traditional Mongolian dishes like buuz, but I also love trying different cuisines, especially Korean and Italian food. I think trying new food is a great way to learn about other cultures."},
+    {q:"Do you prefer spending time indoors or outdoors?", sample:"It depends on the season, but generally I prefer outdoors. I like walking, playing sports, and just being in nature. However, during winter, I tend to stay indoors and read or watch films."},
+  ]},
+  part2:{label:"Part 2 (Cue Card)", cards:[
+    {title:"Describe a skill you would like to learn.", bullets:["what the skill is","why you want to learn it","how you would learn it","and explain how this skill would help you in the future"],
+      sample:"One skill I would really like to learn is playing the guitar. I've always admired people who can play an instrument, and music has been a big part of my life since I was young, even though I've never learned to play anything myself.\n\nThe main reason I want to learn guitar is that I think it would be a great way to relax after a busy day at university. I also think it would be really satisfying to be able to play some of my favourite songs myself, instead of just listening to them.\n\nAs for how I would learn, I think I would start with online tutorials, since there are so many free lessons available nowadays for beginners. Later on, once I've learned the basics, I might consider taking a few lessons with a real teacher to correct my technique and get feedback.\n\nI believe this skill would help me in the future because it would give me a creative hobby that isn't related to screens or studying, which I think is important for my mental well-being. It could also be a fun way to meet other people who enjoy music."},
+    {title:"Describe a memorable journey you have taken.", bullets:["where you went","who you went with","what you did there","and explain why it was memorable"],
+      sample:"I'd like to talk about a trip I took to Lake Khuvsgul in northern Mongolia two summers ago. I went there with three close friends from university during our summer break.\n\nWe travelled by car, which took almost two days, but the journey itself was part of the adventure, as we stopped in small towns along the way and saw some beautiful countryside. Once we arrived, we spent five days camping right next to the lake, swimming, hiking in the surrounding hills, and cooking meals together over a fire.\n\nThis journey was memorable for several reasons. First, the scenery was absolutely stunning, unlike anything I had seen before. Second, spending so much uninterrupted time with close friends, away from phones and daily responsibilities, made us much closer as a group. We still talk about that trip whenever we meet.\n\nOverall, it wasn't a luxurious holiday, but it was one of the most meaningful trips I've ever taken, mainly because of the people I shared it with and the natural beauty we experienced together."},
+    {title:"Describe a piece of technology that you find useful.", bullets:["what it is","how often you use it","what you use it for","and explain why you find it useful"],
+      sample:"The piece of technology I find most useful is probably my smartphone, although I know that's a fairly common answer. Still, I think it genuinely plays a huge role in my daily life.\n\nI use it constantly, probably dozens of times a day, for everything from communicating with friends and family to checking my university timetable and reading the news. I also rely on it heavily for navigation whenever I'm in an unfamiliar area of the city.\n\nWhat I find most useful specifically is the combination of a good camera and instant access to the internet. I can take a photo of something interesting, look up information about it immediately, and share it with friends within seconds. Before smartphones existed, all of that would have required several separate devices.\n\nThe reason I find it so useful is simply how much time and effort it saves me. It has essentially replaced a camera, a map, a diary, and a telephone all in one device, which makes daily life significantly more convenient and efficient."},
+  ]},
+  part3:{label:"Part 3", qa:[
+    {q:"Do you think schools should teach more practical skills, or focus mainly on academic subjects?", sample:"I think schools should aim for a balance between the two, although I do believe more practical skills could be introduced. Academic subjects like mathematics and science are essential for developing logical thinking, but many students leave school without knowing how to manage money or cook a basic meal. Including some practical skills alongside academic subjects would prepare students more fully for adult life."},
+    {q:"How has technology changed the way people travel compared to the past?", sample:"Technology has transformed travel enormously. In the past, people relied on printed maps and travel agents to plan a trip, whereas now almost everything can be arranged instantly through a smartphone, from booking flights to finding accommodation and reading reviews from other travellers. Navigation apps have also made it much easier to explore unfamiliar places confidently without getting lost."},
+    {q:"Do you think people rely too much on technology nowadays?", sample:"In some ways, yes, I think many people do rely too heavily on technology, particularly smartphones. It's common to see people struggle with basic tasks, like remembering phone numbers or reading a paper map, because technology has always done it for them. That said, I don't think this reliance is entirely negative, since technology also allows us to be more efficient and connected than ever before."},
+    {q:"What skills do you think will be most important for young people in the future?", sample:"I believe adaptability and digital literacy will be particularly important, since technology and job markets are changing so quickly that people will likely need to learn new skills throughout their careers. Beyond that, soft skills like communication and critical thinking will remain valuable, because they are difficult for machines or automation to replace."},
+    {q:"Some people say travelling is the best way to learn about the world. Do you agree?", sample:"I largely agree, because travelling exposes you directly to different cultures, languages and ways of life in a way that books or the internet simply cannot replicate. That said, I don't think it's the only way to learn about the world; reading, documentaries and conversations with people from different backgrounds can also broaden your understanding, especially for those who don't have the opportunity to travel often."},
+  ]},
+};
+let ieltsSpkPart = "part1";
+let ieltsSpkReveal = {};
+function renderIeltsSpeakingFilters(){
+  const box = document.getElementById("ielts-speaking-filters");
+  if(!box) return;
+  box.innerHTML = "";
+  Object.keys(IELTS_SPEAKING).forEach(key=>{
+    const chip = document.createElement("button");
+    chip.className = "chip"+(key===ieltsSpkPart?" active":"");
+    chip.textContent = IELTS_SPEAKING[key].label;
+    chip.addEventListener("click", ()=>{ ieltsSpkPart=key; ieltsSpkReveal={}; renderIeltsSpeakingFilters(); renderIeltsSpeaking(); });
+    box.appendChild(chip);
+  });
+}
+function renderIeltsSpeaking(){
+  const box = document.getElementById("ielts-speaking-body");
+  if(!box) return;
+  const d = IELTS_SPEAKING[ieltsSpkPart];
+  let html = `<p class="intro" style="max-width:100%;">IELTS Speaking-ийн гурван хэсэгт зориулсан дадлагын асуулт, сэдэв. Эхлээд өөрөө аман хариулт өгөөд, дараа нь жишээ хариултыг үзээрэй.</p>`;
+  if(d.qa){
+    html += d.qa.map((item,i)=>{
+      const revealed = !!ieltsSpkReveal[i];
+      return `<div class="spk-qa-item">
+        <div style="font-weight:600;font-size:.88rem;">${escapeHtml(item.q)} ${speakerBtnHtmlEn(item.q,"")}</div>
+        <button class="btn-ghost" style="margin-top:10px;" data-reveal="${i}">${revealed?"Жишээ хариултыг нуух":"Жишээ хариулт харах"}</button>
+        ${revealed?`<div class="spk-sample"><p style="font-size:.84rem;">${escapeHtml(item.sample)} ${speakerBtnHtmlEn(item.sample,"")}</p></div>`:""}
+      </div>`;
+    }).join("");
+  } else if(d.cards){
+    html += d.cards.map((c,i)=>{
+      const revealed = !!ieltsSpkReveal[i];
+      return `<div class="spk-desc-item">
+        <div style="font-weight:600;font-size:.88rem;margin-bottom:6px;">${escapeHtml(c.title)}</div>
+        <div class="ielts-cue-bullets"><i>You should say:</i><ul style="margin:6px 0 0 18px;padding:0;font-size:.82rem;">${c.bullets.map(b=>`<li>${escapeHtml(b)}</li>`).join("")}</ul></div>
+        <button class="btn-ghost" style="margin-top:10px;" data-reveal="${i}">${revealed?"Жишээ хариултыг нуух":"Жишээ хариулт харах"}</button>
+        ${revealed?`<div class="spk-sample"><p style="font-size:.84rem;white-space:pre-line;">${escapeHtml(c.sample)} ${speakerBtnHtmlEn(c.sample,"")}</p></div>`:""}
+      </div>`;
+    }).join("");
+  }
+  box.innerHTML = html;
+  box.querySelectorAll("[data-reveal]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ const i=btn.dataset.reveal; ieltsSpkReveal[i]=!ieltsSpkReveal[i]; renderIeltsSpeaking(); });
+  });
+}
+
+/* ============================= HSK / IELTS ТРАК СЭЛГЭГЧ ============================= */
+let currentTrack = "hsk";
+let currentIeltsView = "vocab";
+function setTrack(track, opts){
+  opts = opts || {};
+  currentTrack = track;
+  document.documentElement.setAttribute("data-track", track);
+  const btnHsk = document.getElementById("track-btn-hsk");
+  const btnIelts = document.getElementById("track-btn-ielts");
+  if(btnHsk) btnHsk.classList.toggle("active", track==="hsk");
+  if(btnIelts) btnIelts.classList.toggle("active", track==="ielts");
+  if(!opts.skipSave){
+    srs.track = track;
+    scheduleSave();
+  }
+  if(track==="hsk"){
+    switchView("lessons");
+  }else{
+    switchIeltsView(currentIeltsView);
+  }
+}
+function switchIeltsView(view){
+  currentIeltsView = view;
+  ["vocab","reading","listening","writing","speaking"].forEach(v=>{
+    const tab = document.getElementById("tab-ielts-"+v);
+    if(tab) tab.classList.toggle("active", v===view);
+    const sec = document.getElementById("ielts-"+v+"-view");
+    if(sec) sec.classList.toggle("active", v===view);
+  });
+  if(view==="vocab"){ renderIeltsVocabFilters(); renderIeltsVocab(); }
+  if(view==="reading"){ ieltsReadActive=null; renderIeltsReading(); }
+  if(view==="listening"){ ieltsListenActive=null; renderIeltsListening(); }
+  if(view==="writing"){ renderIeltsWritingFilters(); renderIeltsWriting(); }
+  if(view==="speaking"){ renderIeltsSpeakingFilters(); renderIeltsSpeaking(); }
+}
+
 /* ============================= VIEW SWITCH ============================= */
 function switchView(view){
   if(view!=="quiz") clearExamTimer();
@@ -4711,6 +5278,18 @@ document.getElementById("tab-progress").addEventListener("click", ()=>switchView
   const tabLbBtn = document.getElementById("tab-leaderboard");
   if(tabLbBtn) tabLbBtn.addEventListener("click", ()=>switchView("leaderboard"));
 }
+
+/* ============================= HSK / IELTS ТРАК СЭЛГЭГЧ: товч холбох ============================= */
+{
+  const trackHskBtn = document.getElementById("track-btn-hsk");
+  const trackIeltsBtn = document.getElementById("track-btn-ielts");
+  if(trackHskBtn) trackHskBtn.addEventListener("click", ()=>setTrack("hsk"));
+  if(trackIeltsBtn) trackIeltsBtn.addEventListener("click", ()=>setTrack("ielts"));
+}
+["vocab","reading","listening","writing","speaking"].forEach(v=>{
+  const btn = document.getElementById("tab-ielts-"+v);
+  if(btn) btn.addEventListener("click", ()=>switchIeltsView(v));
+});
 
 /* ============================= MOBILE NAV (☰ dropdown) ============================= */
 // Below 720px the CSS turns #main-nav into a hidden dropdown; this button
@@ -4909,6 +5488,7 @@ if(logoutBtn) logoutBtn.addEventListener("click", ()=>{
   renderTopQuote();
   await loadState();
   renderProfileBlock();
+  setTrack(srs.track||"hsk", {skipSave:true});
   renderWotd();
   renderLevelTabs();
   renderLessons();

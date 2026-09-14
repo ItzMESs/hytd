@@ -3,21 +3,30 @@
 export const BODY_HTML = `<header class="top">
   <div class="top-inner">
     <div class="brand">
-      <span class="mark">汉</span>
-      <span class="name">HSK Path<small>Хичээл · Давталт · Тест · Тоглоом · Ахиц</small></span>
+      <span class="mark" id="brand-mark">汉</span>
+      <span class="name" id="brand-name">HSK Path<small id="brand-tagline">Хичээл · Давталт · Тест · Тоглоом · Ахиц</small></span>
+    </div>
+    <div class="track-switch" id="track-switch" role="group" aria-label="Хэл сэлгэх">
+      <button type="button" id="track-btn-hsk" class="track-switch-btn active">🇨🇳 HSK</button>
+      <button type="button" id="track-btn-ielts" class="track-switch-btn">🇬🇧 IELTS</button>
     </div>
     <div class="nav-wrap">
       <button id="nav-toggle" class="nav-toggle-btn" aria-expanded="false" aria-controls="main-nav" aria-label="Цэс">
         <span class="hamburger-ic">☰</span>
       </button>
       <div class="view-toggle" id="main-nav">
-        <button id="tab-lessons" class="active"><span class="tab-ic">📖</span>Хичээл</button>
-        <button id="tab-grammar"><span class="tab-ic">📐</span>Дүрэм</button>
-        <button id="tab-review"><span class="tab-ic">🗂️</span>Давталт</button>
-        <button id="tab-quiz"><span class="tab-ic">✏️</span>Тест</button>
-        <button id="tab-games"><span class="tab-ic">🎮</span>Тоглоом</button>
-        <button id="tab-progress"><span class="tab-ic">📊</span>Ахиц</button>
-        <button id="tab-leaderboard"><span class="tab-ic">🏆</span>Тэргүүлэгчид<span class="tab-badge" id="tab-leaderboard-badge" hidden>0</span></button>
+        <button id="tab-lessons" class="active track-hsk"><span class="tab-ic">📖</span>Хичээл</button>
+        <button id="tab-grammar" class="track-hsk"><span class="tab-ic">📐</span>Дүрэм</button>
+        <button id="tab-review" class="track-hsk"><span class="tab-ic">🗂️</span>Давталт</button>
+        <button id="tab-quiz" class="track-hsk"><span class="tab-ic">✏️</span>Тест</button>
+        <button id="tab-games" class="track-hsk"><span class="tab-ic">🎮</span>Тоглоом</button>
+        <button id="tab-ielts-vocab" class="track-ielts" hidden><span class="tab-ic">🗂️</span>Үгийн сан</button>
+        <button id="tab-ielts-reading" class="track-ielts" hidden><span class="tab-ic">📖</span>Reading</button>
+        <button id="tab-ielts-listening" class="track-ielts" hidden><span class="tab-ic">🎧</span>Listening</button>
+        <button id="tab-ielts-writing" class="track-ielts" hidden><span class="tab-ic">✍️</span>Writing</button>
+        <button id="tab-ielts-speaking" class="track-ielts" hidden><span class="tab-ic">🗣️</span>Speaking</button>
+        <button id="tab-progress" class="track-hsk"><span class="tab-ic">📊</span>Ахиц</button>
+        <button id="tab-leaderboard" class="track-hsk"><span class="tab-ic">🏆</span>Тэргүүлэгчид<span class="tab-badge" id="tab-leaderboard-badge" hidden>0</span></button>
       </div>
     </div>
     <div class="stats">
@@ -100,7 +109,7 @@ export const BODY_HTML = `<header class="top">
 
 <div class="wrap">
 
-  <section id="lessons-view">
+  <section id="lessons-view" class="track-hsk">
     <p class="intro">HSK 1-ээс 5 хүртэлх түвшний дүрмийн хичээлүүд, тэдгээрийг тайлбарлах жишээ үгсийн сан. Мөн тухайн түвшний <strong>албан ёсны (хуучин стандарт) бүрэн үгийн сан ойролцоогоор 2500 үгийг</strong> доор жагсаасан болно — эдгээр бүх үг <strong>Давталт</strong> болон <strong>Тест</strong> хэсэгт ашиглагдана. Дүрмийн хичээлээ үзсэний дараа Давталт хэсэгт очиж Anki маягийн давталтаар бататгаад, Тест хэсэгт мэдлэгээ шалгаарай.</p>
     <div id="wotd-card" class="wotd-card"></div>
     <div id="lesson-list"></div>
@@ -137,7 +146,7 @@ export const BODY_HTML = `<header class="top">
     </div>
   </section>
 
-  <section id="grammar-view">
+  <section id="grammar-view" class="track-hsk">
     <div class="scope-filters" id="grammar-subtab-filters"></div>
     <div id="grammar-main">
       <p class="intro">HSK 1-ээс 5 хүртэлх түвшний бүх дүрмийн цэгүүд нэг дор — хайж олоод, шууд холбогдох хичээл рүү очиж болно.</p>
@@ -158,7 +167,7 @@ export const BODY_HTML = `<header class="top">
     </div>
   </section>
 
-  <section id="review-view">
+  <section id="review-view" class="track-hsk">
     <div class="standard-toggle" id="review-standard-toggle"></div>
     <div class="scope-filters" id="review-filters"></div>
     <div class="deck-stage">
@@ -174,13 +183,13 @@ export const BODY_HTML = `<header class="top">
     </div>
   </section>
 
-  <section id="quiz-view">
+  <section id="quiz-view" class="track-hsk">
     <div class="standard-toggle" id="quiz-standard-toggle"></div>
     <div class="scope-filters" id="quiz-filters"></div>
     <div id="quiz-body"></div>
   </section>
 
-  <section id="games-view">
+  <section id="games-view" class="track-hsk">
     <div class="scope-filters" id="games-mode-filters"></div>
     <div class="scope-filters" id="games-scramble-filters"></div>
     <div class="scope-filters" id="games-listen-filters"></div>
@@ -192,16 +201,39 @@ export const BODY_HTML = `<header class="top">
     <div id="games-body"></div>
   </section>
 
-  <section id="progress-view">
+  <section id="progress-view" class="track-hsk">
     <div id="progress-body"></div>
   </section>
 
-  <section id="leaderboard-view">
+  <section id="leaderboard-view" class="track-hsk">
     <div id="leaderboard-page-body"></div>
   </section>
 
   <section id="profile-view">
     <div id="profile-body"></div>
+  </section>
+
+  <section id="ielts-vocab-view" class="track-ielts" hidden>
+    <div class="scope-filters" id="ielts-vocab-filters"></div>
+    <div id="ielts-vocab-body"></div>
+  </section>
+
+  <section id="ielts-reading-view" class="track-ielts" hidden>
+    <div id="ielts-reading-body"></div>
+  </section>
+
+  <section id="ielts-listening-view" class="track-ielts" hidden>
+    <div id="ielts-listening-body"></div>
+  </section>
+
+  <section id="ielts-writing-view" class="track-ielts" hidden>
+    <div class="scope-filters" id="ielts-writing-filters"></div>
+    <div id="ielts-writing-body"></div>
+  </section>
+
+  <section id="ielts-speaking-view" class="track-ielts" hidden>
+    <div class="scope-filters" id="ielts-speaking-filters"></div>
+    <div id="ielts-speaking-body"></div>
   </section>
 
   <p class="save-note" id="save-note">Ахиц дэвшил автоматаар хадгалагдана.</p>
